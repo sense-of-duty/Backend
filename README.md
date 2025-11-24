@@ -6,7 +6,6 @@
 2. **무엇을 할지 바로 이해될 수 있는 제목**을 붙여주세요.
     - 예시: `회원가입 API 구현`, `로그인 페이지 UI`, `헤더 공통 컴포넌트 추가`
 
----
 
 ## 2. Issue 번호를 기반으로 브랜치 이름을 만들어주세요!
 
@@ -15,7 +14,7 @@
 1. 작업할 repository를 clone 해옵니다.
     
     ```bash
-    git clone git@github.com:ORG_NAME/REPO_NAME.git
+    git clone https://github.com/sense-of-duty/Backend.git (클론 하려는 레포지토리 주소)
     cd REPO_NAME
     ```
     
@@ -50,7 +49,6 @@
     - `feat`, `fix`, `refactor`, `chore` 등 사용
     
 
----
 
 ## 3. 작업한 내용을 푸시할 때
 
@@ -60,22 +58,18 @@
 git push origin feat/1-register-api
 ```
 
----
 
 ## 4. 작업 완료 후 PR & 리뷰
 
 1. GitHub에서 `Compare & pull request` 버튼을 눌러 PR을 생성합니다.
 2. PR 제목은 커밋과 비슷한 형태로 작성해주세요.
     - 예: `feat: create register api (#1)`
-3. PR 본문에 관련 Issue를 연결해주세요.
-    
-    ```markdown
-    closes #1
-    ```
+3. PR에 관련 Issue를 연결해주세요.
+    - 오른쪽 하단에 Development를 클릭해서 작업한 Issue 번호를 연결합니다.
+    - 연결 후 PR 날리면 merge될 때 자동으로 Issue 닫힙니다 !
     
 4. **2명 이상에게 Approve**를 받으면 Merge하셔도 됩니다.
     - 기본 규칙: PR 작성자가 본인 PR을 Merge합니다.
 
----
 
 ## 5. 백엔드 개발 환경은 JAVA 17 버전입니다. 버전에 맞게 개발해주세요.

@@ -19,6 +19,7 @@
 - `fix/` : 버그 수정
 - `refactor/` : 리팩토링
 - `chore/` : 설정, 빌드, 기타 잡일
+5. Commit 메시지는 `feat: create register api (#1)"` 처럼 컨벤션 잘 지켜주시고, 뒤에 issue 번호 작성해주세요.
 
 ## 3. 작업한 내용을 푸시할 때는 `git push origin feat/1-register-api` 로 푸시합니다.
 

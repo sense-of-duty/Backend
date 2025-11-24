@@ -19,5 +19,7 @@
 - `fix/` : 버그 수정
 - `refactor/` : 리팩토링
 - `chore/` : 설정, 빌드, 기타 잡일
-1. 작업한 내용을 푸시할 때는 `git push origin feat/1-register-api` 로 푸시합니다.
-2. 작업이 완료된 후, PR 올려서 리뷰 받으시면 됩니다. merge는 제가 판단해서 하도록 하겠습니다 !
+
+## 3. 작업한 내용을 푸시할 때는 `git push origin feat/1-register-api` 로 푸시합니다.
+
+## 4. 작업이 완료된 후, PR 올려서 리뷰 받으시면 됩니다. merge는 제가 하겠습니다 !

@@ -70,10 +70,10 @@ public class AuthService {
             throw new BadRequestException(ErrorMessage.WRONG_PASSWORD_INPUT);
         }
 
-        return updateAndCreateToken(user);
+        return updateTimeAndCreateToken(user);
     }
 
-    private LoginResponse updateAndCreateToken(User user) {
+    private LoginResponse updateTimeAndCreateToken(User user) {
         user.updateLastLogin(LocalDateTime.now());
 
         String accessToken = tokenProvider.createAccessToken(user.getId(), user.getRole().name());
@@ -88,24 +88,20 @@ public class AuthService {
     @Transactional
     public LoginResponse oauthLogin(OAuthLoginRequest oAuthLoginRequest) {
 
-        // 1) 인가 코드 -> 액세스 토큰
         GoogleTokenResponse tokenResponse = googleOAuthClient.exchangeCodeForToken(oAuthLoginRequest.getAuthorizationCode());
 
-        // 2) 액세스 토큰 -> 구글 프로필
         GoogleUserInfoResponse userInfo = googleOAuthClient.getUserInfo(tokenResponse.getAccessToken());
 
         if (userInfo.getVerifiedEmail() != null && !userInfo.getVerifiedEmail()) {
             throw new BadRequestException(ErrorMessage.OAUTH_EMAIL_NOT_VERIFIED);
         }
 
-        // 3) 우리 서비스에 이미 있는 이메일인지 확인
         User user = userRepository.findByEmail(userInfo.getEmail())
                 .orElseGet(() -> {
                     User newUser = User.createOAuthUser(userInfo.getEmail(), userInfo.getName());
                     return userRepository.save(newUser);
                 });
 
-        // 4) OAuthAccount 연결 (없으면 생성)
         oAuthAccountRepository
                 .findByProviderAndProviderId(Provider.GOOGLE, userInfo.getId())
                 .orElseGet(() -> oAuthAccountRepository.save(
@@ -113,11 +109,10 @@ public class AuthService {
                                 user,
                                 Provider.GOOGLE,
                                 userInfo.getId(),
-                                userInfo.getEmail(),
-                                userInfo.getPicture()
+                                userInfo.getEmail()
                         )
                 ));
 
-        return updateAndCreateToken(user);
+        return updateTimeAndCreateToken(user);
     }
 }

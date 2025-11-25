@@ -45,10 +45,6 @@ public class OAuthAccount {
     @Column
     private String providerEmail;
 
-    // OAuth 제공자(구글, 카카오 등)에 등록된 사용자 프로필 이미지 URL
-    @Column
-    private String profileImage;
-
     @Column(nullable = false)
     private LocalDateTime signedUpAt;
 
@@ -56,7 +52,7 @@ public class OAuthAccount {
     private LocalDateTime lastLoginAt;
 
     public static OAuthAccount create(User user, Provider provider, String providerId,
-                                      String providerEmail, String profileImage)
+                                      String providerEmail)
     {
         LocalDateTime now = LocalDateTime.now();
         return OAuthAccount.builder()
@@ -64,7 +60,6 @@ public class OAuthAccount {
                 .provider(provider)
                 .providerId(providerId)
                 .providerEmail(providerEmail)
-                .profileImage(profileImage)
                 .signedUpAt(now)
                 .lastLoginAt(now)
                 .build();

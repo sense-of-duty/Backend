@@ -66,20 +66,20 @@ public class GoogleOAuthClientImpl implements GoogleOAuthClient {
     public GoogleUserInfoResponse getUserInfo(String accessToken) {
         String url = "https://www.googleapis.com/oauth2/v2/userinfo";
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setBearerAuth(accessToken);
 
-        HttpEntity<Void> request = new HttpEntity<>(headers);
+        HttpEntity<Void> httpEntity = new HttpEntity<>(httpHeaders);
 
         try {
-            ResponseEntity<GoogleUserInfoResponse> response =
-                    restTemplate.exchange(url, HttpMethod.GET, request, GoogleUserInfoResponse.class);
+            ResponseEntity<GoogleUserInfoResponse> exchanged =
+                    restTemplate.exchange(url, HttpMethod.GET, httpEntity, GoogleUserInfoResponse.class);
 
-            if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            if (!exchanged.getStatusCode().is2xxSuccessful() || exchanged.getBody() == null) {
                 throw new BadRequestException(ErrorMessage.OAUTH_PROFILE_FETCH_FAILED);
             }
 
-            return response.getBody();
+            return exchanged.getBody();
         } catch (RestClientException e) {
             throw new BadRequestException(ErrorMessage.OAUTH_PROFILE_FETCH_FAILED);
         }

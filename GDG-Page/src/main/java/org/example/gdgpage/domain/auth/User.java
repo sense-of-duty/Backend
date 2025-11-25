@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -42,7 +43,12 @@ public class User {
     private String name;
 
     @Column(nullable = false, length = 20)
+    @Pattern(regexp = "^010-[0-9]{4}-[0-9]{4}$")
     private String phone;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private PartType part;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)

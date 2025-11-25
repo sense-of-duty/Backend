@@ -1,6 +1,5 @@
 package org.example.gdgpage.jwt;
 
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -9,7 +8,8 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.coyote.BadRequestException;
+import org.example.gdgpage.exception.BadRequestException;
+import org.example.gdgpage.exception.ErrorMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,6 +21,7 @@ import javax.crypto.SecretKey;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class TokenProvider {
@@ -91,7 +92,7 @@ public class TokenProvider {
                 Arrays.stream(StringUtils.hasText(roleClaim) ? roleClaim.split(DELIMITER) : new String[0])
                         .map(String::trim)
                         .filter(StringUtils::hasText)
-                        .map(TokenProvider::toRole)
+                        .map(TokenProvider::toRole).filter(Objects::nonNull)
                         .map(SimpleGrantedAuthority::new)
                         .toList();
 

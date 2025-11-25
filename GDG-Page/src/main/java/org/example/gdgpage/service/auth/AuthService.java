@@ -5,12 +5,12 @@ import org.example.gdgpage.domain.auth.OAuthAccount;
 import org.example.gdgpage.domain.auth.Provider;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.dto.auth.request.LoginRequest;
-import org.example.gdgpage.dto.oauth.request.OAuthLoginRequest;
 import org.example.gdgpage.dto.auth.request.SignUpRequest;
-import org.example.gdgpage.dto.oauth.response.GoogleTokenResponse;
-import org.example.gdgpage.dto.oauth.response.GoogleUserInfoResponse;
 import org.example.gdgpage.dto.auth.response.LoginResponse;
 import org.example.gdgpage.dto.auth.response.UserResponse;
+import org.example.gdgpage.dto.oauth.request.OAuthLoginRequest;
+import org.example.gdgpage.dto.oauth.response.GoogleTokenResponse;
+import org.example.gdgpage.dto.oauth.response.GoogleUserInfoResponse;
 import org.example.gdgpage.dto.token.TokenDto;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
@@ -60,6 +60,7 @@ public class AuthService {
         userRepository.save(user);
     }
 
+    @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new BadRequestException(ErrorMessage.WRONG_EMAIL_INPUT));
@@ -83,11 +84,8 @@ public class AuthService {
         return LoginResponse.of(tokenDto, userResponse);
     }
 
+    @Transactional
     public LoginResponse oauthLogin(OAuthLoginRequest oAuthLoginRequest) {
-
-        if (oAuthLoginRequest.getProvider() != Provider.GOOGLE) {
-            throw new BadRequestException(ErrorMessage.EMAIL_ALREADY_REGISTERED_WITH_OTHER_PROVIDER);
-        }
 
         // 1) 인가 코드 -> 액세스 토큰
         GoogleTokenResponse tokenResponse = googleOAuthClient.exchangeCodeForToken(oAuthLoginRequest.getAuthorizationCode());

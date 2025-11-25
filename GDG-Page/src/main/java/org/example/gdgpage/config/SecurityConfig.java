@@ -5,7 +5,6 @@ import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.jwt.JwtFilter;
 import org.example.gdgpage.jwt.TokenProvider;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,7 +28,7 @@ public class SecurityConfig {
     private final TokenProvider tokenProvider;
 
     private static final String[] PUBLIC_AUTH = {
-            "/auth/**", "/oauth2/**"
+            "/auth/**", "/oauth2/**" // 추후에 ** 제거하고 경로 지정
     };
 
     private static final String[] SWAGGER_WHITELIST = {

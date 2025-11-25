@@ -30,7 +30,7 @@ public class GoogleOAuthClientImpl implements GoogleOAuthClient {
     private String clientSecret;
 
     @Value("${google.redirect-uri}")
-    private String redirectUri;   // ✅ yml에서 주입
+    private String redirectUri;
 
     @Override
     public GoogleTokenResponse exchangeCodeForToken(String code) {
@@ -43,7 +43,7 @@ public class GoogleOAuthClientImpl implements GoogleOAuthClient {
         body.add("code", code);
         body.add("client_id", clientId);
         body.add("client_secret", clientSecret);
-        body.add("redirect_uri", redirectUri);   // ✅ 파라미터 대신 필드 사용
+        body.add("redirect_uri", redirectUri);
         body.add("grant_type", "authorization_code");
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);

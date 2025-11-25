@@ -20,7 +20,4 @@ public class GoogleTokenResponse {
 
     @JsonProperty("token_type")
     private String tokenType;
-
-    @JsonProperty("id_token")
-    private String idToken; // 필요하면 사용
 }

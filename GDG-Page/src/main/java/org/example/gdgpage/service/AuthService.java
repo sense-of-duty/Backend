@@ -3,12 +3,14 @@ package org.example.gdgpage.service;
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.dto.auth.request.SignUpRequestDTO;
+import org.example.gdgpage.dto.token.TokenDto;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.jwt.TokenProvider;
 import org.example.gdgpage.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +20,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
 
+    @Transactional
     public void signUp(SignUpRequestDTO signUpRequestDTO) {
         if (userRepository.existsByEmail(signUpRequestDTO.getEmail())) {
             throw new BadRequestException(ErrorMessage.ALREADY_EXIST_EMAIL);

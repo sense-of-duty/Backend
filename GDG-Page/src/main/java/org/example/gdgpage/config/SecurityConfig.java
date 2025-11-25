@@ -28,7 +28,7 @@ public class SecurityConfig {
     private final TokenProvider tokenProvider;
 
     private static final String[] PUBLIC_AUTH = {
-            "/auth/signup" // 추가 예정
+            "/auth/**" // 추가 예정
     };
 
     @Bean

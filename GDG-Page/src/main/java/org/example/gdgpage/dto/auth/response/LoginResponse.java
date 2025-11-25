@@ -1,6 +1,5 @@
 package org.example.gdgpage.dto.auth.response;
 
-
 import lombok.Builder;
 import lombok.Getter;
 import org.example.gdgpage.dto.token.TokenDto;

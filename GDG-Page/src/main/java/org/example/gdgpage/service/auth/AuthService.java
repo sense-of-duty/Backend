@@ -15,6 +15,7 @@ import org.example.gdgpage.dto.token.TokenDto;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.jwt.TokenProvider;
+import org.example.gdgpage.mapper.UserMapper;
 import org.example.gdgpage.repository.OAuthAccountRepository;
 import org.example.gdgpage.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -79,7 +80,7 @@ public class AuthService {
         String refreshToken = tokenProvider.createRefreshToken(user.getId());
 
         TokenDto tokenDto = new TokenDto(accessToken, refreshToken);
-        UserResponse userResponse = UserResponse.from(user);
+        UserResponse userResponse = UserMapper.toUserResponse(user);
 
         return LoginResponse.of(tokenDto, userResponse);
     }

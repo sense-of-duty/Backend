@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Getter;
 import org.example.gdgpage.domain.auth.PartType;
 import org.example.gdgpage.domain.auth.Role;
-import org.example.gdgpage.domain.auth.User;
 
 import java.time.LocalDateTime;
 
@@ -23,20 +22,4 @@ public class UserResponse {
     private boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime lastLoginAt;
-
-    public static UserResponse from(User user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .phone(user.getPhone())
-                .part(user.getPart())
-                .role(user.getRole())
-                .isApproved(user.isApproved())
-                .isProfileCompleted(user.isProfileCompleted())
-                .isActive(user.isActive())
-                .createdAt(user.getCreatedAt())
-                .lastLoginAt(user.getLastLoginAt())
-                .build();
-    }
 }

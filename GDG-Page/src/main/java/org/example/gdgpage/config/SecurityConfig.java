@@ -1,6 +1,7 @@
 package org.example.gdgpage.config;
 
 import lombok.RequiredArgsConstructor;
+import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.jwt.JwtFilter;
 import org.example.gdgpage.jwt.TokenProvider;

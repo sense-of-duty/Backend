@@ -1,10 +1,11 @@
 package org.example.gdgpage.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.dto.auth.request.SignUpRequestDTO;
-import org.example.gdgpage.dto.token.TokenDto;
-import org.example.gdgpage.jwt.TokenProvider;
 import org.example.gdgpage.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,11 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @Operation(summary = "회원가입", description = "로컬 회원가입 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "회원가입 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음")
+    })
     @PostMapping("/signup")
     public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequestDTO signUpRequestDTO) {
         authService.signUp(signUpRequestDTO);

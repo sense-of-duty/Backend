@@ -28,7 +28,14 @@ public class SecurityConfig {
     private final TokenProvider tokenProvider;
 
     private static final String[] PUBLIC_AUTH = {
-            "/auth/**" // 추가 예정
+            "/auth/signup", "/auth/login" // 추가 예정
+    };
+
+    private static final String[] SWAGGER_WHITELIST = {
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs",
+            "/v3/api-docs/**"
     };
 
     @Bean
@@ -42,6 +49,7 @@ public class SecurityConfig {
                 .exceptionHandling(e -> e.authenticationEntryPoint(authenticationEntryPoint()).accessDeniedHandler(accessDeniedHandler()))
                 .authorizeHttpRequests(a -> a
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .requestMatchers(PUBLIC_AUTH).permitAll()
                         .anyRequest().authenticated()
                 )

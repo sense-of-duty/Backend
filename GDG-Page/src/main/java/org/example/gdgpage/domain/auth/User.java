@@ -43,7 +43,7 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, length = 10)
     private String name;
 
-    @Column(nullable = false, length = 20)
+    @Column(length = 20)
     @Pattern(regexp = "^010-[0-9]{4}-[0-9]{4}$")
     private String phone;
 
@@ -52,19 +52,19 @@ public class User extends BaseTimeEntity {
     private PartType part;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
+    @Column(length = 10)
     private Role role;
 
     // 관리자에게 승인됐는지 여부
-    @Column(name = "is_approved", nullable = false)
+    @Column(name = "is_approved")
     private boolean isApproved;
 
     // 로컬은 항상 true, 소셜 로그인은 추가 정보 입력 페이지에서 입력이 완료되면 true
-    @Column(name = "is_profile_completed", nullable = false)
+    @Column(name = "is_profile_completed")
     private boolean isProfileCompleted;
 
     // 현재 멤버인지, 전 기수 멤버인지
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "is_active")
     private boolean isActive;
 
     @Column
@@ -80,10 +80,11 @@ public class User extends BaseTimeEntity {
                 .role(Role.MEMBER)
                 .isApproved(false)
                 .isProfileCompleted(true)
+                .isActive(true)
                 .build();
     }
 
-    public static User createOAuthUser(String email, String name, Provider provider) {
+    public static User createOAuthUser(String email, String name) {
         return User.builder()
                 .email(email)
                 .password(null)
@@ -93,6 +94,7 @@ public class User extends BaseTimeEntity {
                 .role(Role.MEMBER)
                 .isApproved(false)
                 .isProfileCompleted(false)
+                .isActive(true)
                 .build();
     }
 
@@ -100,5 +102,13 @@ public class User extends BaseTimeEntity {
         this.phone = phone;
         this.part = part;
         this.isProfileCompleted = true;
+    }
+
+    public void updateLastLogin(LocalDateTime now) {
+        this.lastLoginAt = now;
+    }
+
+    public void deactivate() {
+        this.isActive = false;
     }
 }

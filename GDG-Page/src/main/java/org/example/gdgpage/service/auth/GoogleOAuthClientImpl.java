@@ -1,0 +1,87 @@
+package org.example.gdgpage.service.auth;
+
+import lombok.RequiredArgsConstructor;
+import org.example.gdgpage.dto.oauth.response.GoogleTokenResponse;
+import org.example.gdgpage.dto.oauth.response.GoogleUserInfoResponse;
+import org.example.gdgpage.exception.BadRequestException;
+import org.example.gdgpage.exception.ErrorMessage;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+@Component
+@RequiredArgsConstructor
+public class GoogleOAuthClientImpl implements GoogleOAuthClient {
+
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    @Value("${google.client-id}")
+    private String clientId;
+
+    @Value("${google.client-secret}")
+    private String clientSecret;
+
+    @Value("${google.redirect-uri}")
+    private String redirectUri;   // ✅ yml에서 주입
+
+    @Override
+    public GoogleTokenResponse exchangeCodeForToken(String code) {
+        String url = "https://oauth2.googleapis.com/token";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("code", code);
+        body.add("client_id", clientId);
+        body.add("client_secret", clientSecret);
+        body.add("redirect_uri", redirectUri);   // ✅ 파라미터 대신 필드 사용
+        body.add("grant_type", "authorization_code");
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<GoogleTokenResponse> response =
+                    restTemplate.exchange(url, HttpMethod.POST, request, GoogleTokenResponse.class);
+
+            if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+                throw new BadRequestException(ErrorMessage.OAUTH_CODE_EXCHANGE_FAILED);
+            }
+
+            return response.getBody();
+        } catch (RestClientException e) {
+            throw new BadRequestException(ErrorMessage.OAUTH_CODE_EXCHANGE_FAILED);
+        }
+    }
+
+    @Override
+    public GoogleUserInfoResponse getUserInfo(String accessToken) {
+        String url = "https://www.googleapis.com/oauth2/v2/userinfo";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<GoogleUserInfoResponse> response =
+                    restTemplate.exchange(url, HttpMethod.GET, request, GoogleUserInfoResponse.class);
+
+            if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+                throw new BadRequestException(ErrorMessage.OAUTH_PROFILE_FETCH_FAILED);
+            }
+
+            return response.getBody();
+        } catch (RestClientException e) {
+            throw new BadRequestException(ErrorMessage.OAUTH_PROFILE_FETCH_FAILED);
+        }
+    }
+}

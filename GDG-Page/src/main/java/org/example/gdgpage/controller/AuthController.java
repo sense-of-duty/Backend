@@ -5,8 +5,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.gdgpage.dto.auth.request.SignUpRequestDTO;
-import org.example.gdgpage.service.AuthService;
+import org.example.gdgpage.dto.auth.request.LoginRequest;
+import org.example.gdgpage.dto.oauth.request.OAuthLoginRequest;
+import org.example.gdgpage.dto.auth.request.SignUpRequest;
+import org.example.gdgpage.dto.auth.response.LoginResponse;
+import org.example.gdgpage.service.auth.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,8 +30,30 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음")
     })
     @PostMapping("/signup")
-    public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequestDTO signUpRequestDTO) {
-        authService.signUp(signUpRequestDTO);
+    public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
+        authService.signUp(signUpRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @Operation(summary = "로그인", description = "로컬 로그인 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "로그인 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음")
+    })
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest requestDTO) {
+        LoginResponse response = authService.login(requestDTO);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "소셜 로그인", description = "소셜 로그인 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "소셜 로그인 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음")
+    })
+    @PostMapping("/oauth/login")
+    public ResponseEntity<LoginResponse> oauthLogin(@Valid @RequestBody OAuthLoginRequest requestDTO) {
+        LoginResponse response = authService.oauthLogin(requestDTO);
+        return ResponseEntity.ok(response);
     }
 }

@@ -19,7 +19,9 @@ public enum ErrorMessage {
     EMAIL_ALREADY_REGISTERED_WITH_OTHER_PROVIDER("이미 존재하는 이메일입니다."),
     OAUTH_CODE_EXCHANGE_FAILED("구글 인가 코드를 액세스 토큰 교환에 실패했습니다."),
     OAUTH_PROFILE_FETCH_FAILED("구글 사용자 프로필을 불러오지 못했습니다."),
-    OAUTH_EMAIL_NOT_VERIFIED("구글 계정 이메일이 검증되지 않았습니다.");;
+    OAUTH_EMAIL_NOT_VERIFIED("구글 계정 이메일이 검증되지 않았습니다."),
+    WRONG_CHECK_PASSWORD("비밀번호가 일치하지 않습니다."),
+    ALREADY_EXIST_PHONE("이미 존재하는 번호입니다.");
 
     private final String message;
 

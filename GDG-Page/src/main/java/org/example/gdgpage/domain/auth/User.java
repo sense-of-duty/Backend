@@ -82,7 +82,7 @@ public class User {
                 .build();
     }
 
-    public static User createOAuthUser(String email, String name, OAuthProvider provider) {
+    public static User createOAuthUser(String email, String name, Provider provider) {
         return User.builder()
                 .email(email)
                 .password(null)

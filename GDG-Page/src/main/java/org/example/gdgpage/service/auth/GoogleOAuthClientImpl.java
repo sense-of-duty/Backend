@@ -23,6 +23,9 @@ public class GoogleOAuthClientImpl implements GoogleOAuthClient {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    private static final String TOKEN_URL = "https://oauth2.googleapis.com/token";
+    private static final String USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
+
     @Value("${google.client-id}")
     private String clientId;
 
@@ -34,8 +37,6 @@ public class GoogleOAuthClientImpl implements GoogleOAuthClient {
 
     @Override
     public GoogleTokenResponse exchangeCodeForToken(String code) {
-        String url = "https://oauth2.googleapis.com/token";
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -50,7 +51,7 @@ public class GoogleOAuthClientImpl implements GoogleOAuthClient {
 
         try {
             ResponseEntity<GoogleTokenResponse> response =
-                    restTemplate.exchange(url, HttpMethod.POST, request, GoogleTokenResponse.class);
+                    restTemplate.exchange(TOKEN_URL, HttpMethod.POST, request, GoogleTokenResponse.class);
 
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
                 throw new BadRequestException(ErrorMessage.OAUTH_CODE_EXCHANGE_FAILED);
@@ -64,8 +65,6 @@ public class GoogleOAuthClientImpl implements GoogleOAuthClient {
 
     @Override
     public GoogleUserInfoResponse getUserInfo(String accessToken) {
-        String url = "https://www.googleapis.com/oauth2/v2/userinfo";
-
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setBearerAuth(accessToken);
 
@@ -73,7 +72,7 @@ public class GoogleOAuthClientImpl implements GoogleOAuthClient {
 
         try {
             ResponseEntity<GoogleUserInfoResponse> exchanged =
-                    restTemplate.exchange(url, HttpMethod.GET, httpEntity, GoogleUserInfoResponse.class);
+                    restTemplate.exchange(USERINFO_URL, HttpMethod.GET, httpEntity, GoogleUserInfoResponse.class);
 
             if (!exchanged.getStatusCode().is2xxSuccessful() || exchanged.getBody() == null) {
                 throw new BadRequestException(ErrorMessage.OAUTH_PROFILE_FETCH_FAILED);

@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Table(name = "notices") //db 네임 이름은 user보니까 users이길래 이것도 s를 붙엿음
 public class Notice extends BaseTimeEntity {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

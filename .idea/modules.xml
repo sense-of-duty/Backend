@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Backend.iml" filepath="$PROJECT_DIR$/.idea/Backend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/GDG-Page.iml" filepath="$PROJECT_DIR$/.idea/modules/GDG-Page.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/GDG-Page.main.iml" filepath="$PROJECT_DIR$/.idea/modules/GDG-Page.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/GDG-Page.test.iml" filepath="$PROJECT_DIR$/.idea/modules/GDG-Page.test.iml" />
     </modules>
   </component>
 </project>

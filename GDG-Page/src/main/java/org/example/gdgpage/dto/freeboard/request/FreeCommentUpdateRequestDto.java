@@ -1,4 +1,5 @@
 package org.example.gdgpage.dto.freeboard.request;
 
-public record FreeCommentUpdateRequestDto() {
-}
+public record FreeCommentUpdateRequestDto(
+        String content
+) {}

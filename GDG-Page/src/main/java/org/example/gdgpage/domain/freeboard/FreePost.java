@@ -34,7 +34,7 @@ public class FreePost extends BaseTimeEntity {
     private Boolean isAnonymous;
 
     @Column(name = "is_pinned", nullable = false)
-    private Boolean isPinned;
+    private Boolean isPinned = false;
 
     @Column(name = "view_count", nullable = false)
     private Integer viewCount = 0;
@@ -68,7 +68,32 @@ public class FreePost extends BaseTimeEntity {
         this.isPinned = isPinned;
     }
 
-    public void update(String title, String content, Boolean isPinned) {
+    public static FreePost create(User author, String title, String content, Boolean isAnonymous) {
+        return new FreePost(
+                author,
+                title,
+                content,
+                isAnonymous,
+                false
+        );
+    }
+
+    public static FreePost createByAdmin(User author, String title, String content, Boolean isAnonymous, Boolean isPinned) {
+        return new FreePost(
+                author,
+                title,
+                content,
+                isAnonymous,
+                isPinned
+        );
+    }
+
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
+
+    public void updateByAdmin(String title, String content, Boolean isPinned) {
         this.title = title;
         this.content = content;
         this.isPinned = isPinned;

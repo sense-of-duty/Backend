@@ -91,29 +91,45 @@ public class AuthService {
     public LoginResponse oauthLogin(OAuthLoginRequest oAuthLoginRequest) {
 
         GoogleTokenResponse tokenResponse = googleOAuthClient.exchangeCodeForToken(oAuthLoginRequest.getAuthorizationCode());
-
         GoogleUserInfoResponse userInfo = googleOAuthClient.getUserInfo(tokenResponse.getAccessToken());
 
         if (userInfo.getVerifiedEmail() != null && !userInfo.getVerifiedEmail()) {
             throw new BadRequestException(ErrorMessage.OAUTH_EMAIL_NOT_VERIFIED);
         }
 
-        User user = userRepository.findByEmail(userInfo.getEmail())
-                .orElseGet(() -> {
-                    User newUser = User.createOAuthUser(userInfo.getEmail(), userInfo.getName());
-                    return userRepository.save(newUser);
-                });
+        String email = userInfo.getEmail();
+        String providerId = userInfo.getId();
 
-        oAuthAccountRepository
-                .findByProviderAndProviderId(Provider.GOOGLE, userInfo.getId())
-                .orElseGet(() -> oAuthAccountRepository.save(
-                        OAuthAccount.create(
-                                user,
-                                Provider.GOOGLE,
-                                userInfo.getId(),
-                                userInfo.getEmail()
-                        )
-                ));
+        OAuthAccount oauthAccount = oAuthAccountRepository
+                .findByProviderAndProviderId(Provider.GOOGLE, providerId)
+                .orElse(null);
+
+        User user;
+
+        if (oauthAccount != null) {
+            user = oauthAccount.getUser();
+            oauthAccount.updateLastLoginAt(LocalDateTime.now());
+        } else {
+            user = userRepository.findByEmail(email)
+                    .orElse(null);
+
+            if (user != null) {
+                throw new BadRequestException(ErrorMessage.EMAIL_ALREADY_REGISTERED_WITH_OTHER_PROVIDER);
+            }
+
+            user = userRepository.save(
+                    User.createOAuthUser(email, userInfo.getName())
+            );
+
+            oAuthAccountRepository.save(
+                    OAuthAccount.create(
+                            user,
+                            Provider.GOOGLE,
+                            providerId,
+                            email
+                    )
+            );
+        }
 
         return updateTimeAndCreateToken(user);
     }

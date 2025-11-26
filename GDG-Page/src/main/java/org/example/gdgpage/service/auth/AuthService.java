@@ -1,5 +1,6 @@
 package org.example.gdgpage.service.auth;
 
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.OAuthAccount;
 import org.example.gdgpage.domain.auth.Provider;
@@ -12,6 +13,7 @@ import org.example.gdgpage.dto.oauth.request.OAuthLoginRequest;
 import org.example.gdgpage.dto.oauth.response.GoogleTokenResponse;
 import org.example.gdgpage.dto.oauth.response.GoogleUserInfoResponse;
 import org.example.gdgpage.dto.token.TokenDto;
+import org.example.gdgpage.dto.token.request.RefreshTokenRequest;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.jwt.TokenProvider;
@@ -114,5 +116,24 @@ public class AuthService {
                 ));
 
         return updateTimeAndCreateToken(user);
+    }
+
+    @Transactional
+    public TokenDto reissue(RefreshTokenRequest request) {
+        String refreshToken = request.getRefreshToken();
+
+        if (!tokenProvider.validateToken(refreshToken)) {
+            throw new BadRequestException(ErrorMessage.INVALID_TOKEN);
+        }
+
+        Claims claims = tokenProvider.parseClaim(refreshToken);
+
+        Long userId = Long.parseLong(claims.getSubject());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));
+
+        String newAccessToken = tokenProvider.createAccessToken(user.getId(), user.getRole().name());
+
+        return new TokenDto(newAccessToken, refreshToken);
     }
 }

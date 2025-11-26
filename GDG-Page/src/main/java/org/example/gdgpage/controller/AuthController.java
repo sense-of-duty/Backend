@@ -9,6 +9,8 @@ import org.example.gdgpage.dto.auth.request.LoginRequest;
 import org.example.gdgpage.dto.oauth.request.OAuthLoginRequest;
 import org.example.gdgpage.dto.auth.request.SignUpRequest;
 import org.example.gdgpage.dto.auth.response.LoginResponse;
+import org.example.gdgpage.dto.token.TokenDto;
+import org.example.gdgpage.dto.token.request.RefreshTokenRequest;
 import org.example.gdgpage.service.auth.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,5 +57,16 @@ public class AuthController {
     public ResponseEntity<LoginResponse> oauthLogin(@Valid @RequestBody OAuthLoginRequest requestDTO) {
         LoginResponse response = authService.oauthLogin(requestDTO);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "토큰 재발급", description = "리프레시 토큰으로 액세스 토큰 재발급 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "토큰 재발급 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음")
+    })
+    @PostMapping("/reissue")
+    public ResponseEntity<TokenDto> reissue(@Valid @RequestBody RefreshTokenRequest request) {
+        TokenDto tokenDto = authService.reissue(request);
+        return ResponseEntity.ok(tokenDto);
     }
 }

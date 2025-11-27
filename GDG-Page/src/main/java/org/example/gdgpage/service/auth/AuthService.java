@@ -38,30 +38,30 @@ public class AuthService {
 
     @Transactional
     public void signUp(SignUpRequest signUpRequest) {
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+        if (userRepository.existsByEmail(signUpRequest.email())) {
             throw new BadRequestException(ErrorMessage.ALREADY_EXIST_EMAIL);
         }
 
-        if (!signUpRequest.getPassword().equals(signUpRequest.getConfirmPassword())) {
+        if (!signUpRequest.password().equals(signUpRequest.confirmPassword())) {
             throw new BadRequestException(ErrorMessage.WRONG_CHECK_PASSWORD);
         }
 
-        if (userRepository.existsByPhone(signUpRequest.getPhone())) {
+        if (userRepository.existsByPhone(signUpRequest.phone())) {
             throw new BadRequestException(ErrorMessage.ALREADY_EXIST_PHONE);
         }
 
-        String encodedPassword = passwordEncoder.encode(signUpRequest.getPassword());
+        String encodedPassword = passwordEncoder.encode(signUpRequest.password());
 
-        User user = User.createUser(signUpRequest.getEmail(), encodedPassword, signUpRequest.getName(), signUpRequest.getPhone(), signUpRequest.getPartType());
+        User user = User.createUser(signUpRequest.email(), encodedPassword, signUpRequest.name(), signUpRequest.phone(), signUpRequest.partType());
 
         userRepository.save(user);
     }
 
     @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(() -> new BadRequestException(ErrorMessage.WRONG_EMAIL_INPUT));
+        User user = userRepository.findByEmail(loginRequest.email()).orElseThrow(() -> new BadRequestException(ErrorMessage.WRONG_EMAIL_INPUT));
 
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(loginRequest.password(), user.getPassword())) {
             throw new BadRequestException(ErrorMessage.WRONG_PASSWORD_INPUT);
         }
 
@@ -83,7 +83,7 @@ public class AuthService {
     @Transactional
     public LoginResponse oauthLogin(OAuthLoginRequest oAuthLoginRequest) {
 
-        GoogleTokenResponse tokenResponse = googleOAuthClient.exchangeCodeForToken(oAuthLoginRequest.getAuthorizationCode());
+        GoogleTokenResponse tokenResponse = googleOAuthClient.exchangeCodeForToken(oAuthLoginRequest.authorizationCode());
         GoogleUserInfoResponse userInfo = googleOAuthClient.getUserInfo(tokenResponse.getAccessToken());
 
         if (userInfo.getVerifiedEmail() != null && !userInfo.getVerifiedEmail()) {
@@ -117,7 +117,7 @@ public class AuthService {
 
     @Transactional
     public TokenDto reissue(RefreshTokenRequest request) {
-        String refreshToken = request.getRefreshToken();
+        String refreshToken = request.refreshToken();
 
         if (!tokenProvider.validateToken(refreshToken)) {
             throw new BadRequestException(ErrorMessage.INVALID_TOKEN);

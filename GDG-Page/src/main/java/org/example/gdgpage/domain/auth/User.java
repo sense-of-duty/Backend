@@ -43,7 +43,7 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, length = 10)
     private String name;
 
-    @Column(length = 20)
+    @Column(length = 20, unique = true)
     @Pattern(regexp = "^010-[0-9]{4}-[0-9]{4}$")
     private String phone;
 

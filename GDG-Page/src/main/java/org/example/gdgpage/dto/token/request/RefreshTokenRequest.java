@@ -1,8 +1,6 @@
 package org.example.gdgpage.dto.token.request;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 public record RefreshTokenRequest (
 

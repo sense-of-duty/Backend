@@ -50,8 +50,7 @@ public class GoogleOAuthClientImpl implements GoogleOAuthClient {
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
         try {
-            ResponseEntity<GoogleTokenResponse> response =
-                    restTemplate.exchange(TOKEN_URL, HttpMethod.POST, request, GoogleTokenResponse.class);
+            ResponseEntity<GoogleTokenResponse> response = restTemplate.exchange(TOKEN_URL, HttpMethod.POST, request, GoogleTokenResponse.class);
 
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
                 throw new BadRequestException(ErrorMessage.OAUTH_CODE_EXCHANGE_FAILED);
@@ -71,8 +70,7 @@ public class GoogleOAuthClientImpl implements GoogleOAuthClient {
         HttpEntity<Void> httpEntity = new HttpEntity<>(httpHeaders);
 
         try {
-            ResponseEntity<GoogleUserInfoResponse> exchanged =
-                    restTemplate.exchange(USERINFO_URL, HttpMethod.GET, httpEntity, GoogleUserInfoResponse.class);
+            ResponseEntity<GoogleUserInfoResponse> exchanged = restTemplate.exchange(USERINFO_URL, HttpMethod.GET, httpEntity, GoogleUserInfoResponse.class);
 
             if (!exchanged.getStatusCode().is2xxSuccessful() || exchanged.getBody() == null) {
                 throw new BadRequestException(ErrorMessage.OAUTH_PROFILE_FETCH_FAILED);

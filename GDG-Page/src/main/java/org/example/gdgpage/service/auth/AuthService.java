@@ -52,21 +52,14 @@ public class AuthService {
 
         String encodedPassword = passwordEncoder.encode(signUpRequest.getPassword());
 
-        User user = User.createUser(
-                signUpRequest.getEmail(),
-                encodedPassword,
-                signUpRequest.getName(),
-                signUpRequest.getPhone(),
-                signUpRequest.getPartType()
-        );
+        User user = User.createUser(signUpRequest.getEmail(), encodedPassword, signUpRequest.getName(), signUpRequest.getPhone(), signUpRequest.getPartType());
 
         userRepository.save(user);
     }
 
     @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new BadRequestException(ErrorMessage.WRONG_EMAIL_INPUT));
+        User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(() -> new BadRequestException(ErrorMessage.WRONG_EMAIL_INPUT));
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new BadRequestException(ErrorMessage.WRONG_PASSWORD_INPUT);
@@ -100,9 +93,7 @@ public class AuthService {
         String email = userInfo.getEmail();
         String providerId = userInfo.getId();
 
-        OAuthAccount oauthAccount = oAuthAccountRepository
-                .findByProviderAndProviderId(Provider.GOOGLE, providerId)
-                .orElse(null);
+        OAuthAccount oauthAccount = oAuthAccountRepository.findByProviderAndProviderId(Provider.GOOGLE, providerId).orElse(null);
 
         User user;
 
@@ -110,25 +101,15 @@ public class AuthService {
             user = oauthAccount.getUser();
             oauthAccount.updateLastLoginAt(LocalDateTime.now());
         } else {
-            user = userRepository.findByEmail(email)
-                    .orElse(null);
+            user = userRepository.findByEmail(email).orElse(null);
 
             if (user != null) {
                 throw new BadRequestException(ErrorMessage.EMAIL_ALREADY_REGISTERED_WITH_OTHER_PROVIDER);
             }
 
-            user = userRepository.save(
-                    User.createOAuthUser(email, userInfo.getName())
-            );
+            user = userRepository.save(User.createOAuthUser(email, userInfo.getName()));
 
-            oAuthAccountRepository.save(
-                    OAuthAccount.create(
-                            user,
-                            Provider.GOOGLE,
-                            providerId,
-                            email
-                    )
-            );
+            oAuthAccountRepository.save(OAuthAccount.create(user, Provider.GOOGLE, providerId, email));
         }
 
         return updateTimeAndCreateToken(user);
@@ -145,8 +126,7 @@ public class AuthService {
         Claims claims = tokenProvider.parseClaim(refreshToken);
 
         Long userId = Long.parseLong(claims.getSubject());
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));
+        User user = userRepository.findById(userId).orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));
 
         String newAccessToken = tokenProvider.createAccessToken(user.getId(), user.getRole().name());
 

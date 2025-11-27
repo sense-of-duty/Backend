@@ -51,9 +51,7 @@ public class OAuthAccount {
     @Column(nullable = false)
     private LocalDateTime lastLoginAt;
 
-    public static OAuthAccount create(User user, Provider provider, String providerId,
-                                      String providerEmail)
-    {
+    public static OAuthAccount create(User user, Provider provider, String providerId, String providerEmail) {
         LocalDateTime now = LocalDateTime.now();
         return OAuthAccount.builder()
                 .user(user)

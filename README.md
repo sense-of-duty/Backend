@@ -68,7 +68,7 @@ git push origin feat/1-register-api
     - 오른쪽 하단에 Development를 클릭해서 작업한 Issue 번호를 연결합니다.
     - 연결 후 PR 날리면 merge될 때 자동으로 Issue 닫힙니다 !
     
-4. **2명에게 Approve**를 받으면 Merge하셔도 됩니다.
+4. **2명 이상에게 Approve**를 받으면 Merge하셔도 됩니다.
     - 기본 규칙: PR 작성자가 본인 PR을 Merge합니다.
 
 

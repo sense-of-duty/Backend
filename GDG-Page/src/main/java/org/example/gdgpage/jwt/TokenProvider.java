@@ -129,11 +129,6 @@ public class TokenProvider {
         }
     }
 
-    public Long getUserIdFromToken(String token) {
-        Claims claims = parseClaim(token);
-        return Long.parseLong(claims.getSubject());
-    }
-
     private static String toRole(String role) {
         if (!StringUtils.hasText(role)) {
             return null;

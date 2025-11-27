@@ -28,7 +28,7 @@ public class SecurityConfig {
     private final TokenProvider tokenProvider;
 
     private static final String[] PUBLIC_AUTH = {
-            "/auth/signup", "/auth/login" // 추가 예정
+            "/auth/**", "/oauth2/**" // 추후에 ** 제거하고 경로 지정
     };
 
     private static final String[] SWAGGER_WHITELIST = {
@@ -39,22 +39,26 @@ public class SecurityConfig {
     };
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(e -> e.authenticationEntryPoint(authenticationEntryPoint()).accessDeniedHandler(accessDeniedHandler()))
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint(authenticationEntryPoint())
+                        .accessDeniedHandler(accessDeniedHandler())
+                )
                 .authorizeHttpRequests(a -> a
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .requestMatchers(PUBLIC_AUTH).permitAll()
                         .anyRequest().authenticated()
                 )
-                .headers(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer.frameOptions(Customizer.withDefaults()).disable())
-                .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .headers(h -> h.frameOptions(Customizer.withDefaults()).disable())
+                .addFilterBefore(new JwtFilter(tokenProvider),
+                        UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

@@ -1,0 +1,31 @@
+name: Deploy GDG-Page to EC2
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "GDG-Page/**"
+      - ".github/workflows/deploy-gdg-page.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/ubuntu/Backend
+            git pull origin main
+            cd GDG-Page
+            docker compose down
+            docker compose up -d --build
+

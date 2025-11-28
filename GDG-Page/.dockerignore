@@ -3,7 +3,6 @@ build
 out
 .git
 .gitignore
-docker-compose.yml
 Dockerfile
 *.iml
 .idea

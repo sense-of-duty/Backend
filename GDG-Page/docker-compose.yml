@@ -9,8 +9,6 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: gdgPage
       TZ: Asia/Seoul
-    ports:
-      - "3306:3306"
     volumes:
       - db-data:/var/lib/mysql
 

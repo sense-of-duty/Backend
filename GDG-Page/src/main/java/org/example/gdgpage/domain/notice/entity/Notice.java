@@ -1,4 +1,4 @@
-package org.example.gdgpage.notice.entity;
+package org.example.gdgpage.domain.notice.entity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -43,7 +43,7 @@ public class Notice extends BaseTimeEntity {
 
     private LocalDateTime deletedAt;
 
-    // 생성자 (Builder 패턴 사용 추천)
+
     @Builder
     public Notice(Long authorId, Long partId, String title, String content, boolean isPinned) {
         this.authorId = authorId;

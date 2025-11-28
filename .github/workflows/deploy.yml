@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
     paths:
       - "GDG-Page/**"
-      - ".github/workflows/deploy-gdg-page.yml"
+      - ".github/workflows/deploy.yml"
 
 jobs:
   deploy:

@@ -1,25 +1,23 @@
 package org.example.gdgpage.dto.auth.response;
 
 import lombok.Builder;
-import lombok.Getter;
 import org.example.gdgpage.domain.auth.PartType;
 import org.example.gdgpage.domain.auth.Role;
 
 import java.time.LocalDateTime;
 
-@Getter
 @Builder
-public class UserResponse {
+public record UserResponse (
 
-    private Long id;
-    private String email;
-    private String name;
-    private String phone;
-    private PartType part;
-    private Role role;
-    private boolean isApproved;
-    private boolean isProfileCompleted;
-    private boolean isActive;
-    private LocalDateTime createdAt;
-    private LocalDateTime lastLoginAt;
-}
+    Long id,
+    String email,
+    String name,
+    String phone,
+    PartType part,
+    Role role,
+    boolean isApproved,
+    boolean isProfileCompleted,
+    boolean isActive,
+    LocalDateTime createdAt,
+    LocalDateTime lastLoginAt
+) {}

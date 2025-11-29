@@ -18,6 +18,7 @@ import org.example.gdgpage.dto.token.request.RefreshTokenRequest;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.jwt.TokenProvider;
+import org.example.gdgpage.mapper.LoginMapper;
 import org.example.gdgpage.mapper.UserMapper;
 import org.example.gdgpage.repository.OAuthAccountRepository;
 import org.example.gdgpage.repository.UserRepository;
@@ -80,21 +81,21 @@ public class AuthService {
         TokenDto tokenDto = new TokenDto(accessToken, refreshToken);
         UserResponse userResponse = UserMapper.toUserResponse(user);
 
-        return LoginResponse.of(tokenDto, userResponse);
+        return LoginMapper.of(tokenDto, userResponse);
     }
 
     @Transactional
     public LoginResponse oauthLogin(OAuthLoginRequest oAuthLoginRequest) {
 
         GoogleTokenResponse tokenResponse = googleOAuthClient.exchangeCodeForToken(oAuthLoginRequest.authorizationCode());
-        GoogleUserInfoResponse userInfo = googleOAuthClient.getUserInfo(tokenResponse.getAccessToken());
+        GoogleUserInfoResponse userInfo = googleOAuthClient.getUserInfo(tokenResponse.accessToken());
 
-        if (userInfo.getVerifiedEmail() != null && !userInfo.getVerifiedEmail()) {
+        if (userInfo.verifiedEmail() != null && !userInfo.verifiedEmail()) {
             throw new BadRequestException(ErrorMessage.OAUTH_EMAIL_NOT_VERIFIED);
         }
 
-        String email = userInfo.getEmail();
-        String providerId = userInfo.getId();
+        String email = userInfo.email();
+        String providerId = userInfo.id();
 
         OAuthAccount oauthAccount = oAuthAccountRepository.findByProviderAndProviderId(Provider.GOOGLE, providerId).orElse(null);
 
@@ -110,7 +111,7 @@ public class AuthService {
                 throw new BadRequestException(ErrorMessage.EMAIL_ALREADY_REGISTERED_WITH_OTHER_PROVIDER);
             }
 
-            user = userRepository.save(User.createOAuthUser(email, userInfo.getName()));
+            user = userRepository.save(User.createOAuthUser(email, userInfo.name()));
 
             oAuthAccountRepository.save(OAuthAccount.create(user, Provider.GOOGLE, providerId, email));
         }

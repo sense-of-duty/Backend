@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.dto.auth.request.LoginRequest;
 import org.example.gdgpage.dto.auth.request.SignUpRequest;
 import org.example.gdgpage.dto.auth.response.LoginResponse;
+import org.example.gdgpage.dto.auth.response.UserResponse;
+import org.example.gdgpage.dto.oauth.request.CompleteProfileRequest;
 import org.example.gdgpage.dto.oauth.request.OAuthLoginRequest;
 import org.example.gdgpage.dto.token.TokenDto;
 import org.example.gdgpage.dto.token.request.RefreshTokenRequest;
@@ -68,5 +70,18 @@ public class AuthController {
     public ResponseEntity<TokenDto> reissue(@Valid @RequestBody RefreshTokenRequest request) {
         TokenDto tokenDto = authService.reissue(request);
         return ResponseEntity.ok(tokenDto);
+    }
+
+    @Operation(summary = "소셜 로그인 추가 정보 입력", description = "소셜 로그인 사용자의 프로필을 완성시킴")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "프로필 완성 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음"),
+            @ApiResponse(responseCode = "401", description = "인증 필요"),
+            @ApiResponse(responseCode = "403", description = "접근 권한 없음")
+    })
+    @PostMapping("/oauth/completeProfile")
+    public ResponseEntity<UserResponse> completeProfile(@Valid @RequestBody CompleteProfileRequest request) {
+        UserResponse response = authService.completeProfile(request);
+        return ResponseEntity.ok(response);
     }
 }

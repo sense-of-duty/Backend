@@ -98,7 +98,8 @@ public class User extends BaseTimeEntity {
                 .build();
     }
 
-    public void completeProfile(String phone, PartType part) {
+    public void completeProfile(String name, String phone, PartType part) {
+        this.name = name;
         this.phone = phone;
         this.part = part;
         this.isProfileCompleted = true;

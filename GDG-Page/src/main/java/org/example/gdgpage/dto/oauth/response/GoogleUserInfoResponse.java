@@ -1,18 +1,16 @@
 package org.example.gdgpage.dto.oauth.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
 
-@Getter
-public class GoogleUserInfoResponse {
+public record GoogleUserInfoResponse (
 
-    private String id;
-    private String email;
-    private String name;
+    String id,
+    String email,
+    String name,
 
     @JsonProperty("verified_email")
-    private Boolean verifiedEmail;
+    Boolean verifiedEmail,
 
     @JsonProperty("picture")
-    private String picture;
-}
+    String picture
+) {}

@@ -9,6 +9,7 @@ import org.example.gdgpage.dto.auth.request.LoginRequest;
 import org.example.gdgpage.dto.auth.request.SignUpRequest;
 import org.example.gdgpage.dto.auth.response.LoginResponse;
 import org.example.gdgpage.dto.auth.response.UserResponse;
+import org.example.gdgpage.dto.oauth.request.CompleteProfileRequest;
 import org.example.gdgpage.dto.oauth.request.OAuthLoginRequest;
 import org.example.gdgpage.dto.oauth.response.GoogleTokenResponse;
 import org.example.gdgpage.dto.oauth.response.GoogleUserInfoResponse;
@@ -20,6 +21,8 @@ import org.example.gdgpage.jwt.TokenProvider;
 import org.example.gdgpage.mapper.UserMapper;
 import org.example.gdgpage.repository.OAuthAccountRepository;
 import org.example.gdgpage.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -131,5 +134,30 @@ public class AuthService {
         String newAccessToken = tokenProvider.createAccessToken(user.getId(), user.getRole().name());
 
         return new TokenDto(newAccessToken, refreshToken);
+    }
+
+    @Transactional
+    public UserResponse completeProfile(CompleteProfileRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || authentication.getName() == null) {
+            throw new BadRequestException(ErrorMessage.NEED_TO_LOGIN);
+        }
+
+        Long userId = Long.parseLong(authentication.getName());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));
+
+        if (user.isProfileCompleted()) {
+            throw new BadRequestException(ErrorMessage.ALREADY_PROFILE_COMPLETED);
+        }
+
+        if (userRepository.existsByPhone(request.phone())) {
+            throw new BadRequestException(ErrorMessage.ALREADY_EXIST_PHONE);
+        }
+
+        user.completeProfile(request.name(), request.phone(), request.partType());
+
+        return UserMapper.toUserResponse(user);
     }
 }

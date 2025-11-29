@@ -111,4 +111,8 @@ public class User extends BaseTimeEntity {
     public void deactivate() {
         this.isActive = false;
     }
+
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 }

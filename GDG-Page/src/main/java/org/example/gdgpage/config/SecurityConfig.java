@@ -31,6 +31,7 @@ public class SecurityConfig {
             "/auth/signup",
             "/auth/login",
             "/auth/oauth/login",
+            "/auth/reissue",
             "/oauth2/**"
     };
 

@@ -1,4 +1,4 @@
-package org.example.gdgpage.dto.auth.response;
+package org.example.gdgpage.dto.user.response;
 
 import lombok.Builder;
 import lombok.Getter;

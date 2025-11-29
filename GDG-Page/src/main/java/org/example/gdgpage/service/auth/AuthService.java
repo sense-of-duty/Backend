@@ -8,7 +8,7 @@ import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.dto.auth.request.LoginRequest;
 import org.example.gdgpage.dto.auth.request.SignUpRequest;
 import org.example.gdgpage.dto.auth.response.LoginResponse;
-import org.example.gdgpage.dto.auth.response.UserResponse;
+import org.example.gdgpage.dto.user.response.UserResponse;
 import org.example.gdgpage.dto.oauth.request.OAuthLoginRequest;
 import org.example.gdgpage.dto.oauth.response.GoogleTokenResponse;
 import org.example.gdgpage.dto.oauth.response.GoogleUserInfoResponse;

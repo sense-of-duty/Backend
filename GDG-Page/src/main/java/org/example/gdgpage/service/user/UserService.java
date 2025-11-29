@@ -34,7 +34,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
 
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
-            throw new BadRequestException(ErrorMessage.WRONG_PASSWORD_INPUT);
+            throw new BadRequestException(ErrorMessage.WRONG_CURRENT_PASSWORD);
         }
 
         if (!request.newPassword().equals(request.confirmNewPassword())) {

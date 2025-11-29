@@ -1,4 +1,4 @@
-package org.example.gdgpage.controller;
+package org.example.gdgpage.controller.auth;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

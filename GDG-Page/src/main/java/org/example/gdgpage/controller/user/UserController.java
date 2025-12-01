@@ -10,7 +10,6 @@ import org.example.gdgpage.dto.user.request.UpdatePasswordRequest;
 import org.example.gdgpage.dto.user.response.UserResponse;
 import org.example.gdgpage.service.user.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;

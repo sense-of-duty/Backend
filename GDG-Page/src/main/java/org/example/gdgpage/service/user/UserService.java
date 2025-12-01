@@ -37,6 +37,10 @@ public class UserService {
     public void changePassword(String refreshToken, UpdatePasswordRequest updatePasswordRequest) {
         User user = getUserFromRefreshToken(refreshToken);
 
+        if (user.getPassword() == null) {
+            throw new BadRequestException(ErrorMessage.OAUTH_ACCOUNT_CANNOT_CHANGE_PASSWORD);
+        }
+
         if (!passwordEncoder.matches(updatePasswordRequest.currentPassword(), user.getPassword())) {
             throw new BadRequestException(ErrorMessage.WRONG_CURRENT_PASSWORD);
         }

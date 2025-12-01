@@ -9,6 +9,7 @@ import org.example.gdgpage.dto.auth.request.LoginRequest;
 import org.example.gdgpage.dto.auth.request.SignUpRequest;
 import org.example.gdgpage.dto.auth.response.LoginResponse;
 import org.example.gdgpage.dto.auth.response.UserResponse;
+import org.example.gdgpage.dto.oauth.request.CompleteProfileRequest;
 import org.example.gdgpage.dto.oauth.request.OAuthLoginRequest;
 import org.example.gdgpage.dto.oauth.response.GoogleTokenResponse;
 import org.example.gdgpage.dto.oauth.response.GoogleUserInfoResponse;
@@ -17,9 +18,12 @@ import org.example.gdgpage.dto.token.request.RefreshTokenRequest;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.jwt.TokenProvider;
+import org.example.gdgpage.mapper.LoginMapper;
 import org.example.gdgpage.mapper.UserMapper;
 import org.example.gdgpage.repository.OAuthAccountRepository;
 import org.example.gdgpage.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,21 +81,21 @@ public class AuthService {
         TokenDto tokenDto = new TokenDto(accessToken, refreshToken);
         UserResponse userResponse = UserMapper.toUserResponse(user);
 
-        return LoginResponse.of(tokenDto, userResponse);
+        return LoginMapper.of(tokenDto, userResponse);
     }
 
     @Transactional
     public LoginResponse oauthLogin(OAuthLoginRequest oAuthLoginRequest) {
 
         GoogleTokenResponse tokenResponse = googleOAuthClient.exchangeCodeForToken(oAuthLoginRequest.authorizationCode());
-        GoogleUserInfoResponse userInfo = googleOAuthClient.getUserInfo(tokenResponse.getAccessToken());
+        GoogleUserInfoResponse userInfo = googleOAuthClient.getUserInfo(tokenResponse.accessToken());
 
-        if (userInfo.getVerifiedEmail() != null && !userInfo.getVerifiedEmail()) {
+        if (userInfo.verifiedEmail() != null && !userInfo.verifiedEmail()) {
             throw new BadRequestException(ErrorMessage.OAUTH_EMAIL_NOT_VERIFIED);
         }
 
-        String email = userInfo.getEmail();
-        String providerId = userInfo.getId();
+        String email = userInfo.email();
+        String providerId = userInfo.id();
 
         OAuthAccount oauthAccount = oAuthAccountRepository.findByProviderAndProviderId(Provider.GOOGLE, providerId).orElse(null);
 
@@ -107,7 +111,7 @@ public class AuthService {
                 throw new BadRequestException(ErrorMessage.EMAIL_ALREADY_REGISTERED_WITH_OTHER_PROVIDER);
             }
 
-            user = userRepository.save(User.createOAuthUser(email, userInfo.getName()));
+            user = userRepository.save(User.createOAuthUser(email, userInfo.name()));
 
             oAuthAccountRepository.save(OAuthAccount.create(user, Provider.GOOGLE, providerId, email));
         }
@@ -131,5 +135,30 @@ public class AuthService {
         String newAccessToken = tokenProvider.createAccessToken(user.getId(), user.getRole().name());
 
         return new TokenDto(newAccessToken, refreshToken);
+    }
+
+    @Transactional
+    public UserResponse completeProfile(CompleteProfileRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || authentication.getName() == null) {
+            throw new BadRequestException(ErrorMessage.NEED_TO_LOGIN);
+        }
+
+        Long userId = Long.parseLong(authentication.getName());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));
+
+        if (user.isProfileCompleted()) {
+            throw new BadRequestException(ErrorMessage.ALREADY_PROFILE_COMPLETED);
+        }
+
+        if (userRepository.existsByPhone(request.phone())) {
+            throw new BadRequestException(ErrorMessage.ALREADY_EXIST_PHONE);
+        }
+
+        user.completeProfile(request.name(), request.phone(), request.partType());
+
+        return UserMapper.toUserResponse(user);
     }
 }

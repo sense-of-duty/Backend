@@ -1,4 +1,4 @@
-package org.example.gdgpage.swagger;
+package org.example.gdgpage.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

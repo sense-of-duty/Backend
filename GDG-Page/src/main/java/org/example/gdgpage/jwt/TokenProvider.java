@@ -8,6 +8,8 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.tomcat.util.bcel.Const;
+import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,9 +29,6 @@ import java.util.Objects;
 public class TokenProvider {
 
     private static final String ROLE_CLAIM = "role";
-    private static final String TOKEN_TYPE = "token_type";
-    private static final String ACCESS_TOKEN = "access_token";
-    private static final String REFRESH_TOKEN = "refresh_token";
     private static final String DELIMITER = ",";
     private static final String AUTHORIZATION = "Authorization";
     private static final String BEARER = "Bearer ";
@@ -58,7 +57,7 @@ public class TokenProvider {
         return Jwts.builder()
                 .subject(userId.toString())
                 .claim(ROLE_CLAIM, rawRole)
-                .claim(TOKEN_TYPE, ACCESS_TOKEN)
+                .claim(Constants.TOKEN_TYPE, Constants.ACCESS_TOKEN)
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(key)
@@ -71,7 +70,7 @@ public class TokenProvider {
 
         return Jwts.builder()
                 .subject(userId.toString())
-                .claim(TOKEN_TYPE, REFRESH_TOKEN)
+                .claim(Constants.TOKEN_TYPE, Constants.REFRESH_TOKEN)
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(key)
@@ -80,9 +79,9 @@ public class TokenProvider {
 
     public Authentication getAuthentication(String token) {
         Claims claims = parseClaim(token);
-        String tokenType = claims.get(TOKEN_TYPE, String.class);
+        String tokenType = claims.get(Constants.TOKEN_TYPE, String.class);
 
-        if (REFRESH_TOKEN.equals(tokenType)) {
+        if (Constants.REFRESH_TOKEN.equals(tokenType)) {
             throw new BadRequestException(ErrorMessage.NO_REFRESH_TOKEN_IN_LOGIN);
         }
 

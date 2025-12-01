@@ -2,6 +2,7 @@ package org.example.gdgpage.service.auth;
 
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.domain.auth.OAuthAccount;
 import org.example.gdgpage.domain.auth.Provider;
 import org.example.gdgpage.domain.auth.User;
@@ -124,6 +125,11 @@ public class AuthService {
         }
 
         Claims claims = tokenProvider.parseClaim(refreshToken);
+        String tokenType = claims.get(Constants.TOKEN_TYPE, String.class);
+
+        if (!Constants.REFRESH_TOKEN.equals(tokenType)) {
+            throw new BadRequestException(ErrorMessage.INVALID_TOKEN);
+        }
 
         Long userId = Long.parseLong(claims.getSubject());
         User user = userRepository.findById(userId).orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));

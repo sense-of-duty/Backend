@@ -77,7 +77,7 @@ public class SecurityConfig {
         return (rehttpServletRequest, httpServletResponse, authenticationException) -> {
             httpServletResponse.setStatus(401);
             httpServletResponse.setContentType(Constants.CONTENT_TYPE);
-            httpServletResponse.getWriter().write(Constants.MESSAGE_INTRO + ErrorMessage.NEED_TO_AUTHORIZE.getMessage() + Constants.MESSAGE_OUTRO);
+            httpServletResponse.getWriter().write(Constants.MESSAGE_INTRO + ErrorMessage.NEED_TO_LOGIN.getMessage() + Constants.MESSAGE_OUTRO);
         };
     }
 

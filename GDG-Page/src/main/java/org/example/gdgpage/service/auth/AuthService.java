@@ -1,11 +1,14 @@
 package org.example.gdgpage.service.auth;
 
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.domain.auth.OAuthAccount;
 import org.example.gdgpage.domain.auth.Provider;
 import org.example.gdgpage.domain.auth.User;
+import org.example.gdgpage.domain.refresh.RefreshToken;
 import org.example.gdgpage.dto.auth.request.LoginRequest;
 import org.example.gdgpage.dto.auth.request.SignUpRequest;
 import org.example.gdgpage.dto.auth.response.LoginResponse;
@@ -20,7 +23,9 @@ import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.jwt.TokenProvider;
 import org.example.gdgpage.mapper.UserMapper;
 import org.example.gdgpage.repository.OAuthAccountRepository;
+import org.example.gdgpage.repository.RefreshTokenRepository;
 import org.example.gdgpage.repository.UserRepository;
+import org.example.gdgpage.util.CookieUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +37,7 @@ import java.time.LocalDateTime;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final OAuthAccountRepository oAuthAccountRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
@@ -59,26 +65,34 @@ public class AuthService {
     }
 
     @Transactional
-    public LoginResponse login(LoginRequest loginRequest) {
+    public LoginResponse login(LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
         User user = userRepository.findByEmail(loginRequest.email()).orElseThrow(() -> new BadRequestException(ErrorMessage.WRONG_EMAIL_INPUT));
 
         if (!passwordEncoder.matches(loginRequest.password(), user.getPassword())) {
             throw new BadRequestException(ErrorMessage.WRONG_PASSWORD_INPUT);
         }
 
-        return updateTimeAndCreateToken(user);
+        return updateTimeAndCreateToken(user, httpServletResponse);
     }
 
-    private LoginResponse updateTimeAndCreateToken(User user) {
+    private LoginResponse updateTimeAndCreateToken(User user, HttpServletResponse httpServletResponse) {
         user.updateLastLogin(LocalDateTime.now());
 
         String accessToken = tokenProvider.createAccessToken(user.getId(), user.getRole().name());
         String refreshToken = tokenProvider.createRefreshToken(user.getId());
 
+        refreshTokenRepository.save(
+                RefreshToken.builder()
+                        .userId(user.getId())
+                        .refreshToken(refreshToken)
+                        .build()
+        );
+
+        CookieUtil.setRefreshTokenCookie(httpServletResponse, refreshToken);
         TokenDto tokenDto = new TokenDto(accessToken, refreshToken);
         UserResponse userResponse = UserMapper.toUserResponse(user);
 
-        return LoginResponse.of(tokenDto, userResponse);
+        return LoginMapper.of(tokenDto, userResponse);
     }
 
     @Transactional

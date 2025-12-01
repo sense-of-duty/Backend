@@ -28,7 +28,12 @@ public class SecurityConfig {
     private final TokenProvider tokenProvider;
 
     private static final String[] PUBLIC_AUTH = {
-            "/auth/**", "/oauth2/**" // 추후에 ** 제거하고 경로 지정
+            "/auth/signup",
+            "/auth/login",
+            "/auth/oauth/login",
+            "/auth/reissue",
+            "/auth/logout",
+            "/oauth2/**"
     };
 
     private static final String[] SWAGGER_WHITELIST = {

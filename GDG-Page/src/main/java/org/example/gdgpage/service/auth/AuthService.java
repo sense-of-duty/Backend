@@ -32,6 +32,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 
@@ -78,28 +79,8 @@ public class AuthService {
         return updateTimeAndCreateToken(user, httpServletResponse);
     }
 
-    private LoginResponse updateTimeAndCreateToken(User user, HttpServletResponse httpServletResponse) {
-        user.updateLastLogin(LocalDateTime.now());
-
-        String accessToken = tokenProvider.createAccessToken(user.getId(), user.getRole().name());
-        String refreshToken = tokenProvider.createRefreshToken(user.getId());
-
-        refreshTokenRepository.save(
-                RefreshToken.builder()
-                        .userId(user.getId())
-                        .refreshToken(refreshToken)
-                        .build()
-        );
-
-        CookieUtil.setRefreshTokenCookie(httpServletResponse, refreshToken);
-        TokenDto tokenDto = new TokenDto(accessToken, refreshToken);
-        UserResponse userResponse = UserMapper.toUserResponse(user);
-
-        return LoginMapper.of(tokenDto, userResponse);
-    }
-
     @Transactional
-    public LoginResponse oauthLogin(OAuthLoginRequest oAuthLoginRequest) {
+    public LoginResponse oauthLogin(OAuthLoginRequest oAuthLoginRequest, HttpServletResponse httpServletResponse) {
 
         GoogleTokenResponse tokenResponse = googleOAuthClient.exchangeCodeForToken(oAuthLoginRequest.authorizationCode());
         GoogleUserInfoResponse userInfo = googleOAuthClient.getUserInfo(tokenResponse.accessToken());
@@ -126,22 +107,24 @@ public class AuthService {
             }
 
             user = userRepository.save(User.createOAuthUser(email, userInfo.name()));
-
             oAuthAccountRepository.save(OAuthAccount.create(user, Provider.GOOGLE, providerId, email));
         }
 
-        return updateTimeAndCreateToken(user);
+        return updateTimeAndCreateToken(user, httpServletResponse);
     }
 
     @Transactional
-    public TokenDto reissue(RefreshTokenRequest request) {
-        String refreshToken = request.refreshToken();
+    public TokenDto reissue(String refreshToken, HttpServletResponse httpServletResponse) {
+        if (!StringUtils.hasText(refreshToken)) {
+            throw new BadRequestException(ErrorMessage.NEED_TO_LOGIN);
+        }
 
         if (!tokenProvider.validateToken(refreshToken)) {
             throw new BadRequestException(ErrorMessage.INVALID_TOKEN);
         }
 
         Claims claims = tokenProvider.parseClaim(refreshToken);
+
         String tokenType = claims.get(Constants.TOKEN_TYPE, String.class);
 
         if (!Constants.REFRESH_TOKEN.equals(tokenType)) {
@@ -149,11 +132,38 @@ public class AuthService {
         }
 
         Long userId = Long.parseLong(claims.getSubject());
-        User user = userRepository.findById(userId).orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));
+
+        RefreshToken stored = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.INVALID_TOKEN));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));
 
         String newAccessToken = tokenProvider.createAccessToken(user.getId(), user.getRole().name());
 
-        return new TokenDto(newAccessToken, refreshToken);
+        refreshTokenRepository.delete(stored);
+
+        String newRefreshToken = tokenProvider.createRefreshToken(user.getId());
+
+        refreshTokenRepository.save(
+                RefreshToken.builder()
+                        .userId(user.getId())
+                        .refreshToken(newRefreshToken)
+                        .build()
+        );
+
+        CookieUtil.setRefreshTokenCookie(httpServletResponse, newRefreshToken);
+
+        return new TokenDto(newAccessToken, newRefreshToken);
+    }
+
+    @Transactional
+    public void logout(String refreshToken, HttpServletResponse response) {
+        if (StringUtils.hasText(refreshToken)) {
+            refreshTokenRepository.deleteByToken(refreshToken);
+        }
+
+        CookieUtil.clearRefreshTokenCookie(response);
     }
 
     @Transactional
@@ -179,5 +189,25 @@ public class AuthService {
         user.completeProfile(request.name(), request.phone(), request.partType());
 
         return UserMapper.toUserResponse(user);
+    }
+
+    private LoginResponse updateTimeAndCreateToken(User user, HttpServletResponse httpServletResponse) {
+        user.updateLastLogin(LocalDateTime.now());
+
+        String accessToken = tokenProvider.createAccessToken(user.getId(), user.getRole().name());
+        String refreshToken = tokenProvider.createRefreshToken(user.getId());
+
+        refreshTokenRepository.save(
+                RefreshToken.builder()
+                        .userId(user.getId())
+                        .refreshToken(refreshToken)
+                        .build()
+        );
+
+        CookieUtil.setRefreshTokenCookie(httpServletResponse, refreshToken);
+        TokenDto tokenDto = new TokenDto(accessToken, refreshToken);
+        UserResponse userResponse = UserMapper.toUserResponse(user);
+
+        return LoginMapper.of(tokenDto, userResponse);
     }
 }

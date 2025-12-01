@@ -3,8 +3,10 @@ package org.example.gdgpage.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.dto.auth.request.LoginRequest;
 import org.example.gdgpage.dto.auth.request.SignUpRequest;
 import org.example.gdgpage.dto.auth.response.LoginResponse;
@@ -12,10 +14,10 @@ import org.example.gdgpage.dto.auth.response.UserResponse;
 import org.example.gdgpage.dto.oauth.request.CompleteProfileRequest;
 import org.example.gdgpage.dto.oauth.request.OAuthLoginRequest;
 import org.example.gdgpage.dto.token.TokenDto;
-import org.example.gdgpage.dto.token.request.RefreshTokenRequest;
 import org.example.gdgpage.service.auth.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,9 +47,9 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음")
     })
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest requestDTO) {
-        LoginResponse response = authService.login(requestDTO);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
+        LoginResponse loginResponse = authService.login(loginRequest, httpServletResponse);
+        return ResponseEntity.ok(loginResponse);
     }
 
     @Operation(summary = "소셜 로그인", description = "소셜 로그인 API")
@@ -56,9 +58,9 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음")
     })
     @PostMapping("/oauth/login")
-    public ResponseEntity<LoginResponse> oauthLogin(@Valid @RequestBody OAuthLoginRequest requestDTO) {
-        LoginResponse response = authService.oauthLogin(requestDTO);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<LoginResponse> oauthLogin(@Valid @RequestBody OAuthLoginRequest oAuthLoginRequest, HttpServletResponse httpServletResponse) {
+        LoginResponse loginResponse = authService.oauthLogin(oAuthLoginRequest, httpServletResponse);
+        return ResponseEntity.ok(loginResponse);
     }
 
     @Operation(summary = "토큰 재발급", description = "리프레시 토큰으로 액세스 토큰 재발급 API")
@@ -67,9 +69,22 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음")
     })
     @PostMapping("/reissue")
-    public ResponseEntity<TokenDto> reissue(@Valid @RequestBody RefreshTokenRequest request) {
-        TokenDto tokenDto = authService.reissue(request);
+    public ResponseEntity<TokenDto> reissue(@CookieValue(name = Constants.REFRESH_TOKEN, required = false) String refreshToken, HttpServletResponse httpServletResponse) {
+        TokenDto tokenDto = authService.reissue(refreshToken, httpServletResponse);
         return ResponseEntity.ok(tokenDto);
+    }
+
+    @Operation(
+            summary = "로그아웃", description = "리프레시 토큰을 만료시키고 로그아웃"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "로그아웃 성공"),
+            @ApiResponse(responseCode = "400", description = "리프레시 토큰이 없거나 유효하지 않음")
+    })
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@CookieValue(name = Constants.REFRESH_TOKEN, required = false) String refreshToken, HttpServletResponse httpServletResponse) {
+        authService.logout(refreshToken, httpServletResponse);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "소셜 로그인 추가 정보 입력", description = "소셜 로그인 사용자의 프로필을 완성시킴")

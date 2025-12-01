@@ -22,7 +22,8 @@ public enum ErrorMessage {
     OAUTH_EMAIL_NOT_VERIFIED("구글 계정 이메일이 검증되지 않았습니다."),
     WRONG_CHECK_PASSWORD("비밀번호가 일치하지 않습니다."),
     ALREADY_EXIST_PHONE("이미 존재하는 번호입니다."),
-    ALREADY_PROFILE_COMPLETED("이미 프로필 작성이 완료된 유저입니다.");
+    ALREADY_PROFILE_COMPLETED("이미 프로필 작성이 완료된 유저입니다."),
+    WRONG_CURRENT_PASSWORD("비밀번호가 일치하지 않습니다.");
 
     private final String message;
 

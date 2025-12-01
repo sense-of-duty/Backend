@@ -3,7 +3,7 @@ package org.example.gdgpage.mapper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.example.gdgpage.domain.auth.User;
-import org.example.gdgpage.dto.auth.response.UserResponse;
+import org.example.gdgpage.dto.user.response.UserResponse;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UserMapper {

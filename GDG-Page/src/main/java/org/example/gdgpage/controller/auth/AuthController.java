@@ -1,4 +1,4 @@
-package org.example.gdgpage.controller;
+package org.example.gdgpage.controller.auth;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,7 +10,7 @@ import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.dto.auth.request.LoginRequest;
 import org.example.gdgpage.dto.auth.request.SignUpRequest;
 import org.example.gdgpage.dto.auth.response.LoginResponse;
-import org.example.gdgpage.dto.auth.response.UserResponse;
+import org.example.gdgpage.dto.user.response.UserResponse;
 import org.example.gdgpage.dto.oauth.request.CompleteProfileRequest;
 import org.example.gdgpage.dto.oauth.request.OAuthLoginRequest;
 import org.example.gdgpage.dto.token.TokenDto;

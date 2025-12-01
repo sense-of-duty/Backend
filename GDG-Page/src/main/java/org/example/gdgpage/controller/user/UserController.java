@@ -28,6 +28,7 @@ public class UserController {
     @Operation(summary = "내 정보 조회", description = "로그인한 사용자의 프로필을 조회")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "400", description = "리프레시 토큰이 없거나 유효하지 않음"),
             @ApiResponse(responseCode = "401", description = "인증 필요")
     })
     @GetMapping("/mypage")
@@ -39,6 +40,7 @@ public class UserController {
     @Operation(summary = "비밀번호 변경", description = "현재 비밀번호 검증 후 새 비밀번호로 변경")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "변경 성공"),
+            @ApiResponse(responseCode = "400", description = "리프레시 토큰이 없거나 유효하지 않음"),
             @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음"),
             @ApiResponse(responseCode = "401", description = "인증 필요")
     })

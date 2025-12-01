@@ -17,7 +17,6 @@ import org.example.gdgpage.dto.oauth.request.OAuthLoginRequest;
 import org.example.gdgpage.dto.oauth.response.GoogleTokenResponse;
 import org.example.gdgpage.dto.oauth.response.GoogleUserInfoResponse;
 import org.example.gdgpage.dto.token.TokenDto;
-import org.example.gdgpage.dto.token.request.RefreshTokenRequest;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.jwt.TokenProvider;
@@ -133,7 +132,7 @@ public class AuthService {
 
         Long userId = Long.parseLong(claims.getSubject());
 
-        RefreshToken stored = refreshTokenRepository.findByToken(refreshToken)
+        RefreshToken stored = refreshTokenRepository.findByRefreshToken(refreshToken)
                 .orElseThrow(() -> new BadRequestException(ErrorMessage.INVALID_TOKEN));
 
         User user = userRepository.findById(userId)
@@ -160,7 +159,7 @@ public class AuthService {
     @Transactional
     public void logout(String refreshToken, HttpServletResponse response) {
         if (StringUtils.hasText(refreshToken)) {
-            refreshTokenRepository.deleteByToken(refreshToken);
+            refreshTokenRepository.deleteByRefreshToken(refreshToken);
         }
 
         CookieUtil.clearRefreshTokenCookie(response);

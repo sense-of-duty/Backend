@@ -5,11 +5,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.dto.user.request.UpdatePasswordRequest;
 import org.example.gdgpage.dto.user.response.UserResponse;
 import org.example.gdgpage.service.user.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,9 +31,8 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "인증 필요")
     })
     @GetMapping("/mypage")
-    public ResponseEntity<UserResponse> getMyProfile(Authentication authentication) {
-        Long userId = getUserId(authentication);
-        UserResponse response = userService.getMyProfile(userId);
+    public ResponseEntity<UserResponse> getMyProfile(@CookieValue(name = Constants.REFRESH_TOKEN, required = false) String refreshToken) {
+        UserResponse response = userService.getMyProfile(refreshToken);
         return ResponseEntity.ok(response);
     }
 
@@ -42,13 +43,9 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "인증 필요")
     })
     @PatchMapping("/mypage/change-password")
-    public ResponseEntity<Void> changePassword(Authentication authentication, @Valid @RequestBody UpdatePasswordRequest request) {
-        Long userId = getUserId(authentication);
-        userService.changePassword(userId, request);
+    public ResponseEntity<Void> changePassword(@CookieValue(name = Constants.REFRESH_TOKEN, required = false) String refreshToken,
+                                               @Valid @RequestBody UpdatePasswordRequest request) {
+        userService.changePassword(refreshToken, request);
         return ResponseEntity.ok().build();
-    }
-
-    private Long getUserId(Authentication authentication) {
-        return Long.parseLong(authentication.getName());
     }
 }

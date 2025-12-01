@@ -1,9 +1,7 @@
 package org.example.gdgpage.service.auth;
 
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.domain.auth.OAuthAccount;
 import org.example.gdgpage.domain.auth.Provider;
 import org.example.gdgpage.domain.auth.User;
@@ -25,6 +23,7 @@ import org.example.gdgpage.mapper.UserMapper;
 import org.example.gdgpage.repository.OAuthAccountRepository;
 import org.example.gdgpage.repository.RefreshTokenRepository;
 import org.example.gdgpage.repository.UserRepository;
+import org.example.gdgpage.service.finder.FindUser;
 import org.example.gdgpage.util.CookieUtil;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -42,6 +41,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final OAuthAccountRepository oAuthAccountRepository;
+    private final FindUser findUser;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final GoogleOAuthClient googleOAuthClient;
@@ -114,33 +114,14 @@ public class AuthService {
 
     @Transactional
     public TokenDto reissue(String refreshToken, HttpServletResponse httpServletResponse) {
-        if (!StringUtils.hasText(refreshToken)) {
-            throw new BadRequestException(ErrorMessage.NEED_TO_LOGIN);
-        }
-
-        if (!tokenProvider.validateToken(refreshToken)) {
-            throw new BadRequestException(ErrorMessage.INVALID_TOKEN);
-        }
-
-        Claims claims = tokenProvider.parseClaim(refreshToken);
-
-        String tokenType = claims.get(Constants.TOKEN_TYPE, String.class);
-
-        if (!Constants.REFRESH_TOKEN.equals(tokenType)) {
-            throw new BadRequestException(ErrorMessage.INVALID_TOKEN);
-        }
-
-        Long userId = Long.parseLong(claims.getSubject());
-
-        RefreshToken stored = refreshTokenRepository.findByRefreshToken(refreshToken)
-                .orElseThrow(() -> new BadRequestException(ErrorMessage.INVALID_TOKEN));
+        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));
 
         String newAccessToken = tokenProvider.createAccessToken(user.getId(), user.getRole().name());
 
-        refreshTokenRepository.delete(stored);
+        refreshTokenRepository.deleteByRefreshToken(refreshToken);
 
         String newRefreshToken = tokenProvider.createRefreshToken(user.getId());
 

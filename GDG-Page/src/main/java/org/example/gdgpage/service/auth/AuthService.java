@@ -95,9 +95,16 @@ public class AuthService {
 
         User user;
 
+        boolean emptyProfileImage = userInfo.picture() != null && !userInfo.picture().isBlank();
+
         if (oauthAccount != null) {
             user = oauthAccount.getUser();
             oauthAccount.updateLastLoginAt(LocalDateTime.now());
+
+            if (emptyProfileImage) {
+                user.updateProfileImage(userInfo.picture());
+            }
+
         } else {
             user = userRepository.findByEmail(email).orElse(null);
 
@@ -106,11 +113,17 @@ public class AuthService {
             }
 
             user = userRepository.save(User.createOAuthUser(email, userInfo.name()));
+
+            if (emptyProfileImage) {
+                user.updateProfileImage(userInfo.picture());
+            }
+
             oAuthAccountRepository.save(OAuthAccount.create(user, Provider.GOOGLE, providerId, email));
         }
 
         return updateTimeAndCreateToken(user, httpServletResponse);
     }
+
 
     @Transactional
     public TokenDto reissue(String refreshToken, HttpServletResponse httpServletResponse) {

@@ -25,6 +25,7 @@ public final class UserMapper {
                 .isActive(user.isActive())
                 .createdAt(user.getCreatedAt())
                 .lastLoginAt(user.getLastLoginAt())
+                .profileImageUrl(user.getProfileImageUrl())
                 .build();
     }
 }

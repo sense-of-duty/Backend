@@ -129,4 +129,12 @@ public class User extends BaseTimeEntity {
         this.isApproved = false;
         this.rejectionReason = reason;
     }
+
+    public void updateRole(Role role) {
+        this.role = role;
+    }
+
+    public void updatePart(PartType part) {
+        this.part = part;
+    }
 }

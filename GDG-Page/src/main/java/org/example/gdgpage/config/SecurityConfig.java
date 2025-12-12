@@ -61,6 +61,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .requestMatchers(PUBLIC_AUTH).permitAll()
+                        .requestMatchers("/admin/**").hasAnyRole("ORGANIZER")
                         .anyRequest().authenticated()
                 )
                 .headers(h -> h.frameOptions(Customizer.withDefaults()).disable())

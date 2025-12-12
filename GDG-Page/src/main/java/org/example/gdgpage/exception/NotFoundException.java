@@ -1,6 +1,11 @@
 package org.example.gdgpage.exception;
 
-public class NotFoundException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-    public NotFoundException(String message) {super(message);}
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class NotFoundException extends RuntimeException {
+    public NotFoundException(ErrorMessage errorMessage) {
+        super(errorMessage.getMessage());
+    }
 }

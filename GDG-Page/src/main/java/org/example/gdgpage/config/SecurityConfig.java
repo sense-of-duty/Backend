@@ -28,7 +28,14 @@ public class SecurityConfig {
     private final TokenProvider tokenProvider;
 
     private static final String[] PUBLIC_AUTH = {
-            "/auth/signup", "/auth/login" // 추가 예정
+            "/auth/signup",
+            "/auth/login",
+            "/auth/oauth/login",
+            "/auth/reissue",
+            "/auth/logout",
+            "/oauth2/**",
+            "/user/mypage",
+            "/user/mypage/change-password"
     };
 
     private static final String[] SWAGGER_WHITELIST = {
@@ -39,22 +46,26 @@ public class SecurityConfig {
     };
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(e -> e.authenticationEntryPoint(authenticationEntryPoint()).accessDeniedHandler(accessDeniedHandler()))
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint(authenticationEntryPoint())
+                        .accessDeniedHandler(accessDeniedHandler())
+                )
                 .authorizeHttpRequests(a -> a
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .requestMatchers(PUBLIC_AUTH).permitAll()
                         .anyRequest().authenticated()
                 )
-                .headers(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer.frameOptions(Customizer.withDefaults()).disable())
-                .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .headers(h -> h.frameOptions(Customizer.withDefaults()).disable())
+                .addFilterBefore(new JwtFilter(tokenProvider),
+                        UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
@@ -68,7 +79,7 @@ public class SecurityConfig {
         return (rehttpServletRequest, httpServletResponse, authenticationException) -> {
             httpServletResponse.setStatus(401);
             httpServletResponse.setContentType(Constants.CONTENT_TYPE);
-            httpServletResponse.getWriter().write(Constants.MESSAGE_INTRO + ErrorMessage.NEED_TO_AUTHORIZE.getMessage() + Constants.MESSAGE_OUTRO);
+            httpServletResponse.getWriter().write(Constants.MESSAGE_INTRO + ErrorMessage.NEED_TO_LOGIN.getMessage() + Constants.MESSAGE_OUTRO);
         };
     }
 

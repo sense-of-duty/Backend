@@ -16,13 +16,6 @@ public class GlobalExceptionHandler {
     private static final String MESSAGE = "message";
     private static final String ELSE_MESSAGE = "요청값이 유효하지 않습니다.";
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> illegalArgumentExceptionHandler(IllegalArgumentException e) {
-        Map<String, Object> body = new HashMap<>();
-        body.put(MESSAGE, e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-    }
-
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Map<String, Object>> badRequestExceptionHandler(BadRequestException e) {
         Map<String, Object> body = new HashMap<>();
@@ -40,5 +33,26 @@ public class GlobalExceptionHandler {
                 .orElse(ELSE_MESSAGE);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(MESSAGE, errorMessage));
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Map<String, Object>> forbiddenExceptionHandler(ForbiddenException e) {
+        Map<String, Object> body = new HashMap<>();
+        body.put(MESSAGE, e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<Map<String, Object>> notFoundExceptionHandler(NotFoundException e) {
+        Map<String, Object> body = new HashMap<>();
+        body.put(MESSAGE, e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> runtimeExceptionHandler(RuntimeException e) {
+        Map<String, Object> body = new HashMap<>();
+        body.put(MESSAGE, e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 }

@@ -95,13 +95,13 @@ public class AuthService {
 
         User user;
 
-        boolean emptyProfileImage = userInfo.picture() != null && !userInfo.picture().isBlank();
+        boolean hasProfileImage = userInfo.picture() != null && !userInfo.picture().isBlank();
 
         if (oauthAccount != null) {
             user = oauthAccount.getUser();
             oauthAccount.updateLastLoginAt(LocalDateTime.now());
 
-            if (emptyProfileImage) {
+            if (hasProfileImage) {
                 user.updateProfileImage(userInfo.picture());
             }
 
@@ -114,7 +114,7 @@ public class AuthService {
 
             user = userRepository.save(User.createOAuthUser(email, userInfo.name()));
 
-            if (emptyProfileImage) {
+            if (hasProfileImage) {
                 user.updateProfileImage(userInfo.picture());
             }
 

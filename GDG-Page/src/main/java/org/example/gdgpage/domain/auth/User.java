@@ -70,6 +70,9 @@ public class User extends BaseTimeEntity {
     @Column
     private LocalDateTime lastLoginAt;
 
+    @Column(name = "rejection_reason", length = 255)
+    private String rejectionReason;
+
     public static User createUser(String email, String password, String name, String phone, PartType part) {
         return User.builder()
                 .email(email)
@@ -115,5 +118,15 @@ public class User extends BaseTimeEntity {
 
     public void updatePassword(String encodedPassword) {
         this.password = encodedPassword;
+    }
+
+    public void approve() {
+        this.isApproved = true;
+        this.rejectionReason = null;
+    }
+
+    public void reject(String reason) {
+        this.isApproved = false;
+        this.rejectionReason = reason;
     }
 }

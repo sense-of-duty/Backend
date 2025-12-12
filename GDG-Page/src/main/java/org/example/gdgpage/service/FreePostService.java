@@ -9,6 +9,7 @@ import org.example.gdgpage.dto.freeboard.request.FreePostUpdateRequestDto;
 import org.example.gdgpage.dto.freeboard.response.FreePostListResponseDto;
 import org.example.gdgpage.dto.freeboard.response.FreePostResponseDto;
 import org.example.gdgpage.exception.BadRequestException;
+import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.exception.ForbiddenException;
 import org.example.gdgpage.exception.NotFoundException;
 import org.example.gdgpage.repository.freeboard.FreePostRepository;
@@ -30,10 +31,10 @@ public class FreePostService {
     public FreePostResponseDto createPost(FreePostCreateRequestDto dto, User author) {
 
         if (dto.title() == null || dto.title().isBlank()) {
-            throw new BadRequestException("제목이 비어있습니다.");
+            throw new BadRequestException(ErrorMessage.EMPTY_TITLE);
         }
         if (dto.content() == null || dto.content().isBlank()) {
-            throw new BadRequestException("본문이 비어있습니다.");
+            throw new BadRequestException(ErrorMessage.EMPTY_CONTENT);
         }
 
         FreePost post;
@@ -62,18 +63,18 @@ public class FreePostService {
     public FreePostResponseDto updatePost(Long postId, FreePostUpdateRequestDto dto, User author) {
 
         FreePost post = freePostRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException("게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
 
         if (!post.getAuthor().getId().equals(author.getId()) &&
                 author.getRole() != Role.ORGANIZER) {
-            throw new ForbiddenException("수정 권한이 없습니다.");
+            throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
         }
 
         if (dto.title() == null || dto.title().isBlank()) {
-            throw new BadRequestException("제목이 비어있습니다.");
+            throw new BadRequestException(ErrorMessage.EMPTY_TITLE);
         }
         if (dto.content() == null || dto.content().isBlank()) {
-            throw new BadRequestException("본문이 비어있습니다.");
+            throw new BadRequestException(ErrorMessage.EMPTY_CONTENT);
         }
 
         if (author.getRole() == Role.ORGANIZER) {
@@ -88,7 +89,7 @@ public class FreePostService {
     @Transactional(readOnly = true)
     public FreePostResponseDto getPost(Long postId) {
         FreePost post = freePostRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException("게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
 
         post.increaseViewCount();
 
@@ -108,11 +109,11 @@ public class FreePostService {
     public void deletePost(Long postId, User author) {
 
         FreePost post = freePostRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException("게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
 
         if (!post.getAuthor().getId().equals(author.getId()) &&
                 author.getRole() != Role.ORGANIZER) {
-            throw new ForbiddenException("삭제 권한이 없습니다.");
+            throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
         }
 
         freePostRepository.delete(post);

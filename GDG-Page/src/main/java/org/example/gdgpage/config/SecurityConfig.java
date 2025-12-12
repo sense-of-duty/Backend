@@ -35,7 +35,8 @@ public class SecurityConfig {
             "/auth/logout",
             "/oauth2/**",
             "/user/mypage",
-            "/user/mypage/change-password"
+            "/user/mypage/change-password",
+            "/admin/**"
     };
 
     private static final String[] SWAGGER_WHITELIST = {

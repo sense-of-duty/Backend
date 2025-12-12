@@ -49,6 +49,7 @@ public class AdminService {
         if (updateUserRequest.role() != null) {
             user.updateRole(updateUserRequest.role());
         }
+
         if (updateUserRequest.part() != null) {
             user.updatePart(updateUserRequest.part());
         }
@@ -66,7 +67,8 @@ public class AdminService {
     public void approveUsers(UserApproveRequest userApproveRequest) {
         Map<Long, User> users = loadUsers(userApproveRequest.userIds());
 
-        users.values().forEach(User::approve);
+        users.values()
+                .forEach(User::approve);
     }
 
     @Transactional
@@ -77,14 +79,19 @@ public class AdminService {
 
         Map<Long, User> users = loadUsers(userRejectRequest.userIds());
 
-        users.values().forEach(user -> user.reject(userRejectRequest.reason()));
+        users.values()
+                .forEach(user -> user.reject(userRejectRequest.reason()));
     }
 
     private Map<Long, User> loadUsers(List<Long> userIds) {
         List<User> users = userRepository.findAllById(userIds);
+
         if (users.size() != userIds.size()) {
             throw new BadRequestException(ErrorMessage.NOT_EXIST_USER);
         }
-        return users.stream().collect(Collectors.toMap(User::getId, Function.identity()));
+
+        return users
+                .stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
     }
 }

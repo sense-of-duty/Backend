@@ -20,6 +20,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProfileImageStorageImpl implements ProfileImageStorage {
 
+    private static final long maxSize = 5 * 1024 * 1024;
+
     private final S3Client s3Client;
 
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
@@ -47,6 +49,10 @@ public class ProfileImageStorageImpl implements ProfileImageStorage {
     @Override
     public String storeProfileImage(Long userId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
+            throw new BadRequestException(ErrorMessage.INVALID_PROFILE_IMAGE);
+        }
+
+        if (file.getSize() > maxSize) {
             throw new BadRequestException(ErrorMessage.INVALID_PROFILE_IMAGE);
         }
 

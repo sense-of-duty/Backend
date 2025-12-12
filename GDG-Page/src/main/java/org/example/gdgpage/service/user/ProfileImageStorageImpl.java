@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
@@ -20,6 +21,19 @@ import java.util.UUID;
 public class ProfileImageStorageImpl implements ProfileImageStorage {
 
     private final S3Client s3Client;
+
+    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+    );
+
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
+            "png",
+            "jpg",
+            "jpeg",
+            "webp"
+    );
 
     @Value("${app.s3.bucket-name}")
     private String bucketName;
@@ -38,12 +52,16 @@ public class ProfileImageStorageImpl implements ProfileImageStorage {
 
         String contentType = file.getContentType();
 
-        if (contentType == null || !contentType.startsWith("image/")) {
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
             throw new BadRequestException(ErrorMessage.INVALID_PROFILE_IMAGE);
         }
 
         String originalFilename = file.getOriginalFilename();
         String extracted = extractExtension(originalFilename, contentType);
+
+        if (!ALLOWED_EXTENSIONS.contains(extracted.toLowerCase())) {
+            throw new BadRequestException(ErrorMessage.INVALID_PROFILE_IMAGE);
+        }
 
         String key = String.format("%s/%d/%s.%s",
                 normalizePrefix(profilePrefix),

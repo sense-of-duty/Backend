@@ -35,7 +35,7 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public List<UserResponse> getSignupRequests() {
-        return userRepository.findAll()
+        return userRepository.findByIsApprovedFalseAndRejectionReasonIsNull()
                 .stream()
                 .map(UserMapper::toUserResponse)
                 .toList();

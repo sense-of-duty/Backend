@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,8 +41,7 @@ public class UserController {
     @Operation(summary = "비밀번호 변경", description = "현재 비밀번호 검증 후 새 비밀번호로 변경")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "변경 성공"),
-            @ApiResponse(responseCode = "400", description = "리프레시 토큰이 없거나 유효하지 않음"),
-            @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음"),
+            @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음 또는 리프레시 토큰 유효하지 않음"),
             @ApiResponse(responseCode = "401", description = "인증 필요")
     })
     @PatchMapping("/mypage/change-password")
@@ -48,5 +49,19 @@ public class UserController {
                                                @Valid @RequestBody UpdatePasswordRequest request) {
         userService.changePassword(refreshToken, request);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "프로필 이미지 변경", description = "마이페이지에서 프로필 이미지를 업로드하여 변경")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "변경 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음 또는 리프레시 토큰 유효하지 않음"),
+            @ApiResponse(responseCode = "401", description = "인증 필요"),
+    })
+    @PatchMapping(value = "/mypage/profile-image", consumes = "multipart/form-data")
+    public ResponseEntity<UserResponse> updateProfileImage(@CookieValue(name = Constants.REFRESH_TOKEN, required = false) String refreshToken,
+                                                           @RequestPart("file") MultipartFile file
+    ) {
+        UserResponse response = userService.updateProfileImage(refreshToken, file);
+        return ResponseEntity.ok(response);
     }
 }

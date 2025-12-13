@@ -2,6 +2,7 @@ package org.example.gdgpage.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.dto.user.response.UserResponse;
 
@@ -11,6 +12,12 @@ public final class UserMapper {
     public static UserResponse toUserResponse(User user) {
         if (user == null) {
             return null;
+        }
+
+        String profileImageUrl = user.getProfileImageUrl();
+
+        if (profileImageUrl == null || profileImageUrl.isBlank()) {
+            profileImageUrl = Constants.DEFAULT_PROFILE_IMAGE_URL;
         }
 
         return UserResponse.builder()
@@ -26,6 +33,7 @@ public final class UserMapper {
                 .createdAt(user.getCreatedAt())
                 .lastLoginAt(user.getLastLoginAt())
                 .rejectionReason(user.getRejectionReason())
+                .profileImageUrl(profileImageUrl)
                 .build();
     }
 }

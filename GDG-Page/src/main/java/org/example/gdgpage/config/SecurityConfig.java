@@ -33,7 +33,10 @@ public class SecurityConfig {
             "/auth/oauth/login",
             "/auth/reissue",
             "/auth/logout",
-            "/oauth2/**",
+            "/oauth2/**"
+    };
+
+    private static final String[] COOKIE_AUTH_ENDPOINTS = {
             "/user/mypage",
             "/user/mypage/change-password",
             "/admin/**"
@@ -63,6 +66,7 @@ public class SecurityConfig {
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .requestMatchers(PUBLIC_AUTH).permitAll()
                         .requestMatchers("/admin/**").hasAnyRole("ORGANIZER")
+                        .requestMatchers(COOKIE_AUTH_ENDPOINTS).permitAll()
                         .anyRequest().authenticated()
                 )
                 .headers(h -> h.frameOptions(Customizer.withDefaults()).disable())

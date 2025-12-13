@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.domain.common.BaseTimeEntity;
 
 import java.time.LocalDateTime;
@@ -73,6 +74,9 @@ public class User extends BaseTimeEntity {
     @Column(name = "rejection_reason", length = 255)
     private String rejectionReason;
 
+    @Column(name = "profile_image_url", length = 255)
+    private String profileImageUrl;
+
     public static User createUser(String email, String password, String name, String phone, PartType part) {
         return User.builder()
                 .email(email)
@@ -84,6 +88,7 @@ public class User extends BaseTimeEntity {
                 .isApproved(false)
                 .isProfileCompleted(true)
                 .isActive(true)
+                .profileImageUrl(Constants.DEFAULT_PROFILE_IMAGE_URL)
                 .build();
     }
 
@@ -98,6 +103,7 @@ public class User extends BaseTimeEntity {
                 .isApproved(false)
                 .isProfileCompleted(false)
                 .isActive(true)
+                .profileImageUrl(Constants.DEFAULT_PROFILE_IMAGE_URL)
                 .build();
     }
 
@@ -136,5 +142,9 @@ public class User extends BaseTimeEntity {
 
     public void updatePart(PartType part) {
         this.part = part;
+    }
+
+    public void updateProfileImage(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

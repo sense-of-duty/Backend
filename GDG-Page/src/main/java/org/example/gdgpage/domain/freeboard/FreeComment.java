@@ -52,4 +52,6 @@ public class FreeComment extends BaseTimeEntity{
     public void increaseLikeCount() {
         this.likeCount++;
     }
+
+    public void setParent(FreeComment parent) { this.parent = parent; }
 }

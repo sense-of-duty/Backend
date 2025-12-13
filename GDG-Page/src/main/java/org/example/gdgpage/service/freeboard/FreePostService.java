@@ -1,4 +1,4 @@
-package org.example.gdgpage.service;
+package org.example.gdgpage.service.freeboard;
 
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.Role;

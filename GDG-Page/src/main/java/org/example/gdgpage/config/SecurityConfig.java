@@ -33,9 +33,13 @@ public class SecurityConfig {
             "/auth/oauth/login",
             "/auth/reissue",
             "/auth/logout",
-            "/oauth2/**",
+            "/oauth2/**"
+    };
+
+    private static final String[] COOKIE_AUTH_ENDPOINTS = {
             "/user/mypage",
-            "/user/mypage/change-password"
+            "/user/mypage/change-password",
+            "/user/mypage/profile-image"
     };
 
     private static final String[] SWAGGER_WHITELIST = {
@@ -61,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .requestMatchers(PUBLIC_AUTH).permitAll()
+                        .requestMatchers(COOKIE_AUTH_ENDPOINTS).permitAll()
                         .anyRequest().authenticated()
                 )
                 .headers(h -> h.frameOptions(Customizer.withDefaults()).disable())

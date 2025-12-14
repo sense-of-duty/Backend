@@ -53,6 +53,10 @@ public class AdminService {
         if (updateUserRequest.part() != null) {
             user.updatePart(updateUserRequest.part());
         }
+
+        if (updateUserRequest.isActive() != null) {
+            user.updateActive(updateUserRequest.isActive());
+        }
     }
 
     @Transactional

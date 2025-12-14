@@ -5,5 +5,6 @@ import org.example.gdgpage.domain.auth.Role;
 
 public record UpdateUserRequest(
         Role role,
-        PartType part
+        PartType part,
+        Boolean isActive
 ) {}

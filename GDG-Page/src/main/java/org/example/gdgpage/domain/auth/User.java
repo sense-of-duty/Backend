@@ -124,10 +124,6 @@ public class User extends BaseTimeEntity {
         this.lastLoginAt = now;
     }
 
-    public void deactivate() {
-        this.isActive = false;
-    }
-
     public void updatePassword(String encodedPassword) {
         this.password = encodedPassword;
     }
@@ -161,5 +157,9 @@ public class User extends BaseTimeEntity {
         this.name = "(삭제된 유저)";
         this.phone = null;
         this.profileImageUrl = Constants.DEFAULT_PROFILE_IMAGE_URL;
+    }
+
+    public void updateActive(boolean active) {
+        this.isActive = active;
     }
 }

@@ -26,7 +26,8 @@ public enum ErrorMessage {
     WRONG_CURRENT_PASSWORD("비밀번호가 일치하지 않습니다."),
     OAUTH_ACCOUNT_CANNOT_CHANGE_PASSWORD("소셜 로그인 유저는 비밀번호 변경이 불가합니다."),
     INVALID_REQUEST("반려 사유를 입력해주세요."),
-    INVALID_PROFILE_IMAGE("유효하지 않은 이미지입니다.");
+    INVALID_PROFILE_IMAGE("유효하지 않은 이미지입니다."),
+    DELETED_USER("삭제된 유저입니다.");
 
     private final String message;
 

@@ -77,6 +77,12 @@ public class User extends BaseTimeEntity {
     @Column(name = "profile_image_url", length = 255)
     private String profileImageUrl;
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean deleted;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     public static User createUser(String email, String password, String name, String phone, PartType part) {
         return User.builder()
                 .email(email)
@@ -146,5 +152,14 @@ public class User extends BaseTimeEntity {
 
     public void updateProfileImage(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public void softDelete() {
+        this.deleted = true;
+        this.deletedAt = LocalDateTime.now();
+        this.isActive = false;
+        this.name = "(삭제된 유저)";
+        this.phone = null;
+        this.profileImageUrl = Constants.DEFAULT_PROFILE_IMAGE_URL;
     }
 }

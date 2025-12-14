@@ -60,7 +60,7 @@ public class AdminService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
 
-        user.deactivate();
+        user.softDelete();
     }
 
     @Transactional

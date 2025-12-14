@@ -38,8 +38,7 @@ public class SecurityConfig {
 
     private static final String[] COOKIE_AUTH_ENDPOINTS = {
             "/user/mypage",
-            "/user/mypage/change-password",
-            "/admin/**"
+            "/user/mypage/change-password"
     };
 
     private static final String[] SWAGGER_WHITELIST = {

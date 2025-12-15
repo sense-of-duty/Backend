@@ -17,7 +17,10 @@ import org.example.gdgpage.repository.freeboard.FreePostRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -84,14 +87,34 @@ public class FreeCommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<FreeCommentResponseDto> getComments(Long postId) {
+    public List<FreeCommentResponseDto> getCommentTree(Long postId) {
 
         FreePost post = freePostRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
 
-        return freeCommentRepository.findByPostOrderByCreatedAtAsc(post)
-                .stream()
+        List<FreeComment> comments = freeCommentRepository
+                .findByPostOrderByCreatedAtAsc(post);
+
+        List<FreeCommentResponseDto> dtoList = comments.stream()
                 .map(FreeCommentResponseDto::new)
                 .toList();
+
+        Map<Long, FreeCommentResponseDto> map = dtoList.stream()
+                .collect(Collectors.toMap(FreeCommentResponseDto::getId, dto -> dto));
+
+        List<FreeCommentResponseDto> roots = new ArrayList<>();
+
+        for (FreeCommentResponseDto dto : dtoList) {
+            if (dto.getParentId() == null) {
+                roots.add(dto);
+            } else {
+                FreeCommentResponseDto parent = map.get(dto.getParentId());
+                if (parent != null) {
+                    parent.addChild(dto);
+                }
+            }
+        }
+
+        return roots;
     }
 }

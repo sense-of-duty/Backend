@@ -19,5 +19,6 @@ public record UserResponse (
     boolean isProfileCompleted,
     boolean isActive,
     LocalDateTime createdAt,
-    LocalDateTime lastLoginAt
+    LocalDateTime lastLoginAt,
+    String profileImageUrl
 ) {}

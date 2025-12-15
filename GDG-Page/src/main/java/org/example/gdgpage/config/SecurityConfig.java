@@ -5,6 +5,7 @@ import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.jwt.JwtFilter;
 import org.example.gdgpage.jwt.TokenProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,6 +20,11 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity(debug = true) // 개발 완료 후 삭제 요망
@@ -27,15 +33,22 @@ public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
 
+    @Value("#{'${app.cors.allowed-origin-patterns}'.split(',')}")
+    private List<String> allowedOrigins;
+
     private static final String[] PUBLIC_AUTH = {
             "/auth/signup",
             "/auth/login",
             "/auth/oauth/login",
             "/auth/reissue",
             "/auth/logout",
-            "/oauth2/**",
+            "/oauth2/**"
+    };
+
+    private static final String[] COOKIE_AUTH_ENDPOINTS = {
             "/user/mypage",
-            "/user/mypage/change-password"
+            "/user/mypage/change-password",
+            "/user/mypage/profile-image"
     };
 
     private static final String[] SWAGGER_WHITELIST = {
@@ -52,6 +65,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(authenticationEntryPoint())
@@ -61,12 +75,27 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .requestMatchers(PUBLIC_AUTH).permitAll()
+                        .requestMatchers(COOKIE_AUTH_ENDPOINTS).authenticated()
                         .anyRequest().authenticated()
                 )
                 .headers(h -> h.frameOptions(Customizer.withDefaults()).disable())
                 .addFilterBefore(new JwtFilter(tokenProvider),
                         UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOriginPatterns(allowedOrigins);
+        config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("Authorization","Set-Cookie"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 
     @Bean

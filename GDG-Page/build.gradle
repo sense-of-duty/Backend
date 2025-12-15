@@ -48,6 +48,9 @@ dependencies {
 
     // swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+
+    // s3
+    implementation 'software.amazon.awssdk:s3:2.25.64'
 }
 
 tasks.named('test') {

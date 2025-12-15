@@ -7,14 +7,13 @@ import org.example.gdgpage.dto.user.response.UserResponse;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.exception.NotFoundException;
-import org.example.gdgpage.jwt.TokenProvider;
 import org.example.gdgpage.mapper.UserMapper;
-import org.example.gdgpage.repository.RefreshTokenRepository;
 import org.example.gdgpage.repository.UserRepository;
 import org.example.gdgpage.service.finder.FindUser;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +21,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final TokenProvider tokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final FindUser findUser;
+    private final ProfileImageStorage profileImageStorage;
 
     @Transactional(readOnly = true)
     public UserResponse getMyProfile(String refreshToken) {
@@ -60,4 +58,16 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
     }
 
+    @Transactional
+    public UserResponse updateProfileImage(String refreshToken, MultipartFile file) {
+        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
+
+        String imageUrl = profileImageStorage.storeProfileImage(userId, file);
+        user.updateProfileImage(imageUrl);
+
+        return UserMapper.toUserResponse(user);
+    }
 }

@@ -80,9 +80,7 @@ public class AuthController {
         return ResponseEntity.ok(tokenDto);
     }
 
-    @Operation(
-            summary = "로그아웃", description = "리프레시 토큰을 만료시키고 로그아웃"
-    )
+    @Operation(summary = "로그아웃", description = "리프레시 토큰을 만료시키고 로그아웃")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "로그아웃 성공"),
             @ApiResponse(responseCode = "400", description = "리프레시 토큰이 없거나 유효하지 않음")

@@ -26,7 +26,7 @@ public class FreePostController {
         return freePostService.createPost(dto, user);
     }
 
-    @PatchMapping("/{postId")
+    @PatchMapping("/{postId}")
     public FreePostResponseDto updatePost(
             @PathVariable Long postId,
             @RequestBody FreePostUpdateRequestDto dto,

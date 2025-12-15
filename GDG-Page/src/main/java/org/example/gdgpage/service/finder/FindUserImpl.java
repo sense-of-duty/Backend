@@ -3,11 +3,14 @@ package org.example.gdgpage.service.finder;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.common.Constants;
+import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.domain.refresh.RefreshToken;
 import org.example.gdgpage.exception.ErrorMessage;
+import org.example.gdgpage.exception.NotFoundException;
 import org.example.gdgpage.exception.UnauthorizedException;
 import org.example.gdgpage.jwt.TokenProvider;
 import org.example.gdgpage.repository.RefreshTokenRepository;
+import org.example.gdgpage.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -17,6 +20,7 @@ public class FindUserImpl implements FindUser {
 
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final UserRepository userRepository;
 
     @Override
     public Long getUserIdFromRefreshToken(String refreshToken) {
@@ -46,5 +50,10 @@ public class FindUserImpl implements FindUser {
 
         return userId;
     }
-}
 
+    @Override
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
+    }
+}

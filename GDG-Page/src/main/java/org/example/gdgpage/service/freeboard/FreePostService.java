@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.Role;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.domain.freeboard.FreePost;
+import org.example.gdgpage.dto.freeboard.request.AdminPostCreateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreePostCreateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreePostUpdateRequestDto;
 import org.example.gdgpage.dto.freeboard.response.FreePostListResponseDto;
@@ -13,6 +14,7 @@ import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.exception.ForbiddenException;
 import org.example.gdgpage.exception.NotFoundException;
 import org.example.gdgpage.repository.freeboard.FreePostRepository;
+import org.example.gdgpage.service.finder.FindUserImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.example.gdgpage.repository.UserRepository;
@@ -25,42 +27,54 @@ import java.util.List;
 public class FreePostService {
 
     private final FreePostRepository freePostRepository;
-    private final UserRepository userRepository;
+    private final FindUserImpl findUser;
 
     @Transactional
-    public FreePostResponseDto createPost(FreePostCreateRequestDto dto, User author) {
+    public FreePostResponseDto createUserPost(FreePostCreateRequestDto dto, String refreshToken) {
 
-        if (dto.title() == null || dto.title().isBlank()) {
-            throw new BadRequestException(ErrorMessage.EMPTY_TITLE);
-        }
-        if (dto.content() == null || dto.content().isBlank()) {
-            throw new BadRequestException(ErrorMessage.EMPTY_CONTENT);
-        }
-
-        FreePost post;
+        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
+        User author = findUser.getUserById(userId);
 
         if (author.getRole() == Role.ORGANIZER) {
-            post = FreePost.createByAdmin(
-                    author,
-                    dto.title(),
-                    dto.content(),
-                    dto.isAnonymous(),
-                    dto.isPinned()
-            );
-        } else {
-            post = FreePost.create(
-                    author,
-                    dto.title(),
-                    dto.content(),
-                    dto.isAnonymous()
-            );
+            throw new ForbiddenException(ErrorMessage.NO_PERMISSION_USER_POST);
         }
+
+        FreePost post = FreePost.create(
+                author,
+                dto.title(),
+                dto.content(),
+                dto.isAnonymous()
+        );
 
         return new FreePostResponseDto(freePostRepository.save(post));
     }
 
     @Transactional
-    public FreePostResponseDto updatePost(Long postId, FreePostUpdateRequestDto dto, User author) {
+    public FreePostResponseDto createAdminPost(AdminPostCreateRequestDto dto, String refreshToken) {
+
+        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
+        User author = findUser.getUserById(userId);
+
+        if (author.getRole() != Role.ORGANIZER) {
+            throw new ForbiddenException(ErrorMessage.NO_PERMISSION_ADMIN_POST);
+        }
+
+        FreePost post = FreePost.createByAdmin(
+                author,
+                dto.title(),
+                dto.content(),
+                dto.isAnonymous(),
+                dto.isPinned()
+        );
+
+        return new FreePostResponseDto(freePostRepository.save(post));
+    }
+
+    @Transactional
+    public FreePostResponseDto updatePost(Long postId, FreePostUpdateRequestDto dto, String refreshToken) {
+
+        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
+        User author = findUser.getUserById(userId);
 
         FreePost post = freePostRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
@@ -87,7 +101,10 @@ public class FreePostService {
     }
 
     @Transactional(readOnly = true)
-    public FreePostResponseDto getPost(Long postId) {
+    public FreePostResponseDto getPost(Long postId, String refreshToken) {
+
+        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
+
         FreePost post = freePostRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
 
@@ -97,7 +114,9 @@ public class FreePostService {
     }
 
     @Transactional(readOnly = true)
-    public List<FreePostListResponseDto> getPostList() {
+    public List<FreePostListResponseDto> getPostList(String refreshToken) {
+
+        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
 
         return freePostRepository.findAll().stream()
                 .sorted(Comparator.comparing(FreePost::getCreatedAt).reversed())
@@ -106,7 +125,10 @@ public class FreePostService {
     }
 
     @Transactional
-    public void deletePost(Long postId, User author) {
+    public void deletePost(Long postId, String refreshToken) {
+
+        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
+        User author = findUser.getUserById(userId);
 
         FreePost post = freePostRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));

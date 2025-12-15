@@ -1,7 +1,8 @@
 package org.example.gdgpage.dto.freeboard.request;
 
-public record FreePostCreateRequestDto(
+public record AdminPostCreateRequestDto(
         String title,
         String content,
-        Boolean isAnonymous
+        Boolean isAnonymous,
+        Boolean isPinned
 ) {}

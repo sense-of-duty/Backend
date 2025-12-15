@@ -2,6 +2,7 @@ package org.example.gdgpage.controller.freeboard;
 
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.User;
+import org.example.gdgpage.dto.freeboard.request.AdminPostCreateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreePostCreateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreePostUpdateRequestDto;
 import org.example.gdgpage.dto.freeboard.response.FreePostListResponseDto;
@@ -20,37 +21,46 @@ public class FreePostController {
 
     @PostMapping
     public FreePostResponseDto createPost(
-            @RequestBody FreePostCreateRequestDto dto,
-            @RequestAttribute User user
+            @RequestHeader("refreshToken") String refreshToken,
+            @RequestBody FreePostCreateRequestDto dto
     ) {
-        return freePostService.createPost(dto, user);
+        return freePostService.createUserPost(dto, refreshToken);
+    }
+
+    @PostMapping("/admin")
+    public FreePostResponseDto createAdminPost(
+            @RequestHeader("refreshToken") String refreshToken,
+            @RequestBody AdminPostCreateRequestDto dto
+    ) {
+        return freePostService.createAdminPost(dto, refreshToken);
     }
 
     @PatchMapping("/{postId}")
     public FreePostResponseDto updatePost(
+            @RequestHeader("refreshToken") String refreshToken,
             @PathVariable Long postId,
-            @RequestBody FreePostUpdateRequestDto dto,
-            @RequestAttribute User user
+            @RequestBody FreePostUpdateRequestDto dto
     ) {
-        return freePostService.updatePost(postId, dto, user);
+        return freePostService.updatePost(postId, dto, refreshToken);
     }
 
     @GetMapping("/{postId}")
-    public FreePostResponseDto getPost(@PathVariable Long postId) {
-        return freePostService.getPost(postId);
+    public FreePostResponseDto getPost(
+            @RequestHeader("refreshToken") String refreshToken,
+            @PathVariable Long postId) {
+        return freePostService.getPost(postId, refreshToken);
     }
 
     @GetMapping
-    public List<FreePostListResponseDto> getPostList() {
-        return freePostService.getPostList();
-    }
-
-    @DeleteMapping("/{postId}")
-    public void deletePost(
-            @PathVariable Long postId,
-            @RequestAttribute User user
+    public List<FreePostListResponseDto> getPostList(
+            @RequestHeader("refreshToken") String refreshToken
     ) {
-        freePostService.deletePost(postId, user);
+        return freePostService.getPostList(refreshToken);
     }
-
+    @DeleteMapping("/{postId}")
+    public void deletePost(@PathVariable Long postId,
+                           @RequestHeader("refreshToken") String refreshToken
+    ) {
+        freePostService.deletePost(postId, refreshToken);
+    }
 }

@@ -33,6 +33,7 @@ public final class UserMapper {
                 .createdAt(user.getCreatedAt())
                 .lastLoginAt(user.getLastLoginAt())
                 .profileImageUrl(profileImageUrl)
+                .emailVerified(user.isEmailVerified())
                 .build();
     }
 }

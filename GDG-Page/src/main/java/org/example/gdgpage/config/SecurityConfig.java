@@ -28,11 +28,7 @@ public class SecurityConfig {
     private final TokenProvider tokenProvider;
 
     private static final String[] PUBLIC_AUTH = {
-            "/auth/signup",
-            "/auth/login",
-            "/auth/oauth/login",
-            "/auth/reissue",
-            "/auth/logout",
+            "/auth/**",
             "/oauth2/**"
     };
 

@@ -45,5 +45,4 @@ app:
     region: ap-northeast-2
 
 password-reset:
-  token-expiration-minutes: 30
   frontend-reset-page-url: ${FRONTEND_RESET_PAGE_URL}

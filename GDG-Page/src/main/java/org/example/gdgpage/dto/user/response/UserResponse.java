@@ -20,5 +20,6 @@ public record UserResponse (
     boolean isActive,
     LocalDateTime createdAt,
     LocalDateTime lastLoginAt,
-    String profileImageUrl
+    String profileImageUrl,
+    boolean emailVerified
 ) {}

@@ -25,7 +25,13 @@ public enum ErrorMessage {
     ALREADY_PROFILE_COMPLETED("이미 프로필 작성이 완료된 유저입니다."),
     WRONG_CURRENT_PASSWORD("비밀번호가 일치하지 않습니다."),
     OAUTH_ACCOUNT_CANNOT_CHANGE_PASSWORD("소셜 로그인 유저는 비밀번호 변경이 불가합니다."),
-    INVALID_PROFILE_IMAGE("유효하지 않은 프로필 이미지입니다.");
+    INVALID_PROFILE_IMAGE("유효하지 않은 프로필 이미지입니다."),
+    INVALID_EMAIL_VERIFICATION_TOKEN("유효하지 않은 링크입니다."),
+    EXPIRED_EMAIL_VERIFICATION_TOKEN("만료된 링크입니다."),
+    EMAIL_ALREADY_VERIFIED("이미 이메일 인증이 완료된 계정입니다."),
+    EMAIL_NOT_VERIFIED("이메일 인증이 완료되지 않았습니다."),
+    INVALID_PASSWORD_RESET_TOKEN("유효하지 않은 링크입니다."),
+    EXPIRED_PASSWORD_RESET_TOKEN("만료된 링크입니다.");
 
     private final String message;
 

@@ -74,6 +74,9 @@ public class User extends BaseTimeEntity {
     @Column(name = "profile_image_url", length = 255)
     private String profileImageUrl;
 
+    @Column(name = "is_email_verified")
+    private boolean emailVerified;
+
     public static User createUser(String email, String password, String name, String phone, PartType part) {
         return User.builder()
                 .email(email)
@@ -86,6 +89,7 @@ public class User extends BaseTimeEntity {
                 .isProfileCompleted(true)
                 .isActive(true)
                 .profileImageUrl(Constants.DEFAULT_PROFILE_IMAGE_URL)
+                .emailVerified(false)
                 .build();
     }
 
@@ -101,6 +105,7 @@ public class User extends BaseTimeEntity {
                 .isProfileCompleted(false)
                 .isActive(true)
                 .profileImageUrl(Constants.DEFAULT_PROFILE_IMAGE_URL)
+                .emailVerified(true)
                 .build();
     }
 
@@ -125,5 +130,9 @@ public class User extends BaseTimeEntity {
 
     public void updateProfileImage(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public void verifyEmail() {
+        this.emailVerified = true;
     }
 }

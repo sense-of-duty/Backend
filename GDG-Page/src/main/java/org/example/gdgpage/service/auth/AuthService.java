@@ -2,7 +2,9 @@ package org.example.gdgpage.service.auth;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.example.gdgpage.domain.auth.EmailVerificationToken;
 import org.example.gdgpage.domain.auth.OAuthAccount;
+import org.example.gdgpage.domain.auth.PasswordResetToken;
 import org.example.gdgpage.domain.auth.Provider;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.domain.refresh.RefreshToken;
@@ -20,11 +22,15 @@ import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.jwt.TokenProvider;
 import org.example.gdgpage.mapper.LoginMapper;
 import org.example.gdgpage.mapper.UserMapper;
+import org.example.gdgpage.repository.EmailVerificationTokenRepository;
 import org.example.gdgpage.repository.OAuthAccountRepository;
+import org.example.gdgpage.repository.PasswordResetTokenRepository;
 import org.example.gdgpage.repository.RefreshTokenRepository;
 import org.example.gdgpage.repository.UserRepository;
 import org.example.gdgpage.service.finder.FindUser;
+import org.example.gdgpage.service.mail.EmailService;
 import org.example.gdgpage.util.CookieUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,6 +51,12 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final GoogleOAuthClient googleOAuthClient;
+    private final EmailVerificationTokenRepository emailVerificationTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final EmailService emailService;
+
+    @Value("${password-reset.frontend-reset-page-url}")
+    private String frontendBaseUrl;
 
     @Transactional
     public void signUp(SignUpRequest signUpRequest) {
@@ -65,6 +77,7 @@ public class AuthService {
         User user = User.createUser(signUpRequest.email(), encodedPassword, signUpRequest.name(), signUpRequest.phone(), signUpRequest.partType());
 
         userRepository.save(user);
+        createAndSendEmailVerification(user);
     }
 
     @Transactional
@@ -73,6 +86,10 @@ public class AuthService {
 
         if (!passwordEncoder.matches(loginRequest.password(), user.getPassword())) {
             throw new BadRequestException(ErrorMessage.WRONG_PASSWORD_INPUT);
+        }
+
+        if (!user.isEmailVerified()) {
+            throw new BadRequestException(ErrorMessage.EMAIL_NOT_VERIFIED);
         }
 
         return updateTimeAndCreateToken(user, httpServletResponse);
@@ -202,5 +219,107 @@ public class AuthService {
         UserResponse userResponse = UserMapper.toUserResponse(user);
 
         return LoginMapper.of(tokenDto, userResponse);
+    }
+
+    @Transactional
+    public void verifyEmail(String token) {
+        EmailVerificationToken emailToken = emailVerificationTokenRepository.findByToken(token)
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.INVALID_EMAIL_VERIFICATION_TOKEN));
+
+        if (emailToken.isUsed()) {
+            throw new BadRequestException(ErrorMessage.INVALID_EMAIL_VERIFICATION_TOKEN);
+        }
+
+        if (emailToken.isExpired()) {
+            throw new BadRequestException(ErrorMessage.EXPIRED_EMAIL_VERIFICATION_TOKEN);
+        }
+
+        User user = userRepository.findById(emailToken.getUserId())
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));
+
+        if (user.isEmailVerified()) {
+            throw new BadRequestException(ErrorMessage.EMAIL_ALREADY_VERIFIED);
+        }
+
+        user.verifyEmail();
+        emailToken.markUsed();
+    }
+
+    @Transactional
+    public void requestPasswordReset(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));
+
+        String token = java.util.UUID.randomUUID().toString();
+
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .token(token)
+                .userId(user.getId())
+                .expiresAt(LocalDateTime.now().plusMinutes(10))
+                .used(false)
+                .build();
+
+        passwordResetTokenRepository.save(resetToken);
+
+        String resetLink = frontendBaseUrl + "/auth/reset-password?token=" + token;
+        emailService.sendPasswordResetMail(user.getEmail(), resetLink);
+    }
+
+    @Transactional
+    public void resetPassword(String token, String newPassword, String confirmPassword) {
+        if (!newPassword.equals(confirmPassword)) {
+            throw new BadRequestException(ErrorMessage.WRONG_CHECK_PASSWORD);
+        }
+
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.INVALID_PASSWORD_RESET_TOKEN));
+
+        if (resetToken.isUsed()) {
+            throw new BadRequestException(ErrorMessage.INVALID_PASSWORD_RESET_TOKEN);
+        }
+
+        if (resetToken.isExpired()) {
+            throw new BadRequestException(ErrorMessage.EXPIRED_PASSWORD_RESET_TOKEN);
+        }
+
+        User user = userRepository.findById(resetToken.getUserId())
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));
+
+        String encoded = passwordEncoder.encode(newPassword);
+        user.updatePassword(encoded);
+
+        resetToken.markUsed();
+
+         refreshTokenRepository.deleteAllByUserId(user.getId());
+    }
+
+    @Transactional
+    public void resendVerificationEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));
+
+        if (user.isEmailVerified()) {
+            throw new BadRequestException(ErrorMessage.EMAIL_ALREADY_VERIFIED);
+        }
+
+        emailVerificationTokenRepository.deleteAllByUserId(user.getId());
+
+        createAndSendEmailVerification(user);
+    }
+
+    private void createAndSendEmailVerification(User user) {
+        String token = java.util.UUID.randomUUID().toString();
+
+        EmailVerificationToken emailToken = EmailVerificationToken.builder()
+                .token(token)
+                .userId(user.getId())
+                .expiresAt(LocalDateTime.now().plusMinutes(10))
+                .used(false)
+                .build();
+
+        emailVerificationTokenRepository.save(emailToken);
+
+        String verificationLink = frontendBaseUrl + "/auth/verify-email?token=" + token;
+        emailService.sendEmailVerificationMail(user.getEmail(), verificationLink);
     }
 }

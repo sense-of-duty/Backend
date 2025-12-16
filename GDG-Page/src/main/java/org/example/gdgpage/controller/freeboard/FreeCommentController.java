@@ -1,7 +1,6 @@
 package org.example.gdgpage.controller.freeboard;
 
 import lombok.RequiredArgsConstructor;
-import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.dto.freeboard.request.FreeCommentCreateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreeCommentUpdateRequestDto;
 import org.example.gdgpage.dto.freeboard.response.FreeCommentResponseDto;

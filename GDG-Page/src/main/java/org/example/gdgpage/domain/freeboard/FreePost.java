@@ -31,7 +31,7 @@ public class FreePost extends BaseTimeEntity {
     private String content;
 
     @Column(name = "is_anonymous", nullable = false)
-    private Boolean isAnonymous;
+    private Boolean isAnonymous = false;
 
     @Column(name = "is_pinned", nullable = false)
     private Boolean isPinned = false;

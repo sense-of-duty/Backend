@@ -21,9 +21,9 @@ public class FreeCommentController {
     public FreeCommentResponseDto createComment(
             @PathVariable Long postId,
             @RequestBody FreeCommentCreateRequestDto dto,
-            @RequestAttribute User user
+            @RequestHeader("refreshToken") String refreshToken
     ) {
-        return freeCommentService.createComment(postId, dto, user);
+        return freeCommentService.createComment(postId, dto, refreshToken);
     }
 
     @PatchMapping("/{commentId}")
@@ -31,24 +31,25 @@ public class FreeCommentController {
             @PathVariable Long postId,
             @PathVariable Long commentId,
             @RequestBody FreeCommentUpdateRequestDto dto,
-            @RequestAttribute User user
+            @RequestHeader("refreshToken") String refreshToken
     ) {
-        return freeCommentService.updateComment(commentId, dto, user);
+        return freeCommentService.updateComment(commentId, dto, refreshToken);
     }
 
     @DeleteMapping("/{commentId}")
     public void deleteComment(
             @PathVariable Long postId,
             @PathVariable Long commentId,
-            @RequestAttribute User user
+            @RequestHeader("refreshToken") String refreshToken
     ) {
-        freeCommentService.deleteComment(commentId, user);
+        freeCommentService.deleteComment(commentId, refreshToken);
     }
 
     @GetMapping
     public List<FreeCommentResponseDto> getComments(
-            @PathVariable Long postId
+            @PathVariable Long postId,
+            @RequestHeader("refreshToken") String refreshToken
     ) {
-        return freeCommentService.getCommentTree(postId);
+        return freeCommentService.getCommentTree(postId, refreshToken);
     }
 }

@@ -14,6 +14,7 @@ import org.example.gdgpage.exception.ForbiddenException;
 import org.example.gdgpage.exception.NotFoundException;
 import org.example.gdgpage.repository.freeboard.FreeCommentRepository;
 import org.example.gdgpage.repository.freeboard.FreePostRepository;
+import org.example.gdgpage.service.finder.FindUserImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,9 +29,13 @@ public class FreeCommentService {
 
     private final FreeCommentRepository freeCommentRepository;
     private final FreePostRepository freePostRepository;
+    private final FindUserImpl findUserImpl;
 
     @Transactional
-    public FreeCommentResponseDto createComment(Long postId, FreeCommentCreateRequestDto dto, User author) {
+    public FreeCommentResponseDto createComment(Long postId, FreeCommentCreateRequestDto dto, String refreshToken) {
+
+        Long userId = findUserImpl.getUserIdFromRefreshToken(refreshToken);
+        User author = findUserImpl.getUserById(userId);
 
         if (dto.content() == null || dto.content().isBlank()) {
             throw new BadRequestException(ErrorMessage.EMPTY_COMMENT);
@@ -52,7 +57,10 @@ public class FreeCommentService {
     }
 
     @Transactional
-    public FreeCommentResponseDto updateComment(Long commentId, FreeCommentUpdateRequestDto dto, User author) {
+    public FreeCommentResponseDto updateComment(Long commentId, FreeCommentUpdateRequestDto dto, String refreshToken) {
+
+        Long userId = findUserImpl.getUserIdFromRefreshToken(refreshToken);
+        User author = findUserImpl.getUserById(userId);
 
         FreeComment comment = freeCommentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
@@ -73,7 +81,10 @@ public class FreeCommentService {
     }
 
     @Transactional
-    public void deleteComment(Long commentId, User author) {
+    public void deleteComment(Long commentId, String refreshToken) {
+
+        Long userId = findUserImpl.getUserIdFromRefreshToken(refreshToken);
+        User author = findUserImpl.getUserById(userId);
 
         FreeComment comment = freeCommentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
@@ -87,7 +98,7 @@ public class FreeCommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<FreeCommentResponseDto> getCommentTree(Long postId) {
+    public List<FreeCommentResponseDto> getCommentTree(Long postId, String refreshToken) {
 
         FreePost post = freePostRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));

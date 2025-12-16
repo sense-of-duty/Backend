@@ -290,7 +290,7 @@ public class AuthService {
 
         resetToken.markUsed();
 
-         refreshTokenRepository.deleteAllByUserId(user.getId());
+        refreshTokenRepository.deleteAllByUserId(user.getId());
     }
 
     @Transactional
@@ -305,6 +305,13 @@ public class AuthService {
         emailVerificationTokenRepository.deleteAllByUserId(user.getId());
 
         createAndSendEmailVerification(user);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean getEmailVerificationStatus(String email) {
+        return userRepository.findByEmail(email)
+                .map(User::isEmailVerified)
+                .orElse(false);
     }
 
     private void createAndSendEmailVerification(User user) {

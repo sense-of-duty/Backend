@@ -75,7 +75,7 @@ public class User extends BaseTimeEntity {
     private String profileImageUrl;
 
     @Column(name = "is_email_verified")
-    private boolean emailVerified;
+    private boolean emailVerified = false;
 
     public static User createUser(String email, String password, String name, String phone, PartType part) {
         return User.builder()

@@ -10,6 +10,7 @@ import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.dto.auth.request.LoginRequest;
 import org.example.gdgpage.dto.auth.request.ResetPasswordRequest;
 import org.example.gdgpage.dto.auth.request.SignUpRequest;
+import org.example.gdgpage.dto.auth.response.EmailVerificationStatusResponse;
 import org.example.gdgpage.dto.auth.response.LoginResponse;
 import org.example.gdgpage.dto.auth.response.MessageResponse;
 import org.example.gdgpage.dto.oauth.request.CompleteProfileRequest;
@@ -147,5 +148,15 @@ public class AuthController {
     public ResponseEntity<Void> resendVerification(@RequestParam("email") String email) {
         authService.resendVerificationEmail(email);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "이메일 인증 상태 조회", description = "이메일 인증 완료 여부를 조회")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공")
+    })
+    @GetMapping("/verify-email/status")
+    public ResponseEntity<EmailVerificationStatusResponse> emailVerificationStatus(@RequestParam("email") String email) {
+        boolean verified = authService.getEmailVerificationStatus(email);
+        return ResponseEntity.ok(new EmailVerificationStatusResponse(verified));
     }
 }

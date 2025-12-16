@@ -38,6 +38,14 @@ public class FreeComment extends BaseTimeEntity{
     @Column(name = "like_count", nullable = false)
     private Integer likeCount = 0;
 
+    @Column(name = "is_deleted")
+    private boolean deleted = false;
+
+    public void delete() {
+        this.deleted = true;
+        this.content = "삭제된 댓글입니다.";
+    }
+
     public FreeComment(FreePost post, User author, String content, Boolean isAnonymous) {
         this.post = post;
         this.author = author;

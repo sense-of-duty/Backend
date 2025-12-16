@@ -94,7 +94,8 @@ public class FreeCommentService {
             throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
         }
 
-        freeCommentRepository.delete(comment);
+        comment.delete();
+        freeCommentRepository.save(comment);
     }
 
     @Transactional(readOnly = true)

@@ -24,6 +24,8 @@ public class FreePostResponseDto {
         this.id = post.getId();
         this.title = post.getTitle();
         this.content = post.getContent();
+        this.isAnonymous = post.getIsAnonymous();
+
         this.authorName = post.getIsAnonymous()
                 ? "익명"
                 : post.getAuthor().getName();
@@ -32,7 +34,6 @@ public class FreePostResponseDto {
         this.viewCount = post.getViewCount();
         this.likeCount = post.getLikeCount();
         this.commentCount = post.getCommentCount();
-        this.authorName = post.getAuthor().getName();
         this.createdAt = post.getCreatedAt();
         this.updatedAt = post.getUpdatedAt();
     }

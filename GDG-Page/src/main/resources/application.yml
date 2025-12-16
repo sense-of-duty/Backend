@@ -43,6 +43,12 @@ app:
     profile-prefix: profiles
   aws:
     region: ap-northeast-2
+  cors:
+    allowed-origin-patterns: ${APP_CORS_ALLOWED_ORIGIN_PATTERNS:https://gdgoc-skhu.ddnsfree.com,http://localhost:*}
+
+
+server:
+  forward-headers-strategy: framework
 
 password-reset:
   frontend-reset-page-url: ${FRONTEND_RESET_PAGE_URL}

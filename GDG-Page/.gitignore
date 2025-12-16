@@ -38,3 +38,4 @@ out/
 
 .env
 .env.example
+.idea/

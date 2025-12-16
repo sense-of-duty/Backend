@@ -47,8 +47,7 @@ public class SecurityConfig {
 
     private static final String[] COOKIE_AUTH_ENDPOINTS = {
             "/user/mypage",
-            "/user/mypage/change-password",
-            "/user/mypage/profile-image"
+            "/user/mypage/change-password"
     };
 
     private static final String[] SWAGGER_WHITELIST = {
@@ -75,6 +74,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .requestMatchers(PUBLIC_AUTH).permitAll()
+                        .requestMatchers("/admin/**").hasAnyRole("ORGANIZER")
                         .requestMatchers(COOKIE_AUTH_ENDPOINTS).authenticated()
                         .anyRequest().authenticated()
                 )

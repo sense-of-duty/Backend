@@ -41,6 +41,7 @@ app:
   s3:
     bucket-name: gdgpage-growthon
     profile-prefix: profiles
+    photo-prefix: photos
   aws:
     region: ap-northeast-2
   cors:

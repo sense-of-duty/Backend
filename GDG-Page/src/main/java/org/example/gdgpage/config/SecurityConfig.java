@@ -38,7 +38,8 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_AUTH = {
             "/auth/**",
-            "/oauth2/**"
+            "/oauth2/**",
+            "/photos/**"
     };
 
     private static final String[] SWAGGER_WHITELIST = {

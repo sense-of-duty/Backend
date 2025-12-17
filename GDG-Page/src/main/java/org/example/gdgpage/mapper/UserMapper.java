@@ -34,6 +34,7 @@ public final class UserMapper {
                 .lastLoginAt(user.getLastLoginAt())
                 .rejectionReason(user.getRejectionReason())
                 .profileImageUrl(profileImageUrl)
+                .emailVerified(user.isEmailVerified())
                 .build();
     }
 }

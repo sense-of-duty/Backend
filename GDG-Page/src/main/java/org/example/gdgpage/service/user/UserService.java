@@ -9,7 +9,6 @@ import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.exception.NotFoundException;
 import org.example.gdgpage.mapper.auth.UserMapper;
 import org.example.gdgpage.repository.auth.UserRepository;
-import org.example.gdgpage.service.finder.FindUser;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,53 +20,45 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final FindUser findUser;
     private final ProfileImageStorage profileImageStorage;
 
     @Transactional(readOnly = true)
-    public UserResponse getMyProfile(String refreshToken) {
-        User user = getUserFromRefreshToken(refreshToken);
-
+    public UserResponse getMyProfile(Long userId) {
+        User user = getUser(userId);
         return UserMapper.toUserResponse(user);
     }
 
     @Transactional
-    public void changePassword(String refreshToken, UpdatePasswordRequest updatePasswordRequest) {
-        User user = getUserFromRefreshToken(refreshToken);
+    public void changePassword(Long userId, UpdatePasswordRequest request) {
+        User user = getUser(userId);
 
         if (user.getPassword() == null) {
             throw new BadRequestException(ErrorMessage.OAUTH_ACCOUNT_CANNOT_CHANGE_PASSWORD);
         }
 
-        if (!passwordEncoder.matches(updatePasswordRequest.currentPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
             throw new BadRequestException(ErrorMessage.WRONG_CURRENT_PASSWORD);
         }
 
-        if (!updatePasswordRequest.newPassword().equals(updatePasswordRequest.confirmNewPassword())) {
+        if (!request.newPassword().equals(request.confirmNewPassword())) {
             throw new BadRequestException(ErrorMessage.WRONG_CHECK_PASSWORD);
         }
 
-        String encoded = passwordEncoder.encode(updatePasswordRequest.newPassword());
-        user.updatePassword(encoded);
-    }
-
-    private User getUserFromRefreshToken(String refreshToken) {
-        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
-
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
+        user.updatePassword(passwordEncoder.encode(request.newPassword()));
     }
 
     @Transactional
-    public UserResponse updateProfileImage(String refreshToken, MultipartFile file) {
-        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
+    public UserResponse updateProfileImage(Long userId, MultipartFile file) {
+        User user = getUser(userId);
 
         String imageUrl = profileImageStorage.storeProfileImage(userId, file);
         user.updateProfileImage(imageUrl);
 
         return UserMapper.toUserResponse(user);
+    }
+
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
     }
 }

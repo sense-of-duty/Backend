@@ -30,7 +30,14 @@ public enum ErrorMessage {
     DELETED_USER("삭제된 유저입니다."),
     NOT_EXIST_LECTURE_MATERIAL("존재하지 않는 강의자료입니다."),
     INVALID_LECTURE_FILE("유효하지 않은 강의자료 파일입니다."),
-    INVALID_LECTURE_INPUT("잘못된 입력입니다.");
+    INVALID_LECTURE_INPUT("잘못된 입력입니다."),
+    INVALID_EMAIL_VERIFICATION_TOKEN("유효하지 않은 링크입니다."),
+    EXPIRED_EMAIL_VERIFICATION_TOKEN("만료된 링크입니다."),
+    EMAIL_ALREADY_VERIFIED("이미 이메일 인증이 완료된 계정입니다."),
+    EMAIL_NOT_VERIFIED("이메일 인증이 완료되지 않았습니다."),
+    INVALID_PASSWORD_RESET_TOKEN("유효하지 않은 링크입니다."),
+    EXPIRED_PASSWORD_RESET_TOKEN("만료된 링크입니다."),
+    INVALID_REQUEST("반려 사유를 입력해주세요.");
 
     private final String message;
 

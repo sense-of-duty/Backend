@@ -37,6 +37,7 @@ public class FreeCommentController {
 
     @DeleteMapping("/{commentId}")
     public void deleteComment(
+            @PathVariable Long postId,
             @PathVariable Long commentId,
             @RequestHeader("refreshToken") String refreshToken
     ) {

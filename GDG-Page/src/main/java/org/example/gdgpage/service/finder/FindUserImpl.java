@@ -7,7 +7,7 @@ import org.example.gdgpage.domain.refresh.RefreshToken;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.exception.UnauthorizedException;
 import org.example.gdgpage.jwt.TokenProvider;
-import org.example.gdgpage.repository.RefreshTokenRepository;
+import org.example.gdgpage.repository.auth.RefreshTokenRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

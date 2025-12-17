@@ -1,4 +1,4 @@
-package org.example.gdgpage.mapper;
+package org.example.gdgpage.mapper.auth;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

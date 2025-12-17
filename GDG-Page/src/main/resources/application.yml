@@ -29,6 +29,7 @@ app:
   s3:
     bucket-name: gdgpage-growthon
     profile-prefix: profiles
+    lecture-prefix: lectures
   aws:
     region: ap-northeast-2
   cors:

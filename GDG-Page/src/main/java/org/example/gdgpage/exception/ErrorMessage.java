@@ -41,7 +41,8 @@ public enum ErrorMessage {
     EMAIL_ALREADY_VERIFIED("이미 이메일 인증이 완료된 계정입니다."),
     EMAIL_NOT_VERIFIED("이메일 인증이 완료되지 않았습니다."),
     INVALID_PASSWORD_RESET_TOKEN("유효하지 않은 링크입니다."),
-    EXPIRED_PASSWORD_RESET_TOKEN("만료된 링크입니다.");
+    EXPIRED_PASSWORD_RESET_TOKEN("만료된 링크입니다."),
+    COMMENT_POST_MISMATCH("댓글이 해당 게시글에 속하지 않습니다.");
 
     private final String message;
 

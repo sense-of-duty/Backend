@@ -60,7 +60,7 @@ public class FreeCommentService {
     }
 
     @Transactional
-    public FreeCommentResponseDto updateComment(Long commentId, FreeCommentUpdateRequestDto dto, Long userId) {
+    public FreeCommentResponseDto updateComment(Long postId, Long commentId, FreeCommentUpdateRequestDto dto, Long userId) {
 
         User author = findUserImpl.getUserById(userId);
 
@@ -76,13 +76,17 @@ public class FreeCommentService {
             throw new BadRequestException(ErrorMessage.EMPTY_COMMENT);
         }
 
+        if (!comment.getPost().getId().equals(postId)) {
+            throw new BadRequestException(ErrorMessage.COMMENT_POST_MISMATCH);
+        }
+
         comment.update(dto.content());
 
         return new FreeCommentResponseDto(comment);
     }
 
     @Transactional
-    public void deleteComment(Long commentId, Long userId) {
+    public void deleteComment(Long postId, Long commentId, Long userId) {
 
         User author = findUserImpl.getUserById(userId);
 
@@ -94,8 +98,11 @@ public class FreeCommentService {
             throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
         }
 
+        if (!comment.getPost().getId().equals(postId)) {
+            throw new BadRequestException(ErrorMessage.COMMENT_POST_MISMATCH);
+        }
+
         comment.delete();
-        freeCommentRepository.save(comment);
     }
 
     @Transactional(readOnly = true)

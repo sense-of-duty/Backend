@@ -34,7 +34,7 @@ public class FreeCommentController {
                                                                 @PathVariable Long commentId,
                                                                 @Valid @RequestBody FreeCommentUpdateRequestDto dto,
                                                                 @AuthenticationPrincipal AuthUser authUser) {
-        FreeCommentResponseDto response = freeCommentService.updateComment(commentId, dto, authUser.id());
+        FreeCommentResponseDto response = freeCommentService.updateComment(postId, commentId, dto, authUser.id());
         return ResponseEntity.ok(response);
     }
 
@@ -42,7 +42,7 @@ public class FreeCommentController {
     public ResponseEntity<Void> deleteComment(@PathVariable Long postId,
                                               @PathVariable Long commentId,
                                               @AuthenticationPrincipal AuthUser authUser) {
-        freeCommentService.deleteComment(commentId, authUser.id());
+        freeCommentService.deleteComment(postId, commentId, authUser.id());
         return ResponseEntity.noContent().build();
     }
 

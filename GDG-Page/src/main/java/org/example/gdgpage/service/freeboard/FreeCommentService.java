@@ -32,9 +32,8 @@ public class FreeCommentService {
     private final FindUserImpl findUserImpl;
 
     @Transactional
-    public FreeCommentResponseDto createComment(Long postId, FreeCommentCreateRequestDto dto, String accessToken) {
+    public FreeCommentResponseDto createComment(Long postId, FreeCommentCreateRequestDto dto, Long userId) {
 
-        Long userId = findUserImpl.getUserIdFromAccessToken(accessToken);
         User author = findUserImpl.getUserById(userId);
 
         if (dto.content() == null || dto.content().isBlank()) {
@@ -54,22 +53,20 @@ public class FreeCommentService {
             }
         }
 
-            FreeComment comment = new FreeComment(post, author, dto.content(), dto.isAnonymous());
-            comment.setParent(parent);
+        FreeComment comment = new FreeComment(post, author, dto.content(), dto.isAnonymous());
+        comment.setParent(parent);
 
         return new FreeCommentResponseDto(freeCommentRepository.save(comment));
     }
 
     @Transactional
-    public FreeCommentResponseDto updateComment(Long commentId, FreeCommentUpdateRequestDto dto, String accessToken) {
+    public FreeCommentResponseDto updateComment(Long commentId, FreeCommentUpdateRequestDto dto, Long userId) {
 
-        Long userId = findUserImpl.getUserIdFromAccessToken(accessToken);
         User author = findUserImpl.getUserById(userId);
 
         FreeComment comment = freeCommentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
 
-        // 권한 확인 (작성자 또는 관리자)
         if (!comment.getAuthor().getId().equals(author.getId()) &&
                 author.getRole() != Role.ORGANIZER) {
             throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
@@ -85,9 +82,8 @@ public class FreeCommentService {
     }
 
     @Transactional
-    public void deleteComment(Long commentId, String accessToken) {
+    public void deleteComment(Long commentId, Long userId) {
 
-        Long userId = findUserImpl.getUserIdFromAccessToken(accessToken);
         User author = findUserImpl.getUserById(userId);
 
         FreeComment comment = freeCommentRepository.findById(commentId)
@@ -103,7 +99,7 @@ public class FreeCommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<FreeCommentResponseDto> getCommentTree(Long postId, String accessToken) {
+    public List<FreeCommentResponseDto> getCommentTree(Long postId, Long userId) {
 
         FreePost post = freePostRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));

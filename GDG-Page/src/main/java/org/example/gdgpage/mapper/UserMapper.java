@@ -32,6 +32,7 @@ public final class UserMapper {
                 .isActive(user.isActive())
                 .createdAt(user.getCreatedAt())
                 .lastLoginAt(user.getLastLoginAt())
+                .rejectionReason(user.getRejectionReason())
                 .profileImageUrl(profileImageUrl)
                 .emailVerified(user.isEmailVerified())
                 .build();

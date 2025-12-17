@@ -56,26 +56,32 @@ public class User extends BaseTimeEntity {
     @Column(length = 10)
     private Role role;
 
-    // 관리자에게 승인됐는지 여부
     @Column(name = "is_approved")
     private boolean isApproved;
 
-    // 로컬은 항상 true, 소셜 로그인은 추가 정보 입력 페이지에서 입력이 완료되면 true
     @Column(name = "is_profile_completed")
     private boolean isProfileCompleted;
 
-    // 현재 멤버인지, 전 기수 멤버인지
     @Column(name = "is_active")
     private boolean isActive;
 
     @Column
     private LocalDateTime lastLoginAt;
 
+    @Column(name = "rejection_reason", length = 255)
+    private String rejectionReason;
+
     @Column(name = "profile_image_url", length = 255)
     private String profileImageUrl;
 
     @Column(name = "is_email_verified")
     private boolean emailVerified = false;
+
+    @Column(name = "is_deleted", nullable = false)
+    private boolean deleted;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     public static User createUser(String email, String password, String name, String phone, PartType part) {
         return User.builder()
@@ -120,12 +126,26 @@ public class User extends BaseTimeEntity {
         this.lastLoginAt = now;
     }
 
-    public void deactivate() {
-        this.isActive = false;
-    }
-
     public void updatePassword(String encodedPassword) {
         this.password = encodedPassword;
+    }
+
+    public void approve() {
+        this.isApproved = true;
+        this.rejectionReason = null;
+    }
+
+    public void reject(String reason) {
+        this.isApproved = false;
+        this.rejectionReason = reason;
+    }
+
+    public void updateRole(Role role) {
+        this.role = role;
+    }
+
+    public void updatePart(PartType part) {
+        this.part = part;
     }
 
     public void updateProfileImage(String profileImageUrl) {
@@ -134,5 +154,18 @@ public class User extends BaseTimeEntity {
 
     public void verifyEmail() {
         this.emailVerified = true;
+    }
+
+    public void softDelete() {
+        this.deleted = true;
+        this.deletedAt = LocalDateTime.now();
+        this.isActive = false;
+        this.name = "(삭제된 유저)";
+        this.phone = null;
+        this.profileImageUrl = Constants.DEFAULT_PROFILE_IMAGE_URL;
+    }
+
+    public void updateActive(boolean active) {
+        this.isActive = active;
     }
 }

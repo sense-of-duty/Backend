@@ -84,6 +84,10 @@ public class AuthService {
     public LoginResponse login(LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
         User user = userRepository.findByEmail(loginRequest.email()).orElseThrow(() -> new BadRequestException(ErrorMessage.WRONG_EMAIL_INPUT));
 
+        if (user.isDeleted()) {
+            throw new BadRequestException(ErrorMessage.DELETED_USER);
+        }
+
         if (!passwordEncoder.matches(loginRequest.password(), user.getPassword())) {
             throw new BadRequestException(ErrorMessage.WRONG_PASSWORD_INPUT);
         }
@@ -116,6 +120,11 @@ public class AuthService {
 
         if (oauthAccount != null) {
             user = oauthAccount.getUser();
+
+            if (user.isDeleted()) {
+                throw new BadRequestException(ErrorMessage.DELETED_USER);
+            }
+
             oauthAccount.updateLastLoginAt(LocalDateTime.now());
 
             if (hasProfileImage) {

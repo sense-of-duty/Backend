@@ -21,5 +21,6 @@ public record UserResponse (
     LocalDateTime createdAt,
     LocalDateTime lastLoginAt,
     String profileImageUrl,
-    boolean emailVerified
+    boolean emailVerified,
+    String rejectionReason
 ) {}

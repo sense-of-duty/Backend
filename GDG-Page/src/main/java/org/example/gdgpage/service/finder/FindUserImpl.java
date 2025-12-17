@@ -51,6 +51,28 @@ public class FindUserImpl implements FindUser {
         return userId;
     }
 
+    public Long getUserIdFromAccessToken(String accessToken) {
+
+        if (!StringUtils.hasText(accessToken)) {
+            throw new UnauthorizedException(ErrorMessage.NEED_TO_LOGIN);
+        }
+
+        String token = accessToken.replace("Bearer ", "");
+
+        if (!tokenProvider.validateToken(token)) {
+            throw new UnauthorizedException(ErrorMessage.INVALID_TOKEN);
+        }
+
+        Claims claims = tokenProvider.parseClaim(token);
+
+        String tokenType = claims.get(Constants.TOKEN_TYPE, String.class);
+        if (!Constants.ACCESS_TOKEN.equals(tokenType)) {
+            throw new UnauthorizedException(ErrorMessage.INVALID_TOKEN);
+        }
+
+        return Long.parseLong(claims.getSubject());
+    }
+
     @Override
     public User getUserById(Long userId) {
         return userRepository.findById(userId)

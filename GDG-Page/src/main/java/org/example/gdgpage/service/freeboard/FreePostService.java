@@ -17,7 +17,6 @@ import org.example.gdgpage.repository.freeboard.FreePostRepository;
 import org.example.gdgpage.service.finder.FindUserImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.example.gdgpage.repository.UserRepository;
 
 import java.util.Comparator;
 import java.util.List;
@@ -30,9 +29,9 @@ public class FreePostService {
     private final FindUserImpl findUser;
 
     @Transactional
-    public FreePostResponseDto createUserPost(FreePostCreateRequestDto dto, String refreshToken) {
+    public FreePostResponseDto createUserPost(FreePostCreateRequestDto dto, String accessToken) {
 
-        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
+        Long userId = findUser.getUserIdFromAccessToken(accessToken);
         User author = findUser.getUserById(userId);
 
         if (author.getRole() == Role.ORGANIZER) {
@@ -50,9 +49,9 @@ public class FreePostService {
     }
 
     @Transactional
-    public FreePostResponseDto createAdminPost(AdminPostCreateRequestDto dto, String refreshToken) {
+    public FreePostResponseDto createAdminPost(AdminPostCreateRequestDto dto, String accessToken) {
 
-        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
+        Long userId = findUser.getUserIdFromAccessToken(accessToken);
         User author = findUser.getUserById(userId);
 
         if (author.getRole() != Role.ORGANIZER) {
@@ -71,9 +70,9 @@ public class FreePostService {
     }
 
     @Transactional
-    public FreePostResponseDto updatePost(Long postId, FreePostUpdateRequestDto dto, String refreshToken) {
+    public FreePostResponseDto updatePost(Long postId, FreePostUpdateRequestDto dto, String accessToken) {
 
-        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
+        Long userId = findUser.getUserIdFromAccessToken(accessToken);
         User author = findUser.getUserById(userId);
 
         FreePost post = freePostRepository.findById(postId)
@@ -101,9 +100,9 @@ public class FreePostService {
     }
 
     @Transactional(readOnly = true)
-    public FreePostResponseDto getPost(Long postId, String refreshToken) {
+    public FreePostResponseDto getPost(Long postId, String accessToken) {
 
-        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
+        Long userId = findUser.getUserIdFromAccessToken(accessToken);
 
         FreePost post = freePostRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
@@ -114,9 +113,9 @@ public class FreePostService {
     }
 
     @Transactional(readOnly = true)
-    public List<FreePostListResponseDto> getPostList(String refreshToken) {
+    public List<FreePostListResponseDto> getPostList(String accessToken) {
 
-        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
+        Long userId = findUser.getUserIdFromAccessToken(accessToken);
 
         return freePostRepository.findAll().stream()
                 .sorted(Comparator.comparing(FreePost::getCreatedAt).reversed())
@@ -125,9 +124,9 @@ public class FreePostService {
     }
 
     @Transactional
-    public void deletePost(Long postId, String refreshToken) {
+    public void deletePost(Long postId, String accessToken) {
 
-        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
+        Long userId = findUser.getUserIdFromAccessToken(accessToken);
         User author = findUser.getUserById(userId);
 
         FreePost post = freePostRepository.findById(postId)

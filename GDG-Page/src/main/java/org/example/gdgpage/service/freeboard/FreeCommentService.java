@@ -32,9 +32,9 @@ public class FreeCommentService {
     private final FindUserImpl findUserImpl;
 
     @Transactional
-    public FreeCommentResponseDto createComment(Long postId, FreeCommentCreateRequestDto dto, String refreshToken) {
+    public FreeCommentResponseDto createComment(Long postId, FreeCommentCreateRequestDto dto, String accessToken) {
 
-        Long userId = findUserImpl.getUserIdFromRefreshToken(refreshToken);
+        Long userId = findUserImpl.getUserIdFromAccessToken(accessToken);
         User author = findUserImpl.getUserById(userId);
 
         if (dto.content() == null || dto.content().isBlank()) {
@@ -48,18 +48,22 @@ public class FreeCommentService {
         if (dto.parentId() != null) {
             parent = freeCommentRepository.findById(dto.parentId())
                     .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_PARENT_COMMENT));
+
+            if (!parent.getPost().getId().equals(postId)) {
+                throw new BadRequestException(ErrorMessage.INVALID_PARENT_COMMENT);
+            }
         }
 
-        FreeComment comment = new FreeComment(post, author, dto.content(), dto.isAnonymous());
-        comment.setParent(parent);
+            FreeComment comment = new FreeComment(post, author, dto.content(), dto.isAnonymous());
+            comment.setParent(parent);
 
         return new FreeCommentResponseDto(freeCommentRepository.save(comment));
     }
 
     @Transactional
-    public FreeCommentResponseDto updateComment(Long commentId, FreeCommentUpdateRequestDto dto, String refreshToken) {
+    public FreeCommentResponseDto updateComment(Long commentId, FreeCommentUpdateRequestDto dto, String accessToken) {
 
-        Long userId = findUserImpl.getUserIdFromRefreshToken(refreshToken);
+        Long userId = findUserImpl.getUserIdFromAccessToken(accessToken);
         User author = findUserImpl.getUserById(userId);
 
         FreeComment comment = freeCommentRepository.findById(commentId)
@@ -81,9 +85,9 @@ public class FreeCommentService {
     }
 
     @Transactional
-    public void deleteComment(Long commentId, String refreshToken) {
+    public void deleteComment(Long commentId, String accessToken) {
 
-        Long userId = findUserImpl.getUserIdFromRefreshToken(refreshToken);
+        Long userId = findUserImpl.getUserIdFromAccessToken(accessToken);
         User author = findUserImpl.getUserById(userId);
 
         FreeComment comment = freeCommentRepository.findById(commentId)
@@ -99,7 +103,7 @@ public class FreeCommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<FreeCommentResponseDto> getCommentTree(Long postId, String refreshToken) {
+    public List<FreeCommentResponseDto> getCommentTree(Long postId, String accessToken) {
 
         FreePost post = freePostRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));

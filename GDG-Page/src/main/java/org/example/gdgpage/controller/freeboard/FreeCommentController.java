@@ -23,9 +23,9 @@ public class FreeCommentController {
     public ResponseEntity<FreeCommentResponseDto> createComment(
             @PathVariable Long postId,
             @Valid @RequestBody FreeCommentCreateRequestDto dto,
-            @RequestHeader("refreshToken") String refreshToken
+            @RequestHeader("Authorization") String accessToken
     ) {
-        FreeCommentResponseDto response = freeCommentService.createComment(postId, dto, refreshToken);
+        FreeCommentResponseDto response = freeCommentService.createComment(postId, dto, accessToken);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -34,9 +34,9 @@ public class FreeCommentController {
             @PathVariable Long postId,
             @PathVariable Long commentId,
             @Valid @RequestBody FreeCommentUpdateRequestDto dto,
-            @RequestHeader("refreshToken") String refreshToken
+            @RequestHeader("Authorization") String accessToken
     ) {
-        FreeCommentResponseDto response = freeCommentService.updateComment(commentId, dto, refreshToken);
+        FreeCommentResponseDto response = freeCommentService.updateComment(commentId, dto, accessToken);
         return ResponseEntity.ok(response);
     }
 
@@ -44,18 +44,18 @@ public class FreeCommentController {
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long postId,
             @PathVariable Long commentId,
-            @RequestHeader("refreshToken") String refreshToken
+            @RequestHeader("Authorization") String accessToken
     ) {
-        freeCommentService.deleteComment(commentId, refreshToken);
+        freeCommentService.deleteComment(commentId, accessToken);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
     public ResponseEntity<List<FreeCommentResponseDto>> getComments(
             @PathVariable Long postId,
-            @RequestHeader("refreshToken") String refreshToken
+            @RequestHeader("Authorization") String accessToken
     ) {
-        List<FreeCommentResponseDto> response = freeCommentService.getCommentTree(postId, refreshToken);
+        List<FreeCommentResponseDto> response = freeCommentService.getCommentTree(postId, accessToken);
         return ResponseEntity.ok(response);
     }
 }

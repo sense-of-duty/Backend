@@ -9,6 +9,7 @@ public enum ErrorMessage {
     WRONG_PASSWORD_INPUT("이메일 또는 비밀번호가 올바르지 않습니다."),
     NOT_EXIST_USER("존재하지 않는 사용자입니다."),
     NOT_EXIST_POST("존재하지 않는 글입니다."),
+    NOT_EXIST_PARENT_COMMENT("부모 댓글을 찾을 수 없습니다."),
     NEED_TO_LOGIN("로그인이 필요한 서비스입니다."),
     NO_PERMISSION("수정/삭제 권한이 없습니다."),
     NOT_EXIST_COMMENT("존재하지 않는 댓글입니다."),
@@ -25,7 +26,16 @@ public enum ErrorMessage {
     ALREADY_PROFILE_COMPLETED("이미 프로필 작성이 완료된 유저입니다."),
     WRONG_CURRENT_PASSWORD("비밀번호가 일치하지 않습니다."),
     OAUTH_ACCOUNT_CANNOT_CHANGE_PASSWORD("소셜 로그인 유저는 비밀번호 변경이 불가합니다."),
-    INVALID_PROFILE_IMAGE("유효하지 않은 프로필 이미지입니다.");
+    INVALID_PROFILE_IMAGE("유효하지 않은 프로필 이미지입니다."),
+    EMPTY_TITLE("제목이 비어있습니다."),
+    EMPTY_CONTENT("본문이 비어있습니다."),
+    EMPTY_COMMENT("댓글 내용이 비어있습니다."),
+    INVALID_REQUEST("반려 사유를 입력해주세요."),
+    DELETED_USER("삭제된 유저입니다."),
+    NO_PERMISSION_USER_POST("관리자는 일반 글쓰기 API를 사용할 수 없습니다."),
+    PINNED_POST_ONLY_ADMIN("관리자만 고정글을 작성할 수 있습니다."),
+    NO_PERMISSION_ADMIN_POST("일반 사용자는 관리자 게시글 작성 API를 사용할 수 없습니다."),
+    INVALID_PARENT_COMMENT("유효하지 않은 부모 댓글입니다.");
 
     private final String message;
 

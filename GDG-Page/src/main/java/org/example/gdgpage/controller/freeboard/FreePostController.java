@@ -24,55 +24,55 @@ public class FreePostController {
 
     @PostMapping
     public ResponseEntity<FreePostResponseDto> createPost(
-            @RequestHeader("refreshToken") String refreshToken,
+            @RequestHeader("Authorization") String accessToken,
             @Valid @RequestBody FreePostCreateRequestDto dto
     ) {
-        FreePostResponseDto response = freePostService.createUserPost(dto, refreshToken);
+        FreePostResponseDto response = freePostService.createUserPost(dto, accessToken);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/admin")
     public ResponseEntity<FreePostResponseDto> createAdminPost(
-            @RequestHeader("refreshToken") String refreshToken,
+            @RequestHeader("Authorization") String accessToken,
             @Valid @RequestBody AdminPostCreateRequestDto dto
     ) {
-        FreePostResponseDto response = freePostService.createAdminPost(dto, refreshToken);
+        FreePostResponseDto response = freePostService.createAdminPost(dto, accessToken);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PatchMapping("/{postId}")
     public ResponseEntity<FreePostResponseDto> updatePost(
-            @RequestHeader("refreshToken") String refreshToken,
+            @RequestHeader("Authorization") String accessToken,
             @PathVariable Long postId,
             @Valid @RequestBody FreePostUpdateRequestDto dto
     ) {
-        FreePostResponseDto response = freePostService.updatePost(postId, dto, refreshToken);
+        FreePostResponseDto response = freePostService.updatePost(postId, dto, accessToken);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{postId}")
     public ResponseEntity<FreePostResponseDto> getPost(
-            @RequestHeader("refreshToken") String refreshToken,
+            @RequestHeader("Authorization") String accessToken,
             @PathVariable Long postId
     ) {
-        FreePostResponseDto response = freePostService.getPost(postId, refreshToken);
+        FreePostResponseDto response = freePostService.getPost(postId, accessToken);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
     public ResponseEntity<List<FreePostListResponseDto>> getPostList(
-            @RequestHeader("refreshToken") String refreshToken
+            @RequestHeader("Authorization") String accessToken
     ) {
-        List<FreePostListResponseDto> response = freePostService.getPostList(refreshToken);
+        List<FreePostListResponseDto> response = freePostService.getPostList(accessToken);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
-            @RequestHeader("refreshToken") String refreshToken,
+            @RequestHeader("Authorization") String accessToken,
             @PathVariable Long postId
     ) {
-        freePostService.deletePost(postId, refreshToken);
+        freePostService.deletePost(postId, accessToken);
         return ResponseEntity.noContent().build();
     }
 }

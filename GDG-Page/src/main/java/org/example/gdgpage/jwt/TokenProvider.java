@@ -8,8 +8,8 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.tomcat.util.bcel.Const;
 import org.example.gdgpage.common.Constants;
+import org.example.gdgpage.domain.auth.AuthUser;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,18 +85,21 @@ public class TokenProvider {
             throw new BadRequestException(ErrorMessage.NO_REFRESH_TOKEN_IN_LOGIN);
         }
 
+        Long userId = Long.parseLong(claims.getSubject());
         String roleClaim = claims.get(ROLE_CLAIM, String.class);
 
         List<SimpleGrantedAuthority> authorities =
                 Arrays.stream(StringUtils.hasText(roleClaim) ? roleClaim.split(DELIMITER) : new String[0])
                         .map(String::trim)
                         .filter(StringUtils::hasText)
-                        .map(TokenProvider::toRole).filter(Objects::nonNull)
+                        .map(TokenProvider::toRole)
+                        .filter(Objects::nonNull)
                         .map(SimpleGrantedAuthority::new)
                         .toList();
 
+        AuthUser principal = new AuthUser(userId, roleClaim);
 
-        return new UsernamePasswordAuthenticationToken(claims.getSubject(), "", authorities);
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
     public boolean validateToken(String token) {

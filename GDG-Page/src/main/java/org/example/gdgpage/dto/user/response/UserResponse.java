@@ -20,6 +20,7 @@ public record UserResponse (
     boolean isActive,
     LocalDateTime createdAt,
     LocalDateTime lastLoginAt,
-    String rejectionReason,
-    String profileImageUrl
+    String profileImageUrl,
+    boolean emailVerified,
+    String rejectionReason
 ) {}

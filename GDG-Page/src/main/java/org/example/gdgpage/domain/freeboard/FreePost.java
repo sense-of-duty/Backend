@@ -52,14 +52,6 @@ public class FreePost extends BaseTimeEntity {
         this.viewCount++;
     }
 
-    public void increaseCommentCount() {
-        this.commentCount++;
-    }
-
-    public void increaseLikeCount() {
-        this.likeCount++;
-    }
-
     public FreePost(User author, String title, String content, Boolean isAnonymous, Boolean isPinned) {
         this.author = author;
         this.title = title;

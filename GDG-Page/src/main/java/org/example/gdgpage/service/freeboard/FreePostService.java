@@ -99,7 +99,7 @@ public class FreePostService {
         return new FreePostResponseDto(post);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public FreePostResponseDto getPost(Long postId, String accessToken) {
 
         Long userId = findUser.getUserIdFromAccessToken(accessToken);

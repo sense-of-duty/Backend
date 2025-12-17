@@ -110,8 +110,9 @@ public class FreePostService {
     @Transactional(readOnly = true)
     public List<FreePostListResponseDto> getPostList(Long userId) {
 
-        return freePostRepository.findAll().stream()
-                .sorted(Comparator.comparing(FreePost::getCreatedAt).reversed())
+        List<FreePost> posts = freePostRepository.findAllWithAuthor();
+
+        return posts.stream()
                 .map(FreePostListResponseDto::new)
                 .toList();
     }

@@ -112,7 +112,7 @@ public class FreeCommentService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
 
         List<FreeComment> comments = freeCommentRepository
-                .findByPostOrderByCreatedAtAsc(post);
+                .findByPostWithAuthorAndParent(post);
 
         List<FreeCommentResponseDto> dtoList = comments.stream()
                 .map(FreeCommentResponseDto::new)

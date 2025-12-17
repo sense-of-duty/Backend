@@ -1,5 +1,6 @@
 package org.example.gdgpage.controller.freeboard;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.dto.freeboard.request.AdminPostCreateRequestDto;
@@ -8,6 +9,8 @@ import org.example.gdgpage.dto.freeboard.request.FreePostUpdateRequestDto;
 import org.example.gdgpage.dto.freeboard.response.FreePostListResponseDto;
 import org.example.gdgpage.dto.freeboard.response.FreePostResponseDto;
 import org.example.gdgpage.service.freeboard.FreePostService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,47 +23,56 @@ public class FreePostController {
     private final FreePostService freePostService;
 
     @PostMapping
-    public FreePostResponseDto createPost(
+    public ResponseEntity<FreePostResponseDto> createPost(
             @RequestHeader("refreshToken") String refreshToken,
-            @RequestBody FreePostCreateRequestDto dto
+            @Valid @RequestBody FreePostCreateRequestDto dto
     ) {
-        return freePostService.createUserPost(dto, refreshToken);
+        FreePostResponseDto response = freePostService.createUserPost(dto, refreshToken);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/admin")
-    public FreePostResponseDto createAdminPost(
+    public ResponseEntity<FreePostResponseDto> createAdminPost(
             @RequestHeader("refreshToken") String refreshToken,
-            @RequestBody AdminPostCreateRequestDto dto
+            @Valid @RequestBody AdminPostCreateRequestDto dto
     ) {
-        return freePostService.createAdminPost(dto, refreshToken);
+        FreePostResponseDto response = freePostService.createAdminPost(dto, refreshToken);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PatchMapping("/{postId}")
-    public FreePostResponseDto updatePost(
+    public ResponseEntity<FreePostResponseDto> updatePost(
             @RequestHeader("refreshToken") String refreshToken,
             @PathVariable Long postId,
-            @RequestBody FreePostUpdateRequestDto dto
+            @Valid @RequestBody FreePostUpdateRequestDto dto
     ) {
-        return freePostService.updatePost(postId, dto, refreshToken);
+        FreePostResponseDto response = freePostService.updatePost(postId, dto, refreshToken);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{postId}")
-    public FreePostResponseDto getPost(
+    public ResponseEntity<FreePostResponseDto> getPost(
             @RequestHeader("refreshToken") String refreshToken,
-            @PathVariable Long postId) {
-        return freePostService.getPost(postId, refreshToken);
+            @PathVariable Long postId
+    ) {
+        FreePostResponseDto response = freePostService.getPost(postId, refreshToken);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public List<FreePostListResponseDto> getPostList(
+    public ResponseEntity<List<FreePostListResponseDto>> getPostList(
             @RequestHeader("refreshToken") String refreshToken
     ) {
-        return freePostService.getPostList(refreshToken);
+        List<FreePostListResponseDto> response = freePostService.getPostList(refreshToken);
+        return ResponseEntity.ok(response);
     }
+
     @DeleteMapping("/{postId}")
-    public void deletePost(@PathVariable Long postId,
-                           @RequestHeader("refreshToken") String refreshToken
+    public ResponseEntity<Void> deletePost(
+            @RequestHeader("refreshToken") String refreshToken,
+            @PathVariable Long postId
     ) {
         freePostService.deletePost(postId, refreshToken);
+        return ResponseEntity.noContent().build();
     }
 }

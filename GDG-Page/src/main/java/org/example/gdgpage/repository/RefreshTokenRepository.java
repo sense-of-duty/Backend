@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
-    Optional<RefreshToken> findByRefreshToken(String token);
     Optional<RefreshToken> findByUserIdAndTokenId(Long userId, String tokenId);
     void deleteAllByUserId(Long userId);
 

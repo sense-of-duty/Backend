@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.example.gdgpage.common.Constants;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
@@ -16,14 +17,13 @@ public final class DeviceCookieUtil {
 
     private static final String PATH = "/";
     private static final String SAME_SITE = "Lax";
-    private static final String DEVICE_ID = "device_id";
 
     public static String getOrSetDeviceId(HttpServletRequest request, HttpServletResponse response) {
         String existing = null;
 
         if (request.getCookies() != null) {
             for (Cookie c : request.getCookies()) {
-                if (DEVICE_ID.equals(c.getName()) && c.getValue() != null && !c.getValue().isBlank()) {
+                if (Constants.DEVICE_ID.equals(c.getName()) && c.getValue() != null && !c.getValue().isBlank()) {
                     existing = c.getValue();
                     break;
                 }
@@ -36,7 +36,7 @@ public final class DeviceCookieUtil {
 
         String newId = UUID.randomUUID().toString();
 
-        ResponseCookie cookie = ResponseCookie.from(DEVICE_ID, newId)
+        ResponseCookie cookie = ResponseCookie.from(Constants.DEVICE_ID, newId)
                 .httpOnly(true)
                 .secure(true)
                 .path(PATH)

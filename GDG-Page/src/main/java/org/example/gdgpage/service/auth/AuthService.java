@@ -1,7 +1,10 @@
 package org.example.gdgpage.service.auth;
 
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.domain.auth.EmailVerificationToken;
 import org.example.gdgpage.domain.auth.OAuthAccount;
 import org.example.gdgpage.domain.auth.PasswordResetToken;
@@ -19,6 +22,7 @@ import org.example.gdgpage.dto.token.TokenDto;
 import org.example.gdgpage.dto.user.response.UserResponse;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
+import org.example.gdgpage.exception.UnauthorizedException;
 import org.example.gdgpage.jwt.TokenProvider;
 import org.example.gdgpage.mapper.LoginMapper;
 import org.example.gdgpage.mapper.UserMapper;
@@ -30,6 +34,8 @@ import org.example.gdgpage.repository.UserRepository;
 import org.example.gdgpage.service.finder.FindUser;
 import org.example.gdgpage.service.mail.EmailService;
 import org.example.gdgpage.util.CookieUtil;
+import org.example.gdgpage.util.DeviceCookieUtil;
+import org.example.gdgpage.util.TokenHashUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,6 +45,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -81,7 +89,7 @@ public class AuthService {
     }
 
     @Transactional
-    public LoginResponse login(LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
+    public LoginResponse login(LoginRequest loginRequest, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         User user = userRepository.findByEmail(loginRequest.email()).orElseThrow(() -> new BadRequestException(ErrorMessage.WRONG_EMAIL_INPUT));
 
         if (user.isDeleted()) {
@@ -96,7 +104,34 @@ public class AuthService {
             throw new BadRequestException(ErrorMessage.EMAIL_NOT_VERIFIED);
         }
 
-        return updateTimeAndCreateToken(user, httpServletResponse);
+        String deviceId = DeviceCookieUtil.getOrSetDeviceId(httpServletRequest, httpServletResponse);
+
+        user.updateLastLogin(LocalDateTime.now());
+
+        String accessToken = tokenProvider.createAccessToken(user.getId(), user.getRole().name());
+        String refreshToken = tokenProvider.createRefreshToken(user.getId(), deviceId);
+
+        Claims claims = tokenProvider.parseClaim(refreshToken);
+        String tokenId = claims.get(Constants.JTI, String.class);
+        Date exp = claims.getExpiration();
+
+        refreshTokenRepository.revokeAllActiveByUserAndDevice(user.getId(), deviceId);
+
+        refreshTokenRepository.save(
+                RefreshToken.builder()
+                        .userId(user.getId())
+                        .deviceId(deviceId)
+                        .tokenId(tokenId)
+                        .tokenHash(TokenHashUtil.sha256Base64(refreshToken))
+                        .expiresAt(exp.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+                        .revoked(false)
+                        .lastUsedAt(LocalDateTime.now())
+                        .build()
+        );
+
+        CookieUtil.setRefreshTokenCookie(httpServletResponse, refreshToken);
+
+        return LoginMapper.of(new TokenDto(accessToken, refreshToken), UserMapper.toUserResponse(user));
     }
 
     @Transactional
@@ -152,38 +187,86 @@ public class AuthService {
 
 
     @Transactional
-    public TokenDto reissue(String refreshToken, HttpServletResponse httpServletResponse) {
-        Long userId = findUser.getUserIdFromRefreshToken(refreshToken);
+    public TokenDto reissue(String refreshToken, HttpServletRequest request, HttpServletResponse response) {
+        if (!StringUtils.hasText(refreshToken)) {
+            throw new UnauthorizedException(ErrorMessage.NEED_TO_LOGIN);
+        }
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));
+        if (!tokenProvider.validateToken(refreshToken)) {
+            throw new UnauthorizedException(ErrorMessage.INVALID_TOKEN);
+        }
 
-        String newAccessToken = tokenProvider.createAccessToken(user.getId(), user.getRole().name());
+        Claims claims = tokenProvider.parseClaim(refreshToken);
 
-        refreshTokenRepository.deleteByRefreshToken(refreshToken);
+        String tokenType = claims.get(Constants.TOKEN_TYPE, String.class);
+        if (!Constants.REFRESH_TOKEN.equals(tokenType)) {
+            throw new UnauthorizedException(ErrorMessage.INVALID_TOKEN);
+        }
 
-        String newRefreshToken = tokenProvider.createRefreshToken(user.getId());
+        Long userId = Long.parseLong(claims.getSubject());
+        String tokenId = claims.get(Constants.JTI, String.class);
+
+        String deviceId = DeviceCookieUtil.getOrSetDeviceId(request, response);
+
+        RefreshToken stored = refreshTokenRepository.findByUserIdAndTokenId(userId, tokenId)
+                .orElseThrow(() -> new UnauthorizedException(ErrorMessage.INVALID_TOKEN));
+
+        if (stored.isExpired() || stored.isRevoked()) {
+            throw new UnauthorizedException(ErrorMessage.INVALID_TOKEN);
+        }
+
+        String presentedHash = TokenHashUtil.sha256Base64(refreshToken);
+        if (!presentedHash.equals(stored.getTokenHash())) {
+            refreshTokenRepository.revokeAllActiveByUser(userId);
+            CookieUtil.clearRefreshTokenCookie(response);
+            throw new UnauthorizedException(ErrorMessage.INVALID_TOKEN);
+        }
+
+        String newAccessToken = tokenProvider.createAccessToken(userId, userRepository.findById(userId)
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER))
+                .getRole().name()
+        );
+
+        String newRefreshToken = tokenProvider.createRefreshToken(userId, deviceId);
+        Claims newClaims = tokenProvider.parseClaim(newRefreshToken);
+        String newTokenId = newClaims.get(Constants.JTI, String.class);
+        Date newExp = newClaims.getExpiration();
+
+        stored.revoke(newTokenId);
+        stored.markUsed();
 
         refreshTokenRepository.save(
                 RefreshToken.builder()
-                        .userId(user.getId())
-                        .refreshToken(newRefreshToken)
+                        .userId(userId)
+                        .deviceId(deviceId)
+                        .tokenId(newTokenId)
+                        .tokenHash(TokenHashUtil.sha256Base64(newRefreshToken))
+                        .expiresAt(newExp.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+                        .revoked(false)
+                        .lastUsedAt(LocalDateTime.now())
                         .build()
         );
 
-        CookieUtil.setRefreshTokenCookie(httpServletResponse, newRefreshToken);
+        CookieUtil.setRefreshTokenCookie(response, newRefreshToken);
 
         return new TokenDto(newAccessToken, newRefreshToken);
     }
 
+
     @Transactional
-    public void logout(String refreshToken, HttpServletResponse response) {
-        if (StringUtils.hasText(refreshToken)) {
-            refreshTokenRepository.deleteByRefreshToken(refreshToken);
+    public void logout(String refreshToken, HttpServletRequest request, HttpServletResponse response) {
+        String deviceId = DeviceCookieUtil.getOrSetDeviceId(request, response);
+
+        if (StringUtils.hasText(refreshToken) && tokenProvider.validateToken(refreshToken)) {
+            Claims claims = tokenProvider.parseClaim(refreshToken);
+            Long userId = Long.parseLong(claims.getSubject());
+
+            refreshTokenRepository.revokeAllActiveByUserAndDevice(userId, deviceId);
         }
 
         CookieUtil.clearRefreshTokenCookie(response);
     }
+
 
     @Transactional
     public UserResponse completeProfile(CompleteProfileRequest request) {

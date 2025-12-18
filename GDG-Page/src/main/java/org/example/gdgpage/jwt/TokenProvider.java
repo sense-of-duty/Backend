@@ -73,8 +73,8 @@ public class TokenProvider {
         return Jwts.builder()
                 .subject(userId.toString())
                 .claim(Constants.TOKEN_TYPE, Constants.REFRESH_TOKEN)
-                .claim("jti", jti)
-                .claim("did", deviceId) // optional
+                .claim(Constants.JTI, jti)
+                .claim(Constants.DID, deviceId)
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(key)

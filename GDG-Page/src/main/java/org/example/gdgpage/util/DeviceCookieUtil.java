@@ -18,13 +18,13 @@ public final class DeviceCookieUtil {
     private static final String PATH = "/";
     private static final String SAME_SITE = "Lax";
 
-    public static String getOrSetDeviceId(HttpServletRequest request, HttpServletResponse response) {
+    public static String getOrSetDeviceId(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         String existing = null;
 
-        if (request.getCookies() != null) {
-            for (Cookie c : request.getCookies()) {
-                if (Constants.DEVICE_ID.equals(c.getName()) && c.getValue() != null && !c.getValue().isBlank()) {
-                    existing = c.getValue();
+        if (httpServletRequest.getCookies() != null) {
+            for (Cookie cookie : httpServletRequest.getCookies()) {
+                if (Constants.DEVICE_ID.equals(cookie.getName()) && cookie.getValue() != null && !cookie.getValue().isBlank()) {
+                    existing = cookie.getValue();
                     break;
                 }
             }
@@ -44,7 +44,7 @@ public final class DeviceCookieUtil {
                 .maxAge(Duration.ofDays(365))
                 .build();
 
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return newId;
     }

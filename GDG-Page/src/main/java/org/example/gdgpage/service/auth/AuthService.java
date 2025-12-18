@@ -159,7 +159,6 @@ public class AuthService {
         return updateTimeAndCreateToken(user, httpServletRequest, httpServletResponse);
     }
 
-
     @Transactional
     public TokenDto reissue(String refreshToken, HttpServletRequest request, HttpServletResponse response) {
         if (!StringUtils.hasText(refreshToken)) {
@@ -227,7 +226,6 @@ public class AuthService {
         return new TokenDto(newAccessToken, newRefreshToken);
     }
 
-
     @Transactional
     public void logout(String refreshToken, HttpServletRequest request, HttpServletResponse response) {
         String deviceId = DeviceCookieUtil.getOrSetDeviceId(request, response);
@@ -241,7 +239,6 @@ public class AuthService {
 
         CookieUtil.clearRefreshTokenCookie(response);
     }
-
 
     @Transactional
     public UserResponse completeProfile(CompleteProfileRequest request) {
@@ -275,8 +272,7 @@ public class AuthService {
 
         return getLoginResponse(response, user, deviceId);
     }
-
-
+    
     @Transactional
     public void verifyEmail(String token) {
         EmailVerificationToken emailToken = emailVerificationTokenRepository.findByToken(token)

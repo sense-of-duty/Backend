@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Component
 public class TokenProvider {
@@ -64,13 +65,16 @@ public class TokenProvider {
                 .compact();
     }
 
-    public String createRefreshToken(Long userId) {
+    public String createRefreshToken(Long userId, String deviceId) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + refreshTokenValidityTime);
+        String jti = UUID.randomUUID().toString();
 
         return Jwts.builder()
                 .subject(userId.toString())
                 .claim(Constants.TOKEN_TYPE, Constants.REFRESH_TOKEN)
+                .claim("jti", jti)
+                .claim("did", deviceId) // optional
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(key)

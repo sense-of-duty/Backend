@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
@@ -16,10 +17,19 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     @Transactional
     @Modifying
     @Query("update RefreshToken rt set rt.revoked = true where rt.userId = :userId and rt.deviceId = :deviceId and rt.revoked = false")
-    int revokeAllActiveByUserAndDevice(@Param("userId") Long userId, @Param("deviceId") String deviceId);
+    void revokeAllActiveByUserAndDevice(@Param("userId") Long userId, @Param("deviceId") String deviceId);
 
     @Transactional
     @Modifying
     @Query("update RefreshToken rt set rt.revoked = true where rt.userId = :userId and rt.revoked = false")
-    int revokeAllActiveByUser(@Param("userId") Long userId);
+    void revokeAllActiveByUser(@Param("userId") Long userId);
+
+    @Transactional
+    @Modifying
+    @Query("""
+        delete from RefreshToken rt
+         where rt.revoked = true
+           and coalesce(rt.lastUsedAt, rt.expiresAt) < :cutoff
+    """)
+    void deleteRevokedBefore(@Param("cutoff") LocalDateTime cutoff);
 }

@@ -46,9 +46,14 @@ app:
   cors:
     allowed-origin-patterns: ${APP_CORS_ALLOWED_ORIGIN_PATTERNS:https://gdgoc-skhu.ddnsfree.com,http://localhost:*}
 
+  security:
+    refresh-token-history-retention-days: 3
+    refresh-token-cleanup-cron: "0 0 4 * * *"
+
 
 server:
   forward-headers-strategy: framework
 
 password-reset:
   frontend-reset-page-url: ${FRONTEND_RESET_PAGE_URL}
+

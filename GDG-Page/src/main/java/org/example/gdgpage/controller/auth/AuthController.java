@@ -66,9 +66,10 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음")
     })
     @PostMapping("/oauth/login")
-    public ResponseEntity<LoginResponse> oauthLogin(@Valid @RequestBody OAuthLoginRequest oAuthLoginRequest, HttpServletResponse httpServletResponse) {
-        LoginResponse loginResponse = authService.oauthLogin(oAuthLoginRequest, httpServletResponse);
-        return ResponseEntity.ok(loginResponse);
+    public ResponseEntity<LoginResponse> oauthLogin(@Valid @RequestBody OAuthLoginRequest oAuthLoginRequest,
+                                                    HttpServletRequest httpServletRequest,
+                                                    HttpServletResponse httpServletResponse) {
+        return ResponseEntity.ok(authService.oauthLogin(oAuthLoginRequest, httpServletRequest, httpServletResponse));
     }
 
     @Operation(summary = "토큰 재발급", description = "리프레시 토큰으로 액세스 토큰 재발급 API")

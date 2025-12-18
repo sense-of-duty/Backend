@@ -31,7 +31,6 @@ import org.example.gdgpage.repository.OAuthAccountRepository;
 import org.example.gdgpage.repository.PasswordResetTokenRepository;
 import org.example.gdgpage.repository.RefreshTokenRepository;
 import org.example.gdgpage.repository.UserRepository;
-import org.example.gdgpage.service.finder.FindUser;
 import org.example.gdgpage.service.mail.EmailService;
 import org.example.gdgpage.util.CookieUtil;
 import org.example.gdgpage.util.DeviceCookieUtil;
@@ -55,7 +54,6 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final OAuthAccountRepository oAuthAccountRepository;
-    private final FindUser findUser;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final GoogleOAuthClient googleOAuthClient;
@@ -108,35 +106,11 @@ public class AuthService {
 
         user.updateLastLogin(LocalDateTime.now());
 
-        String accessToken = tokenProvider.createAccessToken(user.getId(), user.getRole().name());
-        String refreshToken = tokenProvider.createRefreshToken(user.getId(), deviceId);
-
-        Claims claims = tokenProvider.parseClaim(refreshToken);
-        String tokenId = claims.get(Constants.JTI, String.class);
-        Date exp = claims.getExpiration();
-
-        refreshTokenRepository.revokeAllActiveByUserAndDevice(user.getId(), deviceId);
-
-        refreshTokenRepository.save(
-                RefreshToken.builder()
-                        .userId(user.getId())
-                        .deviceId(deviceId)
-                        .tokenId(tokenId)
-                        .tokenHash(TokenHashUtil.sha256Base64(refreshToken))
-                        .expiresAt(exp.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
-                        .revoked(false)
-                        .lastUsedAt(LocalDateTime.now())
-                        .build()
-        );
-
-        CookieUtil.setRefreshTokenCookie(httpServletResponse, refreshToken);
-
-        return LoginMapper.of(new TokenDto(accessToken, refreshToken), UserMapper.toUserResponse(user));
+        return getLoginResponse(httpServletResponse, user, deviceId);
     }
 
     @Transactional
-    public LoginResponse oauthLogin(OAuthLoginRequest oAuthLoginRequest, HttpServletResponse httpServletResponse) {
-
+    public LoginResponse oauthLogin(OAuthLoginRequest oAuthLoginRequest, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         GoogleTokenResponse tokenResponse = googleOAuthClient.exchangeCodeForToken(oAuthLoginRequest.authorizationCode());
         GoogleUserInfoResponse userInfo = googleOAuthClient.getUserInfo(tokenResponse.accessToken());
 
@@ -182,7 +156,7 @@ public class AuthService {
             oAuthAccountRepository.save(OAuthAccount.create(user, Provider.GOOGLE, providerId, email));
         }
 
-        return updateTimeAndCreateToken(user, httpServletResponse);
+        return updateTimeAndCreateToken(user, httpServletRequest, httpServletResponse);
     }
 
 
@@ -204,6 +178,7 @@ public class AuthService {
         }
 
         Long userId = Long.parseLong(claims.getSubject());
+
         String tokenId = claims.get(Constants.JTI, String.class);
 
         String deviceId = DeviceCookieUtil.getOrSetDeviceId(request, response);
@@ -293,25 +268,14 @@ public class AuthService {
         return UserMapper.toUserResponse(user);
     }
 
-    private LoginResponse updateTimeAndCreateToken(User user, HttpServletResponse httpServletResponse) {
+    private LoginResponse updateTimeAndCreateToken(User user, HttpServletRequest request, HttpServletResponse response) {
         user.updateLastLogin(LocalDateTime.now());
 
-        String accessToken = tokenProvider.createAccessToken(user.getId(), user.getRole().name());
-        String refreshToken = tokenProvider.createRefreshToken(user.getId());
+        String deviceId = DeviceCookieUtil.getOrSetDeviceId(request, response);
 
-        refreshTokenRepository.save(
-                RefreshToken.builder()
-                        .userId(user.getId())
-                        .refreshToken(refreshToken)
-                        .build()
-        );
-
-        CookieUtil.setRefreshTokenCookie(httpServletResponse, refreshToken);
-        TokenDto tokenDto = new TokenDto(accessToken, refreshToken);
-        UserResponse userResponse = UserMapper.toUserResponse(user);
-
-        return LoginMapper.of(tokenDto, userResponse);
+        return getLoginResponse(response, user, deviceId);
     }
+
 
     @Transactional
     public void verifyEmail(String token) {
@@ -420,5 +384,33 @@ public class AuthService {
 
         String verificationLink = frontendBaseUrl + "/auth/verify-email?token=" + token;
         emailService.sendEmailVerificationMail(user.getEmail(), verificationLink);
+    }
+
+
+    private LoginResponse getLoginResponse(HttpServletResponse httpServletResponse, User user, String deviceId) {
+        String accessToken = tokenProvider.createAccessToken(user.getId(), user.getRole().name());
+        String refreshToken = tokenProvider.createRefreshToken(user.getId(), deviceId);
+
+        Claims claims = tokenProvider.parseClaim(refreshToken);
+        String tokenId = claims.get(Constants.JTI, String.class);
+        Date exp = claims.getExpiration();
+
+        refreshTokenRepository.revokeAllActiveByUserAndDevice(user.getId(), deviceId);
+
+        refreshTokenRepository.save(
+                RefreshToken.builder()
+                        .userId(user.getId())
+                        .deviceId(deviceId)
+                        .tokenId(tokenId)
+                        .tokenHash(TokenHashUtil.sha256Base64(refreshToken))
+                        .expiresAt(exp.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+                        .revoked(false)
+                        .lastUsedAt(LocalDateTime.now())
+                        .build()
+        );
+
+        CookieUtil.setRefreshTokenCookie(httpServletResponse, refreshToken);
+
+        return LoginMapper.of(new TokenDto(accessToken, refreshToken), UserMapper.toUserResponse(user));
     }
 }

@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.common.Constants;
+import org.example.gdgpage.domain.auth.AuthUser;
 import org.example.gdgpage.domain.auth.EmailVerificationToken;
 import org.example.gdgpage.domain.auth.OAuthAccount;
 import org.example.gdgpage.domain.auth.PasswordResetToken;
@@ -247,11 +248,13 @@ public class AuthService {
     public UserResponse completeProfile(CompleteProfileRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || authentication.getName() == null) {
+        if (authentication == null || authentication.getPrincipal() == null) {
             throw new BadRequestException(ErrorMessage.NEED_TO_LOGIN);
         }
 
-        Long userId = Long.parseLong(authentication.getName());
+        AuthUser authUser = (AuthUser) authentication.getPrincipal();
+        Long userId = authUser.id();
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));
 

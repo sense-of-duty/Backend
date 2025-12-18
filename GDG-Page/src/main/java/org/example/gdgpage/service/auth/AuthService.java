@@ -160,7 +160,7 @@ public class AuthService {
     }
 
     @Transactional
-    public TokenDto reissue(String refreshToken, HttpServletRequest request, HttpServletResponse response) {
+    public TokenDto reissue(String refreshToken, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         if (!StringUtils.hasText(refreshToken)) {
             throw new UnauthorizedException(ErrorMessage.NEED_TO_LOGIN);
         }
@@ -172,6 +172,7 @@ public class AuthService {
         Claims claims = tokenProvider.parseClaim(refreshToken);
 
         String tokenType = claims.get(Constants.TOKEN_TYPE, String.class);
+
         if (!Constants.REFRESH_TOKEN.equals(tokenType)) {
             throw new UnauthorizedException(ErrorMessage.INVALID_TOKEN);
         }
@@ -180,7 +181,7 @@ public class AuthService {
 
         String tokenId = claims.get(Constants.JTI, String.class);
 
-        String deviceId = DeviceCookieUtil.getOrSetDeviceId(request, response);
+        String deviceId = DeviceCookieUtil.getOrSetDeviceId(httpServletRequest, httpServletResponse);
 
         RefreshToken stored = refreshTokenRepository.findByUserIdAndTokenId(userId, tokenId)
                 .orElseThrow(() -> new UnauthorizedException(ErrorMessage.INVALID_TOKEN));
@@ -190,9 +191,11 @@ public class AuthService {
         }
 
         String presentedHash = TokenHashUtil.sha256Base64(refreshToken);
+
         if (!presentedHash.equals(stored.getTokenHash())) {
             refreshTokenRepository.revokeAllActiveByUser(userId);
-            CookieUtil.clearRefreshTokenCookie(response);
+            CookieUtil.clearRefreshTokenCookie(httpServletResponse);
+
             throw new UnauthorizedException(ErrorMessage.INVALID_TOKEN);
         }
 
@@ -221,9 +224,9 @@ public class AuthService {
                         .build()
         );
 
-        CookieUtil.setRefreshTokenCookie(response, newRefreshToken);
+        CookieUtil.setRefreshTokenCookie(httpServletResponse, newRefreshToken);
 
-        return new TokenDto(newAccessToken, newRefreshToken);
+        return new TokenDto(newAccessToken);
     }
 
     @Transactional
@@ -272,7 +275,7 @@ public class AuthService {
 
         return getLoginResponse(response, user, deviceId);
     }
-    
+
     @Transactional
     public void verifyEmail(String token) {
         EmailVerificationToken emailToken = emailVerificationTokenRepository.findByToken(token)
@@ -407,6 +410,6 @@ public class AuthService {
 
         CookieUtil.setRefreshTokenCookie(httpServletResponse, refreshToken);
 
-        return LoginMapper.of(new TokenDto(accessToken, refreshToken), UserMapper.toUserResponse(user));
+        return LoginMapper.of(new TokenDto(accessToken), UserMapper.toUserResponse(user));
     }
 }

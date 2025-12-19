@@ -9,6 +9,7 @@ import org.example.gdgpage.dto.assignment.response.SubmissionListResponse;
 import org.example.gdgpage.dto.assignment.response.SubmissionResponse;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
+import org.example.gdgpage.exception.ForbiddenException;
 import org.example.gdgpage.mapper.assignment.SubmissionMapper;
 import org.example.gdgpage.repository.UserRepository;
 import org.example.gdgpage.repository.assignment.AssignmentSubmissionRepository;
@@ -35,7 +36,7 @@ public class SubmissionService {
                 .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_USER));
 
         if (user.isDeleted() || !user.isActive()) {
-            throw new BadRequestException(ErrorMessage.ONLY_ACTIVE_USER_CAN_SUBMIT);
+            throw new ForbiddenException(ErrorMessage.ONLY_ACTIVE_USER_CAN_SUBMIT);
         }
 
          if (LocalDateTime.now().isAfter(assignment.getDueAt())) {

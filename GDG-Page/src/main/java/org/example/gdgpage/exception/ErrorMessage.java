@@ -37,7 +37,8 @@ public enum ErrorMessage {
     NOT_EXIST_ASSIGNMENT("존재하지 않는 과제입니다."),
     ONLY_ACTIVE_USER_CAN_SUBMIT("현 기수 멤버만 제출 가능합니다."),
     ASSIGNMENT_DUE_PASSED("과제 제출 기한이 지났습니다."),
-    NOT_EXIST_SUBMISSION("존재하지 않는 제출입니다.");
+    NOT_EXIST_SUBMISSION("존재하지 않는 제출입니다."),
+    NOT_EXIST_FEEDBACK("존재하지 않는 피드백입니다.");
 
     private final String message;
 

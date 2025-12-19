@@ -62,15 +62,7 @@ public class FreeCommentService {
     @Transactional
     public FreeCommentResponseDto updateComment(Long postId, Long commentId, FreeCommentUpdateRequestDto dto, Long userId) {
 
-        User author = findUserImpl.getUserById(userId);
-
-        FreeComment comment = freeCommentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
-
-        if (!comment.getAuthor().getId().equals(author.getId()) &&
-                author.getRole() != Role.ORGANIZER) {
-            throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
-        }
+        FreeComment comment = getCommentWithPermissionCheck(commentId, userId);
 
         if (dto.content() == null || dto.content().isBlank()) {
             throw new BadRequestException(ErrorMessage.EMPTY_COMMENT);
@@ -88,15 +80,7 @@ public class FreeCommentService {
     @Transactional
     public void deleteComment(Long postId, Long commentId, Long userId) {
 
-        User author = findUserImpl.getUserById(userId);
-
-        FreeComment comment = freeCommentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
-
-        if (!comment.getAuthor().getId().equals(author.getId()) &&
-                author.getRole() != Role.ORGANIZER) {
-            throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
-        }
+        FreeComment comment = getCommentWithPermissionCheck(commentId, userId);
 
         if (!comment.getPost().getId().equals(postId)) {
             throw new BadRequestException(ErrorMessage.COMMENT_POST_MISMATCH);
@@ -136,4 +120,21 @@ public class FreeCommentService {
 
         return roots;
     }
+
+    private FreeComment getCommentWithPermissionCheck(Long commentId, Long userId) {
+        User user = findUserImpl.getUserById(userId);
+
+        FreeComment comment = freeCommentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
+
+        boolean isOwner = comment.getAuthor().getId().equals(user.getId());
+        boolean isOrganizer = user.getRole() == Role.ORGANIZER;
+
+        if (!isOwner && !isOrganizer) {
+            throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
+        }
+
+        return comment;
+    }
+
 }

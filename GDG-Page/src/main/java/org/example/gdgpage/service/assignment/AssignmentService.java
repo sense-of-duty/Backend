@@ -35,7 +35,7 @@ public class AssignmentService {
     }
 
     public List<AssignmentListResponse> getAll() {
-        return assignmentRepository.findAll().stream()
+        return assignmentRepository.findAllWithParts().stream()
                 .map(AssignmentMapper::toListResponse)
                 .toList();
     }

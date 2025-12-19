@@ -36,10 +36,10 @@ public class AssignmentSubmission extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "assignment_id", nullable = false)
     private Long assignmentId;
 
-    @Column(nullable = false)
+    @Column(name = "submitter_id", nullable = false)
     private Long submitterId;
 
     @Lob

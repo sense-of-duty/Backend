@@ -10,16 +10,12 @@ import org.example.gdgpage.dto.assignment.response.AssignmentResponse;
 public final class AssignmentMapper {
 
     public static AssignmentResponse toResponse(Assignment assignment) {
-        if (assignment == null) {
-            return null;
-        }
-
         return AssignmentResponse.builder()
                 .id(assignment.getId())
                 .title(assignment.getTitle())
                 .content(assignment.getContent())
                 .dueAt(assignment.getDueAt())
-                .partId(assignment.getPartId())
+                .parts(assignment.getParts())
                 .authorId(assignment.getAuthorId())
                 .createdAt(assignment.getCreatedAt())
                 .updatedAt(assignment.getUpdatedAt())
@@ -35,7 +31,7 @@ public final class AssignmentMapper {
                 .id(assignment.getId())
                 .title(assignment.getTitle())
                 .dueAt(assignment.getDueAt())
-                .partId(assignment.getPartId())
+                .parts(assignment.getParts())
                 .authorId(assignment.getAuthorId())
                 .createdAt(assignment.getCreatedAt())
                 .build();

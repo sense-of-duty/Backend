@@ -1,8 +1,10 @@
 package org.example.gdgpage.dto.assignment.response;
 
 import lombok.Builder;
+import org.example.gdgpage.domain.auth.PartType;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Builder
 public record AssignmentResponse(
@@ -10,7 +12,7 @@ public record AssignmentResponse(
         String title,
         String content,
         LocalDateTime dueAt,
-        Long partId,
+        Set<PartType> parts,
         Long authorId,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

@@ -22,16 +22,16 @@ public class AssignmentService {
     private final AssignmentRepository assignmentRepository;
 
     @Transactional
-    public Long create(Long authorId, AssignmentCreateRequest assignmentCreateRequest) {
+    public AssignmentResponse create(Long authorId, AssignmentCreateRequest request) {
         Assignment assignment = Assignment.create(
                 authorId,
-                assignmentCreateRequest.title(),
-                assignmentCreateRequest.content(),
-                assignmentCreateRequest.dueAt(),
-                assignmentCreateRequest.partId()
-        );
+                request.title(),
+                request.content(),
+                request.dueAt(),
+                request.parts());
 
-        return assignmentRepository.save(assignment).getId();
+        Assignment saved = assignmentRepository.save(assignment);
+        return AssignmentMapper.toResponse(saved);
     }
 
     public List<AssignmentListResponse> getAll() {

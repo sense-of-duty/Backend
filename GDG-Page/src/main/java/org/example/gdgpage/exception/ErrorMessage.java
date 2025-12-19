@@ -33,7 +33,8 @@ public enum ErrorMessage {
     INVALID_PASSWORD_RESET_TOKEN("유효하지 않은 링크입니다."),
     EXPIRED_PASSWORD_RESET_TOKEN("만료된 링크입니다."),
     INVALID_REQUEST("반려 사유를 입력해주세요."),
-    DELETED_USER("삭제된 유저입니다.");
+    DELETED_USER("삭제된 유저입니다."),
+    NOT_EXIST_ASSIGNMENT("존재하지 않는 과제입니다.");
 
     private final String message;
 

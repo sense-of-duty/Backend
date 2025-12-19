@@ -24,7 +24,7 @@ public class FeedbackService {
     private final SubmissionFeedbackRepository feedbackRepository;
 
     @Transactional
-    public Long createFeedback(Long submissionId, Long authorId, FeedbackCreateRequest feedbackCreateRequest) {
+    public FeedbackResponse createFeedback(Long submissionId, Long authorId, FeedbackCreateRequest feedbackCreateRequest) {
         AssignmentSubmission submission = submissionService.getSubmissionEntity(submissionId);
 
         SubmissionFeedback feedback = SubmissionFeedback.create(
@@ -33,11 +33,12 @@ public class FeedbackService {
                 feedbackCreateRequest.content()
         );
 
-        return feedbackRepository.save(feedback).getId();
+        SubmissionFeedback saved = feedbackRepository.save(feedback);
+        return FeedbackMapper.toResponse(saved);
     }
 
     public List<FeedbackResponse> getFeedbacks(Long submissionId) {
-        submissionService.getSubmissionEntity(submissionId); // 존재 검증
+        submissionService.getSubmissionEntity(submissionId);
 
         return feedbackRepository.findAllBySubmissionIdOrderByCreatedAtAsc(submissionId).stream()
                 .map(FeedbackMapper::toResponse)
@@ -45,11 +46,13 @@ public class FeedbackService {
     }
 
     @Transactional
-    public void deleteFeedback(Long feedbackId, Long requesterId, boolean isAdmin) {
-        SubmissionFeedback feedback = feedbackRepository.findById(feedbackId)
+    public void deleteFeedback(Long submissionId, Long feedbackId, Long requesterId, boolean isAdmin) {
+        SubmissionFeedback feedback = feedbackRepository.findByIdAndSubmissionId(feedbackId, submissionId)
                 .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_FEEDBACK));
 
-        if (!isAdmin && !feedback.getAuthorId().equals(requesterId)) {
+        boolean isAuthor = feedback.getAuthorId().equals(requesterId);
+
+        if (!isAdmin && !isAuthor) {
             throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
         }
 

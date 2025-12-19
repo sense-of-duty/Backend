@@ -70,15 +70,8 @@ public class FreePostService {
     @Transactional
     public FreePostResponseDto updatePost(Long postId, FreePostUpdateRequestDto dto, Long userId) {
 
-        User author = findUser.getUserById(userId);
-
-        FreePost post = freePostRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
-
-        if (!post.getAuthor().getId().equals(author.getId()) &&
-                author.getRole() != Role.ORGANIZER) {
-            throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
-        }
+        FreePost post = getPostWithPermissionCheck(postId, userId);
+        User user = findUser.getUserById(userId);
 
         if (dto.title() == null || dto.title().isBlank()) {
             throw new BadRequestException(ErrorMessage.EMPTY_TITLE);
@@ -87,7 +80,7 @@ public class FreePostService {
             throw new BadRequestException(ErrorMessage.EMPTY_CONTENT);
         }
 
-        if (author.getRole() == Role.ORGANIZER) {
+        if (user.getRole() == Role.ORGANIZER) {
             post.updateByAdmin(dto.title(), dto.content(), dto.isPinned());
         } else {
             post.update(dto.title(), dto.content());
@@ -120,6 +113,11 @@ public class FreePostService {
     @Transactional
     public void deletePost(Long postId, Long userId) {
 
+        FreePost post = getPostWithPermissionCheck(postId, userId);
+        freePostRepository.delete(post);
+    }
+
+    private FreePost getPostWithPermissionCheck(Long postId, Long userId) {
         User author = findUser.getUserById(userId);
 
         FreePost post = freePostRepository.findById(postId)
@@ -130,6 +128,6 @@ public class FreePostService {
             throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
         }
 
-        freePostRepository.delete(post);
+        return post;
     }
 }

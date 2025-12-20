@@ -48,6 +48,13 @@ public class FreePost extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FreeComment> comments = new ArrayList<>();
 
+    @OneToMany(
+            mappedBy = "post",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<FreePostLike> likes = new ArrayList<>();
+
     public void increaseViewCount() {
         this.viewCount++;
     }

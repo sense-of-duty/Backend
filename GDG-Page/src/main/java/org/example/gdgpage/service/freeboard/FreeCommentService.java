@@ -35,9 +35,9 @@ public class FreeCommentService {
     private final FindUserImpl findUserImpl;
 
     @Transactional
-    public void likeComment(Long commentId, Long userId) {
+    public void likeComment(Long postId, Long commentId, Long userId) {
         User user = findUserImpl.getUserById(userId);
-        FreeComment comment = getLikeableComment(commentId);
+        FreeComment comment = getLikeableComment(postId, commentId);
 
         if (freeCommentLikeRepository.existsByUserAndComment(user, comment)) {
             throw new BadRequestException(ErrorMessage.ALREADY_LIKED);
@@ -48,9 +48,9 @@ public class FreeCommentService {
     }
 
     @Transactional
-    public void unlikeComment(Long commentId, Long userId) {
+    public void unlikeComment(Long postId, Long commentId, Long userId) {
         User user = findUserImpl.getUserById(userId);
-        FreeComment comment = getLikeableComment(commentId);
+        FreeComment comment = getLikeableComment(postId, commentId);
 
         FreeCommentLike like = freeCommentLikeRepository
                 .findByUserAndComment(user, comment)
@@ -175,12 +175,17 @@ public class FreeCommentService {
         return comment;
     }
 
-    private FreeComment getLikeableComment(Long commentId) {
+    private FreeComment getLikeableComment(Long postId, Long commentId) {
         FreeComment comment = freeCommentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
 
         if (comment.isDeleted()) {
             throw new BadRequestException(ErrorMessage.NOT_EXIST_COMMENT);
+        }
+
+        FreePost post = comment.getPost();
+        if (post == null || !post.getId().equals(postId)) {
+            throw new NotFoundException(ErrorMessage.NOT_EXIST_POST);
         }
 
         return comment;

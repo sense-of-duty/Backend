@@ -57,7 +57,7 @@ public class FreeCommentController {
     public ResponseEntity<Void> likeComment(@PathVariable Long postId,
                                             @PathVariable Long commentId,
                                             @AuthenticationPrincipal AuthUser authUser) {
-        freeCommentService.likeComment(commentId, authUser.id());
+        freeCommentService.likeComment(postId, commentId, authUser.id());
         return ResponseEntity.ok().build();
     }
 
@@ -65,7 +65,7 @@ public class FreeCommentController {
     public ResponseEntity<Void> unlikeComment(@PathVariable Long postId,
                                               @PathVariable Long commentId,
                                               @AuthenticationPrincipal AuthUser authUser) {
-        freeCommentService.unlikeComment(commentId, authUser.id());
+        freeCommentService.unlikeComment(postId, commentId, authUser.id());
         return ResponseEntity.noContent().build();
     }
 }

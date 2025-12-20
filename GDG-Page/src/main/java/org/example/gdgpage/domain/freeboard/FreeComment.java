@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.domain.common.BaseTimeEntity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -40,6 +43,13 @@ public class FreeComment extends BaseTimeEntity{
 
     @Column(name = "is_deleted")
     private boolean deleted = false;
+
+    @OneToMany(
+            mappedBy = "comment",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<FreeCommentLike> likes = new ArrayList<>();
 
     public void delete() {
         this.deleted = true;

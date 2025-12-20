@@ -86,6 +86,8 @@ public class FreeCommentService {
         FreeComment comment = new FreeComment(post, author, dto.content(), dto.isAnonymous());
         comment.setParent(parent);
 
+        post.increaseCommentCount();
+
         return new FreeCommentResponseDto(freeCommentRepository.save(comment));
     }
 
@@ -115,6 +117,8 @@ public class FreeCommentService {
         if (!comment.getPost().getId().equals(postId)) {
             throw new BadRequestException(ErrorMessage.COMMENT_POST_MISMATCH);
         }
+
+        comment.getPost().decreaseCommentCount();
 
         comment.delete();
     }

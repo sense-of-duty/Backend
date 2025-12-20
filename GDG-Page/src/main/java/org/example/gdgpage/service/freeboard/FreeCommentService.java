@@ -127,6 +127,10 @@ public class FreeCommentService {
         FreeComment comment = freeCommentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
 
+        if (comment.isDeleted()) {
+            throw new BadRequestException(ErrorMessage.ALREADY_DELETED_COMMENT);
+        }
+
         boolean isOwner = comment.getAuthor().getId().equals(user.getId());
         boolean isOrganizer = user.getRole() == Role.ORGANIZER;
 

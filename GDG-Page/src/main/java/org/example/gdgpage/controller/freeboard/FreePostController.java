@@ -54,7 +54,7 @@ public class FreePostController {
 
     @GetMapping
     public ResponseEntity<List<FreePostListResponseDto>> getPostList(@AuthenticationPrincipal AuthUser authUser) {
-        List<FreePostListResponseDto> response = freePostService.getPostList(authUser.id());
+        List<FreePostListResponseDto> response = freePostService.getPostList();
         return ResponseEntity.ok(response);
     }
 

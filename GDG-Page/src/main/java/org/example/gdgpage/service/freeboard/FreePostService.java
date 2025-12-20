@@ -101,7 +101,7 @@ public class FreePostService {
     }
 
     @Transactional(readOnly = true)
-    public List<FreePostListResponseDto> getPostList(Long userId) {
+    public List<FreePostListResponseDto> getPostList() {
 
         List<FreePost> posts = freePostRepository.findAllWithAuthor();
 

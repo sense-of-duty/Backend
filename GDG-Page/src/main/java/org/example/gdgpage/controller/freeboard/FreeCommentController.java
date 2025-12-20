@@ -52,4 +52,20 @@ public class FreeCommentController {
         List<FreeCommentResponseDto> response = freeCommentService.getCommentTree(postId, authUser.id());
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/{commentId}/likes")
+    public ResponseEntity<Void> likeComment(@PathVariable Long postId,
+                                            @PathVariable Long commentId,
+                                            @AuthenticationPrincipal AuthUser authUser) {
+        freeCommentService.likeComment(commentId, authUser.id());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{commentId}/likes")
+    public ResponseEntity<Void> unlikeComment(@PathVariable Long postId,
+                                              @PathVariable Long commentId,
+                                              @AuthenticationPrincipal AuthUser authUser) {
+        freeCommentService.unlikeComment(commentId, authUser.id());
+        return ResponseEntity.noContent().build();
+    }
 }

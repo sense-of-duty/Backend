@@ -61,5 +61,13 @@ public class FreeComment extends BaseTimeEntity{
         this.likeCount++;
     }
 
-    public void setParent(FreeComment parent) { this.parent = parent; }
+    public void decreaseLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
+        }
+    }
+
+    public void setParent(FreeComment parent) {
+        this.parent = parent;
+    }
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.Role;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.domain.freeboard.FreeComment;
+import org.example.gdgpage.domain.freeboard.FreeCommentLike;
 import org.example.gdgpage.domain.freeboard.FreePost;
 import org.example.gdgpage.dto.freeboard.request.FreeCommentCreateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreeCommentUpdateRequestDto;
@@ -12,6 +13,7 @@ import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.exception.ForbiddenException;
 import org.example.gdgpage.exception.NotFoundException;
+import org.example.gdgpage.repository.freeboard.FreeCommentLikeRepository;
 import org.example.gdgpage.repository.freeboard.FreeCommentRepository;
 import org.example.gdgpage.repository.freeboard.FreePostRepository;
 import org.example.gdgpage.service.finder.FindUserImpl;
@@ -29,7 +31,35 @@ public class FreeCommentService {
 
     private final FreeCommentRepository freeCommentRepository;
     private final FreePostRepository freePostRepository;
+    private final FreeCommentLikeRepository freeCommentLikeRepository;
     private final FindUserImpl findUserImpl;
+
+    @Transactional
+    public void likeComment(Long commentId, Long userId) {
+        User user = findUserImpl.getUserById(userId);
+        FreeComment comment = getLikeableComment(commentId);
+
+        if (freeCommentLikeRepository.existsByUserAndComment(user, comment)) {
+            throw new BadRequestException(ErrorMessage.ALREADY_LIKED);
+        }
+
+        freeCommentLikeRepository.save(new FreeCommentLike(user, comment));
+        comment.increaseLikeCount();
+    }
+
+    @Transactional
+    public void unlikeComment(Long commentId, Long userId) {
+        User user = findUserImpl.getUserById(userId);
+        FreeComment comment = getLikeableComment(commentId);
+
+        FreeCommentLike like = freeCommentLikeRepository
+                .findByUserAndComment(user, comment)
+                .orElseThrow(() ->
+                        new BadRequestException(ErrorMessage.NOT_LIKED));
+
+        freeCommentLikeRepository.delete(like);
+        comment.decreaseLikeCount();
+    }
 
     @Transactional
     public FreeCommentResponseDto createComment(Long postId, FreeCommentCreateRequestDto dto, Long userId) {
@@ -128,7 +158,7 @@ public class FreeCommentService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
 
         if (comment.isDeleted()) {
-            throw new BadRequestException(ErrorMessage.ALREADY_DELETED_COMMENT);
+            throw new BadRequestException(ErrorMessage.NOT_EXIST_COMMENT);
         }
 
         boolean isOwner = comment.getAuthor().getId().equals(user.getId());
@@ -136,6 +166,17 @@ public class FreeCommentService {
 
         if (!isOwner && !isOrganizer) {
             throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
+        }
+
+        return comment;
+    }
+
+    private FreeComment getLikeableComment(Long commentId) {
+        FreeComment comment = freeCommentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
+
+        if (comment.isDeleted()) {
+            throw new BadRequestException(ErrorMessage.NOT_EXIST_COMMENT);
         }
 
         return comment;

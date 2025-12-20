@@ -90,4 +90,14 @@ public class FreePost extends BaseTimeEntity {
         this.content = content;
         this.isPinned = isPinned;
     }
+
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
+        }
+    }
 }

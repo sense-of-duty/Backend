@@ -43,7 +43,8 @@ public enum ErrorMessage {
     INVALID_PASSWORD_RESET_TOKEN("유효하지 않은 링크입니다."),
     EXPIRED_PASSWORD_RESET_TOKEN("만료된 링크입니다."),
     COMMENT_POST_MISMATCH("댓글이 해당 게시글에 속하지 않습니다."),
-    ALREADY_DELETED_COMMENT("이미 삭제된 댓글입니다.");
+    ALREADY_LIKED("이미 좋아요를 눌렀습니다."),
+    NOT_LIKED("취소할 좋아요가 없습니다.");
 
     private final String message;
 

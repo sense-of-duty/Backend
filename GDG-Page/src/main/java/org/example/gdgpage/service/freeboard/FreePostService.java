@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.Role;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.domain.freeboard.FreePost;
+import org.example.gdgpage.domain.freeboard.FreePostLike;
 import org.example.gdgpage.dto.freeboard.request.AdminPostCreateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreePostCreateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreePostUpdateRequestDto;
@@ -13,6 +14,7 @@ import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.exception.ForbiddenException;
 import org.example.gdgpage.exception.NotFoundException;
+import org.example.gdgpage.repository.freeboard.FreePostLikeRepository;
 import org.example.gdgpage.repository.freeboard.FreePostRepository;
 import org.example.gdgpage.service.finder.FindUserImpl;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ public class FreePostService {
 
     private final FreePostRepository freePostRepository;
     private final FindUserImpl findUser;
+    private final FreePostLikeRepository freePostLikeRepository;
 
     @Transactional
     public FreePostResponseDto createUserPost(FreePostCreateRequestDto dto, Long userId) {
@@ -129,4 +132,37 @@ public class FreePostService {
 
         return post;
     }
+
+    @Transactional
+    public void likePost(Long postId, Long userId) {
+        User user = findUser.getUserById(userId);
+        FreePost post = getLikeablePost(postId);
+
+        if (freePostLikeRepository.existsByUserAndPost(user, post)) {
+            throw new BadRequestException(ErrorMessage.ALREADY_LIKED);
+        }
+
+        freePostLikeRepository.save(new FreePostLike(user, post));
+        post.increaseLikeCount();
+    }
+
+    @Transactional
+    public void unlikePost(Long postId, Long userId) {
+        User user = findUser.getUserById(userId);
+        FreePost post = getLikeablePost(postId);
+
+        FreePostLike like = freePostLikeRepository
+                .findByUserAndPost(user, post)
+                .orElseThrow(() ->
+                        new BadRequestException(ErrorMessage.NOT_LIKED));
+
+        freePostLikeRepository.delete(like);
+        post.decreaseLikeCount();
+    }
+
+    private FreePost getLikeablePost(Long postId) {
+        return freePostRepository.findById(postId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
+    }
+
 }

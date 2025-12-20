@@ -63,4 +63,22 @@ public class FreePostController {
         freePostService.deletePost(postId, authUser.id());
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{postId}/likes")
+    public ResponseEntity<Void> likePost(
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long postId
+    ) {
+        freePostService.likePost(postId, authUser.id());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{postId}/likes")
+    public ResponseEntity<Void> unlikePost(
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long postId
+    ) {
+        freePostService.unlikePost(postId, authUser.id());
+        return ResponseEntity.noContent().build();
+    }
 }

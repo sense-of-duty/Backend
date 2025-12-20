@@ -50,9 +50,7 @@ public class LectureMaterialService {
     }
 
     @Transactional(readOnly = true)
-    public List<LectureMaterialSummaryResponse> lectureMaterialList(String keyword, int page, int size) {
-        Long userId = AuthUtil.currentUserId();
-
+    public List<LectureMaterialSummaryResponse> lectureMaterialList(Long userId, String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<LectureMaterial> pageResult = (keyword == null || keyword.isBlank()
@@ -77,11 +75,8 @@ public class LectureMaterialService {
                 .toList();
     }
 
-
     @Transactional(readOnly = true)
-    public LectureMaterialResponse getLectureMaterial(Long lectureId) {
-        Long userId = AuthUtil.currentUserId();
-
+    public LectureMaterialResponse getLectureMaterial(Long userId, Long lectureId) {
         LectureMaterial material = lectureMaterialRepository.findByIdAndDeletedFalse(lectureId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_LECTURE_MATERIAL));
 
@@ -116,9 +111,7 @@ public class LectureMaterialService {
     }
 
     @Transactional
-    public boolean toggleBookmark(Long lectureId) {
-        Long userId = AuthUtil.currentUserId();
-
+    public boolean toggleBookmark(Long userId, Long lectureId) {
         LectureMaterial lecture = lectureMaterialRepository.findByIdAndDeletedFalse(lectureId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_LECTURE_MATERIAL));
 

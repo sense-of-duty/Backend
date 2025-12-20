@@ -8,16 +8,16 @@ import java.time.LocalDateTime;
 @Getter
 public class FreePostListResponseDto {
 
-    private Long id;
-    private String title;
-    private String previewContent;
-    private String authorName;
-    private Boolean isAnonymous;
-    private Boolean isPinned;
-    private Integer viewCount;
-    private Integer likeCount;
-    private Integer commentCount;
-    private LocalDateTime createdAt;
+    private final Long id;
+    private final String title;
+    private final String previewContent;
+    private final String authorName;
+    private final Boolean isAnonymous;
+    private final Boolean isPinned;
+    private final Integer viewCount;
+    private final Integer likeCount;
+    private final Integer commentCount;
+    private final LocalDateTime createdAt;
 
     public FreePostListResponseDto(FreePost post) {
 

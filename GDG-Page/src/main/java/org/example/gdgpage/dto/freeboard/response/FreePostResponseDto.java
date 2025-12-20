@@ -8,17 +8,17 @@ import java.time.LocalDateTime;
 @Getter
 public class FreePostResponseDto {
 
-    private Long id;
-    private String title;
-    private String content;
-    private Boolean isAnonymous;
-    private Boolean isPinned;
-    private Integer viewCount;
-    private Integer likeCount;
-    private Integer commentCount;
-    private String authorName;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private final Long id;
+    private final String title;
+    private final String content;
+    private final Boolean isAnonymous;
+    private final Boolean isPinned;
+    private final Integer viewCount;
+    private final Integer likeCount;
+    private final Integer commentCount;
+    private final String authorName;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
 
     public FreePostResponseDto(FreePost post) {
         this.id = post.getId();

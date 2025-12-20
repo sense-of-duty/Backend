@@ -10,16 +10,16 @@ import java.util.List;
 @Getter
 public class FreeCommentResponseDto {
 
-    private Long id;
-    private String content;
-    private Boolean isAnonymous;
-    private String authorName;
-    private Integer likeCount;
-    private Long parentId;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private final Long id;
+    private final String content;
+    private final Boolean isAnonymous;
+    private final String authorName;
+    private final Integer likeCount;
+    private final Long parentId;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
 
-    private List<FreeCommentResponseDto> children = new ArrayList<>();
+    private final List<FreeCommentResponseDto> children = new ArrayList<>();
 
     public FreeCommentResponseDto(FreeComment comment) {
         this.id = comment.getId();

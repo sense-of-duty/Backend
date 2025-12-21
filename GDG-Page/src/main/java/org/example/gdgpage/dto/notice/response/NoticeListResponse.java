@@ -1,19 +1,17 @@
 package org.example.gdgpage.dto.notice.response;
 
-import lombok.*;
+import lombok.Builder;
+import org.example.gdgpage.domain.auth.PartType;
 import java.time.LocalDateTime;
 
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Builder
-public class NoticeListResponse {
-
-    private Long id;
-    private String title;
-    private Long authorId;
-    private Long partId;
-    private int viewCount;
-    private boolean isPinned;
-    private LocalDateTime createdAt;
+public record NoticeListResponse(
+        Long id,
+        String title,
+        Long authorId,
+        PartType partId,
+        int viewCount,
+        boolean isPinned,
+        LocalDateTime createdAt
+) {
 }

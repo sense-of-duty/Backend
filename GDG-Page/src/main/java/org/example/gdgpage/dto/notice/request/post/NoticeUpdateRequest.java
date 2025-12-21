@@ -1,18 +1,13 @@
 package org.example.gdgpage.dto.notice.request.post;
 
-import lombok.*;
+import lombok.Builder;
+import org.example.gdgpage.domain.auth.PartType;
 
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Builder
-public class NoticeUpdateRequest {
-
-    private String title;
-
-    private String content;
-
-    private boolean isPinned;
-
-    private Long partId;
+public record NoticeUpdateRequest(
+        String title,
+        String content,
+        boolean isPinned,
+        PartType partId
+) {
 }

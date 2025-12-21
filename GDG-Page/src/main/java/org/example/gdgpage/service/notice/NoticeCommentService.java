@@ -1,6 +1,7 @@
 package org.example.gdgpage.service.notice;
 
 import lombok.RequiredArgsConstructor;
+import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.domain.notice.entity.Notice;
 import org.example.gdgpage.domain.notice.entity.NoticeComment;
 import org.example.gdgpage.domain.notice.repository.NoticeRepository;
@@ -8,6 +9,7 @@ import org.example.gdgpage.domain.notice.repository.NoticeCommentRepository;
 import org.example.gdgpage.dto.notice.request.comment.NoticeCommentCreateRequest;
 import org.example.gdgpage.dto.notice.request.comment.NoticeCommentUpdateRequest;
 import org.example.gdgpage.dto.notice.response.comment.NoticeCommentResponse;
+import org.example.gdgpage.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,7 @@ public class NoticeCommentService {
 
     private final NoticeCommentRepository commentRepository;
     private final NoticeRepository noticeRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public Long createComment(Long noticeId, Long authorId, NoticeCommentCreateRequest request) {
@@ -28,15 +31,15 @@ public class NoticeCommentService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
         NoticeComment parent = null;
-        if (request.getParentId() != null) {
-            parent = commentRepository.findById(request.getParentId())
-                    .orElseThrow(() -> new IllegalArgumentException("부모 댓글이 존재하지 않습니다."));
+        if (request.parentId() != null) {
+            parent = commentRepository.findById(request.parentId())
+                    .orElseThrow(() -> new IllegalArgumentException("답글이 존재하지 않습니다."));
         }
 
         NoticeComment comment = NoticeComment.builder()
-                .content(request.getContent())
+                .content(request.content())
                 .isAnonymous(request.isAnonymous())
-                .postType(request.getPostType())
+                .postType(request.postType())
                 .authorId(authorId)
                 .notice(notice)
                 .parent(parent)
@@ -60,7 +63,7 @@ public class NoticeCommentService {
         NoticeComment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
 
-        comment.updateContent(request.getContent());
+        comment.updateContent(request.content());
     }
 
     @Transactional
@@ -72,10 +75,21 @@ public class NoticeCommentService {
     }
 
     private NoticeCommentResponse convertToResponse(NoticeComment comment) {
+
+        String authorName = userRepository.findById(comment.getAuthorId())
+                .map(User::getName)
+                .orElse("탈퇴한 사용자");
+
+
+        if (comment.isAnonymous()) {
+            authorName = "익명";
+        }
+
         return NoticeCommentResponse.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
                 .authorId(comment.getAuthorId())
+                .authorName(authorName)
                 .isAnonymous(comment.isAnonymous())
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())

@@ -2,25 +2,20 @@ package org.example.gdgpage.dto.notice.request.post;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import org.example.gdgpage.domain.auth.PartType;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class NoticeCreateRequest {
+public record NoticeCreateRequest(
+        @NotBlank(message = "제목을 입력해주세요.")
+        String title,
 
-    @NotBlank(message = "제목을 입력해주세요.")
-    private String title;
+        @NotBlank(message = "내용을 입력해주세요.")
+        String content,
 
-    @NotBlank(message = "내용을 입력해주세요.")
-    private String content;
+        boolean isPinned,
 
-    private boolean isPinned;
-
-    @NotNull(message = "파트 ID는 필수입니다.")
-    private Long partId;
+        @NotNull(message = "소속 파트를 선택해주세요.")
+        PartType partId
+) {
 }

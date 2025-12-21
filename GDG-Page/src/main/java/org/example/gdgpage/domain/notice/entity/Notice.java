@@ -2,6 +2,7 @@ package org.example.gdgpage.domain.notice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.gdgpage.domain.auth.PartType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -21,8 +22,9 @@ public class Notice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "part_id")
-    private Long partId;
+    private PartType partId;
 
     @Column(name = "author_id", nullable = false)
     private Long authorId;

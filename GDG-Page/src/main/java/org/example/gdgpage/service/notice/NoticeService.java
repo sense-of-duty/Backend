@@ -1,11 +1,13 @@
 package org.example.gdgpage.service.notice;
 
 import lombok.RequiredArgsConstructor;
+import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.domain.notice.entity.Notice;
 import org.example.gdgpage.domain.notice.repository.NoticeRepository;
 import org.example.gdgpage.dto.notice.request.post.NoticeCreateRequest;
 import org.example.gdgpage.dto.notice.response.NoticeListResponse;
 import org.example.gdgpage.dto.notice.response.post.NoticeResponse;
+import org.example.gdgpage.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,22 +20,21 @@ import java.util.stream.Collectors;
 public class NoticeService {
 
     private final NoticeRepository noticeRepository;
-
+    private final UserRepository userRepository;
 
     @Transactional
     public Long createNotice(Long authorId, NoticeCreateRequest request) {
         Notice notice = Notice.builder()
-                .title(request.getTitle())
-                .content(request.getContent())
+                .title(request.title())
+                .content(request.content())
                 .isPinned(request.isPinned())
-                .partId(request.getPartId())
+                .partId(request.partId()) // record 방식 호출
                 .authorId(authorId)
                 .viewCount(0)
                 .build();
 
         return noticeRepository.save(notice).getId();
     }
-
 
     public List<NoticeListResponse> getAllNotices() {
         return noticeRepository.findAll().stream()
@@ -54,13 +55,20 @@ public class NoticeService {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
+        // 작성자 이름 매핑 로직 추가
+        String authorName = userRepository.findById(notice.getAuthorId())
+                .map(User::getName)
+                .orElse("탈퇴한 사용자");
+
         notice.incrementViewCount();
 
         return NoticeResponse.builder()
                 .id(notice.getId())
                 .title(notice.getTitle())
                 .content(notice.getContent())
+                .partId(notice.getPartId())
                 .authorId(notice.getAuthorId())
+                .authorName(authorName) // 이제 null이 아니라 이름이 나옵니다
                 .viewCount(notice.getViewCount())
                 .isPinned(notice.isPinned())
                 .createdAt(notice.getCreatedAt())
@@ -77,7 +85,8 @@ public class NoticeService {
             throw new RuntimeException("수정 권한이 없습니다.");
         }
 
-        notice.updateNotice(request.getTitle(), request.getContent(), request.isPinned());
+        // 엔티티의 updateNotice 메서드에도 request.partId()를 추가해야 합니다
+        notice.updateNotice(request.title(), request.content(), request.isPinned());
     }
 
     @Transactional

@@ -5,13 +5,15 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lombok.Getter;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
+
 
 @Getter
 @MappedSuperclass
 public class BaseTimeEntity {
-
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

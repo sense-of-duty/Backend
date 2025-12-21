@@ -1,14 +1,10 @@
 package org.example.gdgpage.dto.notice.request.comment;
 
-import lombok.*;
+import lombok.Builder;
 
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Builder
-public class NoticeCommentUpdateRequest {
-
-    private String content;
-
-    private boolean isAnonymous;
+public record NoticeCommentUpdateRequest(
+        String content,
+        boolean isAnonymous
+) {
 }

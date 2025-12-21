@@ -1,7 +1,7 @@
 package org.example.gdgpage.controller.notice;
 
 import lombok.RequiredArgsConstructor;
-import org.example.gdgpage.domain.auth.PrincipalDetails;
+import org.example.gdgpage.domain.auth.AuthUser; // PrincipalDetails 대신 AuthUser 임포트
 import org.example.gdgpage.dto.notice.request.comment.NoticeCommentCreateRequest;
 import org.example.gdgpage.dto.notice.request.comment.NoticeCommentUpdateRequest;
 import org.example.gdgpage.dto.notice.response.comment.NoticeCommentResponse;
@@ -16,17 +16,23 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/notices/{noticeId}/comments")
-public class NoticeComment {
+public class NoticeCommentController {
 
     private final NoticeCommentService noticeCommentService;
 
     @PostMapping
-    public ResponseEntity<Long> createComment(
-            @PathVariable Long noticeId,
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @RequestBody NoticeCommentCreateRequest request) {
+    public ResponseEntity<?> createComment( // 리턴 타입을 ResponseEntity<?>로 유연하게 변경
+                                            @PathVariable Long noticeId,
+                                            @AuthenticationPrincipal AuthUser authUser, // AuthUser로 변경
+                                            @RequestBody NoticeCommentCreateRequest request) {
 
-        Long authorId = principalDetails.getUser().getId();
+        // 로그인 체크 추가
+        if (authUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요한 서비스입니다.");
+        }
+
+        // 팀원들의 AuthUser 필드명(userId 또는 id)에 맞춰서 호출하세요.
+        Long authorId = authUser.id();
         Long commentId = noticeCommentService.createComment(noticeId, authorId, request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(commentId);

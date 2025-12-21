@@ -59,7 +59,7 @@ public class LectureMaterialController {
 
     @Operation(summary = "내 즐겨찾기 목록", description = "내가 즐겨찾기한 강의자료 ID 목록")
     @GetMapping("/bookmarks/myBookmarks")
-    public ResponseEntity<List<Long>> myBookmarks() {
-        return ResponseEntity.ok(lectureMaterialService.myBookmarks());
+    public ResponseEntity<List<Long>> myBookmarks(@AuthenticationPrincipal AuthUser authUser) {
+        return ResponseEntity.ok(lectureMaterialService.myBookmarks(authUser.id()));
     }
 }

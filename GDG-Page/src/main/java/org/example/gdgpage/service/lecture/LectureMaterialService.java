@@ -127,8 +127,7 @@ public class LectureMaterialService {
     }
 
     @Transactional(readOnly = true)
-    public List<Long> myBookmarks() {
-        Long userId = AuthUtil.currentUserId();
+    public List<Long> myBookmarks(Long userId) {
         return lectureBookmarkRepository.findAllActiveLectureIdsByUserId(userId);
     }
 }

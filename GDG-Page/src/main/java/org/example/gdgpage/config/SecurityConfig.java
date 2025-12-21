@@ -37,8 +37,12 @@ public class SecurityConfig {
     private List<String> allowedOrigins;
 
     private static final String[] PUBLIC_AUTH = {
-            "/auth/**",
-            "/oauth2/**"
+            "/auth/signup",
+            "/auth/login",
+            "/auth/oauth/login",
+            "/auth/reissue",
+            "/auth/logout",
+            "/oauth2/**",
     };
 
     private static final String[] SWAGGER_WHITELIST = {

@@ -1,4 +1,4 @@
-package org.example.gdgpage.repository;
+package org.example.gdgpage.repository.auth;
 
 import org.example.gdgpage.domain.auth.OAuthAccount;
 import org.example.gdgpage.domain.auth.Provider;

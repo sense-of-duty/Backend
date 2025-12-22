@@ -1,0 +1,70 @@
+package org.example.gdgpage.service.notification;
+
+import lombok.RequiredArgsConstructor;
+import org.example.gdgpage.domain.auth.User;
+import org.example.gdgpage.domain.notification.Notification;
+import org.example.gdgpage.domain.notification.NotificationType;
+import org.example.gdgpage.exception.ErrorMessage;
+import org.example.gdgpage.exception.ForbiddenException;
+import org.example.gdgpage.exception.NotFoundException;
+import org.example.gdgpage.repository.auth.UserRepository;
+import org.example.gdgpage.repository.notification.NotificationRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class NotificationService {
+
+    private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
+
+    @Transactional
+    public void createNotification(
+            User receiver,
+            NotificationType type,
+            String message,
+            Long targetId,
+            String targetUrl
+    ) {
+        Notification notification = Notification.builder()
+                .receiver(receiver)
+                .type(type)
+                .message(message)
+                .targetId(targetId)
+                .targetUrl(targetUrl)
+                .isRead(false)
+                .build();
+
+        notificationRepository.save(notification);
+    }
+
+    public List<Notification> getMyNotifications(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
+
+        return notificationRepository.findByReceiverOrderByCreatedAtDesc(user);
+    }
+
+    public long countUnread(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
+
+        return notificationRepository.countByReceiverAndIsReadFalse(user);
+    }
+
+    @Transactional
+    public void markAsRead(Long notificationId, Long userId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_NOTIFICATION));
+
+        if (!notification.getReceiver().getId().equals(userId)) {
+            throw new ForbiddenException(ErrorMessage.ACCESS_DENY);
+        }
+
+        notification.markAsRead();
+    }
+}

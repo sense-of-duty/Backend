@@ -37,7 +37,8 @@ public enum ErrorMessage {
     EMAIL_NOT_VERIFIED("이메일 인증이 완료되지 않았습니다."),
     INVALID_PASSWORD_RESET_TOKEN("유효하지 않은 링크입니다."),
     EXPIRED_PASSWORD_RESET_TOKEN("만료된 링크입니다."),
-    INVALID_REQUEST("반려 사유를 입력해주세요.");
+    INVALID_REQUEST("반려 사유를 입력해주세요."),
+    NOT_EXIST_NOTIFICATION("존재하지 않는 알람입니다.");
 
     private final String message;
 

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.attendance.AttendanceSession;
 import org.example.gdgpage.domain.attendance.AttendanceSessionStatus;
 import org.example.gdgpage.domain.attendance.Week;
+import org.example.gdgpage.domain.auth.PartType;
 import org.example.gdgpage.dto.attendance.response.ActiveSessionResponse;
 import org.example.gdgpage.dto.attendance.response.AdminSessionStartResponse;
 import org.example.gdgpage.exception.BadRequestException;
@@ -70,22 +71,29 @@ public class AttendanceSessionService {
     }
 
     @Transactional(readOnly = true)
-    public ActiveSessionResponse getActiveSessionForCourse(Long courseId) {
+    public ActiveSessionResponse getActiveSessionForPart(PartType part) {
         LocalDateTime now = LocalDateTime.now();
-        return sessionRepository.findActiveByCourseId(courseId, now)
+
+        return sessionRepository.findActiveByPart(part, now)
                 .map(AttendanceMapper::toActiveSessionResponse)
                 .orElse(null);
     }
 
     @Transactional(readOnly = true)
-    public AttendanceSession getActiveSessionForWeekOrNull(Long weekId) {
+    public AttendanceSession getActiveSessionEntityForPartOrNull(PartType part) {
         LocalDateTime now = LocalDateTime.now();
-        return sessionRepository.findActiveByWeekId(weekId, now)
+
+        return sessionRepository.findActiveByPart(part, now)
                 .orElse(null);
     }
 
     public boolean matchesCode(AttendanceSession session, String rawCode) {
         return passwordEncoder.matches(rawCode, session.getCodeHash());
     }
-}
 
+    @Transactional(readOnly = true)
+    public AttendanceSession getSession(Long sessionId) {
+        return sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_ATTENDANCE_SESSION));
+    }
+}

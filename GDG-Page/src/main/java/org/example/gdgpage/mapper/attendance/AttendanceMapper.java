@@ -18,32 +18,38 @@ public final class AttendanceMapper {
     public static WeekCreateResponse toWeekCreateResponse(Week week) {
         return WeekCreateResponse.builder()
                 .weekId(week.getId())
-                .courseId(week.getCourseId())
+                .part(week.getPart())
                 .weekNo(week.getWeekNo())
                 .build();
     }
 
     public static AdminSessionStartResponse toAdminSessionStartResponse(AttendanceSession session, String rawCode) {
+        Week week = session.getWeek();
         return AdminSessionStartResponse.builder()
                 .sessionId(session.getId())
-                .weekId(session.getWeek().getId())
-                .weekNo(session.getWeek().getWeekNo())
+                .weekId(week.getId())
+                .part(week.getPart())
+                .weekNo(week.getWeekNo())
                 .code(rawCode)
                 .expiresAt(session.getExpiresAt())
                 .build();
     }
 
     public static ActiveSessionResponse toActiveSessionResponse(AttendanceSession session) {
+        Week week = session.getWeek();
         return ActiveSessionResponse.builder()
-                .weekId(session.getWeek().getId())
-                .weekNo(session.getWeek().getWeekNo())
+                .weekId(week.getId())
+                .part(week.getPart())
+                .weekNo(week.getWeekNo())
                 .expiresAt(session.getExpiresAt())
                 .build();
     }
 
-    public static AttendanceCheckResponse toAttendanceCheckResponse(Week week, AttendanceRecord record) {
+    public static AttendanceCheckResponse toAttendanceCheckResponse(AttendanceRecord record) {
+        Week week = record.getWeek();
         return AttendanceCheckResponse.builder()
                 .weekId(week.getId())
+                .part(week.getPart())
                 .weekNo(week.getWeekNo())
                 .status(record.getStatus().name())
                 .checkedAt(record.getCheckedAt())
@@ -70,4 +76,3 @@ public final class AttendanceMapper {
                 .build();
     }
 }
-

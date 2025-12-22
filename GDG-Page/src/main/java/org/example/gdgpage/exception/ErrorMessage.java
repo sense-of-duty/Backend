@@ -43,7 +43,8 @@ public enum ErrorMessage {
     ATTENDANCE_SESSION_NOT_ACTIVE("현재 진행 중인 출석이 없습니다."),
     ATTENDANCE_CODE_INVALID("출석 번호가 올바르지 않습니다."),
     ATTENDANCE_ALREADY_CHECKED("이미 출석 체크를 했습니다."),
-    NOT_EXIST_ATTENDANCE_SESSION("출석 세션을 찾을 수 없습니다.");
+    NOT_EXIST_ATTENDANCE_SESSION("출석 세션을 찾을 수 없습니다."),
+    FORBIDDEN_PART_ACCESS("다른 파트의 출석은 관리할 수 없습니다.");
 
     private final String message;
 

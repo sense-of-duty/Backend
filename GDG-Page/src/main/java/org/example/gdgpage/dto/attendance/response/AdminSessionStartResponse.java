@@ -1,6 +1,7 @@
 package org.example.gdgpage.dto.attendance.response;
 
 import lombok.Builder;
+import org.example.gdgpage.domain.auth.PartType;
 
 import java.time.LocalDateTime;
 
@@ -8,7 +9,8 @@ import java.time.LocalDateTime;
 public record AdminSessionStartResponse(
         Long sessionId,
         Long weekId,
+        PartType part,
         int weekNo,
-        String code,          // 관리자에게만 반환
+        String code,              // 관리자만
         LocalDateTime expiresAt
 ) {}

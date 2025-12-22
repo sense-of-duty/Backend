@@ -2,6 +2,7 @@ package org.example.gdgpage.service.attendance;
 
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.attendance.Week;
+import org.example.gdgpage.domain.auth.PartType;
 import org.example.gdgpage.dto.attendance.response.WeekCreateResponse;
 import org.example.gdgpage.mapper.attendance.AttendanceMapper;
 import org.example.gdgpage.repository.attendance.WeekRepository;
@@ -17,18 +18,18 @@ public class AttendanceWeekService {
     private final WeekRepository weekRepository;
 
     @Transactional
-    public WeekCreateResponse createNextWeek(Long courseId) {
-        List<Week> latest = weekRepository.findLatestForUpdate(courseId);
+    public WeekCreateResponse createNextWeek(PartType part) {
+        List<Week> latest = weekRepository.findLatestForUpdate(part);
 
         int nextWeekNo = latest.isEmpty() ? 1 : latest.get(0).getWeekNo() + 1;
 
-        Week week = weekRepository.save(
+        Week saved = weekRepository.save(
                 Week.builder()
-                        .courseId(courseId)
+                        .part(part)
                         .weekNo(nextWeekNo)
                         .build()
         );
 
-        return AttendanceMapper.toWeekCreateResponse(week);
+        return AttendanceMapper.toWeekCreateResponse(saved);
     }
 }

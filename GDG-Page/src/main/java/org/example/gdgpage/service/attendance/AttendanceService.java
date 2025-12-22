@@ -5,12 +5,15 @@ import org.example.gdgpage.domain.attendance.AttendanceRecord;
 import org.example.gdgpage.domain.attendance.AttendanceSession;
 import org.example.gdgpage.domain.attendance.AttendanceStatus;
 import org.example.gdgpage.domain.attendance.Week;
+import org.example.gdgpage.domain.auth.PartType;
 import org.example.gdgpage.domain.auth.User;
+import org.example.gdgpage.dto.attendance.response.ActiveSessionResponse;
 import org.example.gdgpage.dto.attendance.response.AttendanceCheckResponse;
 import org.example.gdgpage.dto.attendance.response.MyAttendanceResponse;
 import org.example.gdgpage.dto.attendance.response.MyAttendanceSummaryResponse;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
+import org.example.gdgpage.exception.ForbiddenException;
 import org.example.gdgpage.exception.NotFoundException;
 import org.example.gdgpage.mapper.attendance.AttendanceMapper;
 import org.example.gdgpage.repository.attendance.AttendanceRecordRepository;
@@ -29,20 +32,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AttendanceService {
 
+    private final UserRepository userRepository;
     private final WeekRepository weekRepository;
     private final AttendanceRecordRepository recordRepository;
     private final AttendanceSessionService sessionService;
-    private final UserRepository userRepository;
 
     @Transactional
-    public AttendanceCheckResponse checkAttendance(Long weekId, Long userId, String code) {
-        Week week = weekRepository.findById(weekId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_WEEK));
-
+    public AttendanceCheckResponse checkAttendance(Long userId, String code) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
 
-        AttendanceSession active = sessionService.getActiveSessionForWeekOrNull(weekId);
+        PartType part = user.getPart();
+
+        AttendanceSession active = sessionService.getActiveSessionEntityForPartOrNull(part);
 
         if (active == null) {
             throw new BadRequestException(ErrorMessage.ATTENDANCE_SESSION_NOT_ACTIVE);
@@ -51,6 +53,8 @@ public class AttendanceService {
         if (!sessionService.matchesCode(active, code)) {
             throw new BadRequestException(ErrorMessage.ATTENDANCE_CODE_INVALID);
         }
+
+        Week week = active.getWeek();
 
         recordRepository.findByWeekAndUser(week, user).ifPresent(record -> {
             if (record.getStatus() == AttendanceStatus.PRESENT) {
@@ -70,16 +74,21 @@ public class AttendanceService {
         record.markPresent(now);
         AttendanceRecord saved = recordRepository.save(record);
 
-        return AttendanceMapper.toAttendanceCheckResponse(week, saved);
+        return AttendanceMapper.toAttendanceCheckResponse(saved);
     }
 
     @Transactional(readOnly = true)
-    public MyAttendanceResponse getMyAttendance(Long courseId, Long userId) {
-        List<Week> weeks = weekRepository.findAllByCourseIdOrderByWeekNoAsc(courseId);
+    public MyAttendanceResponse getMyAttendance(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
+
+        PartType part = user.getPart();
+
+        List<Week> weeks = weekRepository.findAllByPartOrderByWeekNoAsc(part);
 
         if (weeks.isEmpty()) {
             return MyAttendanceResponse.builder()
-                    .courseId(courseId)
+                    .part(part)
                     .weeks(List.of())
                     .build();
         }
@@ -101,15 +110,22 @@ public class AttendanceService {
         }
 
         return MyAttendanceResponse.builder()
-                .courseId(courseId)
+                .part(part)
                 .weeks(summary)
                 .build();
     }
 
     @Transactional
-    public void adminUpdateStatus(Long weekId, Long targetUserId, AttendanceStatus status, Long adminId) {
+    public void adminUpdateStatus(Long adminId, Long weekId, Long targetUserId, AttendanceStatus status) {
+        User admin = userRepository.findById(adminId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
+
         Week week = weekRepository.findById(weekId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_WEEK));
+
+        if (week.getPart() != admin.getPart()) {
+            throw new ForbiddenException(ErrorMessage.FORBIDDEN_PART_ACCESS);
+        }
 
         User target = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
@@ -125,5 +141,15 @@ public class AttendanceService {
 
         record.adminUpdate(status, adminId, now);
         recordRepository.save(record);
+    }
+
+    @Transactional(readOnly = true)
+    public ActiveSessionResponse getActive(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
+
+        PartType part = user.getPart();
+
+        return sessionService.getActiveSessionForPart(part); // 없으면 null 반환
     }
 }

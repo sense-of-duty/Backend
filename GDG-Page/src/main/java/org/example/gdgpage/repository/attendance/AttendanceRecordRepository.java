@@ -10,7 +10,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+
 public interface AttendanceRecordRepository extends JpaRepository<AttendanceRecord, Long> {
+
     Optional<AttendanceRecord> findByWeekAndUser(Week week, User user);
 
     @Query("""

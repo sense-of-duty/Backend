@@ -36,8 +36,8 @@ public class AttendanceController {
             @ApiResponse(responseCode = "401", description = "인증 필요")
     })
     @GetMapping("/courses/{courseId}/attendance/active")
-    public ResponseEntity<ActiveSessionResponse> getActive(@PathVariable Long courseId) {
-        ActiveSessionResponse active = sessionService.getActiveSessionForCourse(courseId);
+    public ResponseEntity<ActiveSessionResponse> getActive(@AuthenticationPrincipal AuthUser authUser) {
+        ActiveSessionResponse active = attendanceService.getActive(authUser.id());
 
         if (active == null) {
             return ResponseEntity.noContent().build();
@@ -53,14 +53,9 @@ public class AttendanceController {
             @ApiResponse(responseCode = "401", description = "인증 필요")
     })
     @PostMapping("/weeks/{weekId}/attendance/check")
-    public ResponseEntity<AttendanceCheckResponse> check(@PathVariable Long weekId,
-                                                         @Valid @RequestBody AttendanceCheckRequest request,
+    public ResponseEntity<AttendanceCheckResponse> check(@Valid @RequestBody AttendanceCheckRequest request,
                                                          @AuthenticationPrincipal AuthUser authUser) {
-
-        AttendanceCheckResponse attendanceCheckResponse =
-                attendanceService.checkAttendance(weekId, authUser.id(), request.code());
-
-        return ResponseEntity.ok(attendanceCheckResponse);
+        return ResponseEntity.ok(attendanceService.checkAttendance(authUser.id(), request.code()));
     }
 
     @Operation(summary = "내 출석 현황 조회", description = "주차별 내 상태 반환. 기록 없으면 ABSENT로 간주")
@@ -69,8 +64,7 @@ public class AttendanceController {
             @ApiResponse(responseCode = "401", description = "인증 필요")
     })
     @GetMapping("/courses/{courseId}/attendance/my-attendance")
-    public ResponseEntity<MyAttendanceResponse> myAttendance(@PathVariable Long courseId,
-                                                             @AuthenticationPrincipal AuthUser authUser) {
-        return ResponseEntity.ok(attendanceService.getMyAttendance(courseId, authUser.id()));
+    public ResponseEntity<MyAttendanceResponse> myAttendance(@AuthenticationPrincipal AuthUser authUser) {
+        return ResponseEntity.ok(attendanceService.getMyAttendance(authUser.id()));
     }
 }

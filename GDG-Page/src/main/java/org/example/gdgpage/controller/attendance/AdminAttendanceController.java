@@ -1,16 +1,15 @@
 package org.example.gdgpage.controller.attendance;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.*;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.AuthUser;
 import org.example.gdgpage.dto.attendance.request.AdminAttendanceUpdateRequest;
 import org.example.gdgpage.dto.attendance.response.AdminSessionStartResponse;
 import org.example.gdgpage.dto.attendance.response.WeekCreateResponse;
-import org.example.gdgpage.service.attendance.AttendanceService;
-import org.example.gdgpage.service.attendance.AttendanceSessionService;
-import org.example.gdgpage.service.attendance.AttendanceWeekService;
+import org.example.gdgpage.service.attendance.AttendanceAdminService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,9 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/admin")
 public class AdminAttendanceController {
 
-    private final AttendanceWeekService weekService;
-    private final AttendanceSessionService sessionService;
-    private final AttendanceService attendanceService;
+    private final AttendanceAdminService attendanceAdminService;
 
     @Operation(summary = "주차 생성", description = "첫 수업이면 1주차, 이후 누를 때마다 +1")
     @ApiResponses({
@@ -35,9 +32,9 @@ public class AdminAttendanceController {
             @ApiResponse(responseCode = "401", description = "인증 필요"),
             @ApiResponse(responseCode = "403", description = "권한 필요")
     })
-    @PostMapping("/courses/{courseId}/weeks")
-    public ResponseEntity<WeekCreateResponse> createWeek(@PathVariable Long courseId) {
-        return ResponseEntity.ok(weekService.createNextWeek(courseId));
+    @PostMapping("/weeks")
+    public ResponseEntity<WeekCreateResponse> createWeek(@AuthenticationPrincipal AuthUser authUser) {
+        return ResponseEntity.ok(attendanceAdminService.createWeek(authUser.id()));
     }
 
     @Operation(summary = "출석 시작", description = "3자리 난수 생성, 5분 유효. 관리자에게만 code 반환")
@@ -50,7 +47,7 @@ public class AdminAttendanceController {
     @PostMapping("/weeks/{weekId}/attendance-sessions")
     public ResponseEntity<AdminSessionStartResponse> startSession(@PathVariable Long weekId,
                                                                   @AuthenticationPrincipal AuthUser authUser) {
-        return ResponseEntity.ok(sessionService.startSession(weekId, authUser.id()));
+        return ResponseEntity.ok(attendanceAdminService.startSession(authUser.id(), weekId));
     }
 
     @Operation(summary = "출석 종료", description = "즉시 출석 불가(코드 무효화)")
@@ -60,8 +57,9 @@ public class AdminAttendanceController {
             @ApiResponse(responseCode = "403", description = "권한 필요")
     })
     @PostMapping("/attendance-sessions/{sessionId}/close")
-    public ResponseEntity<Void> closeSession(@PathVariable Long sessionId) {
-        sessionService.closeSession(sessionId);
+    public ResponseEntity<Void> closeSession(@PathVariable Long sessionId,
+                                             @AuthenticationPrincipal AuthUser authUser) {
+        attendanceAdminService.closeSession(authUser.id(), sessionId);
         return ResponseEntity.ok().build();
     }
 
@@ -77,8 +75,7 @@ public class AdminAttendanceController {
                                             @PathVariable Long userId,
                                             @Valid @RequestBody AdminAttendanceUpdateRequest request,
                                             @AuthenticationPrincipal AuthUser authUser) {
-
-        attendanceService.adminUpdateStatus(weekId, userId, request.status(), authUser.id());
+        attendanceAdminService.updateStatus(authUser.id(), weekId, userId, request.status());
         return ResponseEntity.ok().build();
     }
 }

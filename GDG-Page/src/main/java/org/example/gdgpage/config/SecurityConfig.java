@@ -42,6 +42,8 @@ public class SecurityConfig {
             "/auth/oauth/login",
             "/auth/reissue",
             "/auth/logout",
+            "/auth/resend-verification",
+            "/auth/verify-email/**",
             "/oauth2/**",
     };
 

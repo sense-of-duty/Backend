@@ -11,7 +11,7 @@ public interface FreePostRepository extends JpaRepository<FreePost, Long> {
     @Query("""
         select p from FreePost p
         join fetch p.author
-        order by p.createdAt desc, p.createdAt desc
+        order by p.isPinned desc, p.createdAt desc
     """)
     List<FreePost> findAllWithAuthor();
 }

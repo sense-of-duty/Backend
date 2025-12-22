@@ -2,6 +2,7 @@ package org.example.gdgpage.domain.freeboard;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.gdgpage.domain.auth.User;
@@ -56,11 +57,13 @@ public class FreeComment extends BaseTimeEntity{
         this.content = "삭제된 댓글입니다.";
     }
 
-    public FreeComment(FreePost post, User author, String content, Boolean isAnonymous) {
+    @Builder
+    public FreeComment(FreePost post, User author, String content, Boolean isAnonymous, FreeComment parent) {
         this.post = post;
         this.author = author;
         this.content = content;
         this.isAnonymous = isAnonymous;
+        this.parent = parent;
     }
 
     public void update(String content) {
@@ -75,9 +78,5 @@ public class FreeComment extends BaseTimeEntity{
         if (this.likeCount > 0) {
             this.likeCount--;
         }
-    }
-
-    public void setParent(FreeComment parent) {
-        this.parent = parent;
     }
 }

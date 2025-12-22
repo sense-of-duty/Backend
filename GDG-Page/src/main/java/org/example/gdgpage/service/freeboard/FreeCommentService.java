@@ -83,8 +83,13 @@ public class FreeCommentService {
             }
         }
 
-        FreeComment comment = new FreeComment(post, author, dto.content(), dto.isAnonymous());
-        comment.setParent(parent);
+        FreeComment comment = FreeComment.builder()
+                .post(post)
+                .author(author)
+                .content(dto.content())
+                .isAnonymous(dto.isAnonymous())
+                .parent(parent)
+                .build();
 
         post.increaseCommentCount();
 

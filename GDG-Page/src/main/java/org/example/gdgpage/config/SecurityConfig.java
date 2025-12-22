@@ -72,6 +72,8 @@ public class SecurityConfig {
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .requestMatchers(PUBLIC_AUTH).permitAll()
                         .requestMatchers("/admin/**").hasAnyRole("ORGANIZER")
+                        .requestMatchers("/assign-admin/**").hasAnyRole("ORGANIZER", "CORE")
+                        .requestMatchers("/lecture-admin/**").hasAnyRole("ORGANIZER", "CORE")
                         .anyRequest().authenticated()
                 )
                 .headers(h -> h.frameOptions(Customizer.withDefaults()).disable())

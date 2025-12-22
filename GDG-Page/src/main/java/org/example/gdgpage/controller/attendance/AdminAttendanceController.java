@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin")
+@RequestMapping("/assign-admin")
 public class AdminAttendanceController {
 
     private final AttendanceAdminService attendanceAdminService;

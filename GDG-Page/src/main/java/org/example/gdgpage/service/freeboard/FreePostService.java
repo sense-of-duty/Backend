@@ -6,6 +6,7 @@ import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.domain.freeboard.FreePost;
 import org.example.gdgpage.domain.freeboard.FreePostLike;
 import org.example.gdgpage.dto.freeboard.request.AdminPostCreateRequestDto;
+import org.example.gdgpage.dto.freeboard.request.AdminPostUpdateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreePostCreateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreePostUpdateRequestDto;
 import org.example.gdgpage.dto.freeboard.response.FreePostListResponseDto;
@@ -82,11 +83,24 @@ public class FreePostService {
             throw new BadRequestException(ErrorMessage.EMPTY_CONTENT);
         }
 
-        if (user.getRole() == Role.ORGANIZER) {
-            post.updateByAdmin(dto.title(), dto.content(), dto.isPinned());
-        } else {
-            post.update(dto.title(), dto.content());
+        post.update(dto.title(), dto.content());
+
+        return new FreePostResponseDto(post);
+    }
+
+    @Transactional
+    public FreePostResponseDto updatePostByAdmin(Long postId, AdminPostUpdateRequestDto dto, Long userId
+    ) {
+        User admin = findUser.getUserById(userId);
+
+        if (admin.getRole() != Role.ORGANIZER) {
+            throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
         }
+
+        FreePost post = freePostRepository.findById(postId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
+
+        post.updateByAdmin(dto.title(), dto.content(), dto.isPinned());
 
         return new FreePostResponseDto(post);
     }

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.AuthUser;
 import org.example.gdgpage.dto.freeboard.request.AdminPostCreateRequestDto;
+import org.example.gdgpage.dto.freeboard.request.AdminPostUpdateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreePostCreateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreePostUpdateRequestDto;
 import org.example.gdgpage.dto.freeboard.response.FreePostListResponseDto;
@@ -44,6 +45,18 @@ public class FreePostController {
         FreePostResponseDto response = freePostService.updatePost(postId, dto, authUser.id());
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/admin/{postId}")
+    public ResponseEntity<FreePostResponseDto> updatePostByAdmin(
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long postId,
+            @Valid @RequestBody AdminPostUpdateRequestDto dto
+    ) {
+        FreePostResponseDto response =
+                freePostService.updatePostByAdmin(postId, dto, authUser.id());
+        return ResponseEntity.ok(response);
+    }
+
 
     @GetMapping("/{postId}")
     public ResponseEntity<FreePostResponseDto> getPost(@AuthenticationPrincipal AuthUser authUser,

@@ -1,7 +1,7 @@
 package org.example.gdgpage.scheduler;
 
 import lombok.RequiredArgsConstructor;
-import org.example.gdgpage.repository.RefreshTokenRepository;
+import org.example.gdgpage.repository.auth.RefreshTokenRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;

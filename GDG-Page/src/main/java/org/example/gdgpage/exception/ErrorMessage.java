@@ -37,7 +37,13 @@ public enum ErrorMessage {
     EMAIL_NOT_VERIFIED("이메일 인증이 완료되지 않았습니다."),
     INVALID_PASSWORD_RESET_TOKEN("유효하지 않은 링크입니다."),
     EXPIRED_PASSWORD_RESET_TOKEN("만료된 링크입니다."),
-    INVALID_REQUEST("반려 사유를 입력해주세요.");
+    INVALID_REQUEST("반려 사유를 입력해주세요."),
+    NOT_EXIST_WEEK("해당 주차 정보를 찾을 수 없습니다."),
+    ATTENDANCE_SESSION_ALREADY_EXISTS("이미 진행 중인 출석이 있습니다."),
+    ATTENDANCE_SESSION_NOT_ACTIVE("현재 진행 중인 출석이 없습니다."),
+    ATTENDANCE_CODE_INVALID("출석 번호가 올바르지 않습니다."),
+    ATTENDANCE_ALREADY_CHECKED("이미 출석 체크를 했습니다."),
+    NOT_EXIST_ATTENDANCE_SESSION("출석 세션을 찾을 수 없습니다.");
 
     private final String message;
 

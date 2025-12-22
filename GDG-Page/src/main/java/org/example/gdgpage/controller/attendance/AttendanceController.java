@@ -11,11 +11,9 @@ import org.example.gdgpage.dto.attendance.response.ActiveSessionResponse;
 import org.example.gdgpage.dto.attendance.response.AttendanceCheckResponse;
 import org.example.gdgpage.dto.attendance.response.MyAttendanceResponse;
 import org.example.gdgpage.service.attendance.AttendanceService;
-import org.example.gdgpage.service.attendance.AttendanceSessionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping
 public class AttendanceController {
 
-    private final AttendanceSessionService sessionService;
     private final AttendanceService attendanceService;
 
     @Operation(summary = "활성화된 출석 조회", description = "활성된 출석이 있으면 입력창 표시, 없으면 204")

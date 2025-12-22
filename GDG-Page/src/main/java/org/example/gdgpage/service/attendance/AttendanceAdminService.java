@@ -8,7 +8,6 @@ import org.example.gdgpage.domain.auth.PartType;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.dto.attendance.response.AdminSessionStartResponse;
 import org.example.gdgpage.dto.attendance.response.WeekCreateResponse;
-import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.exception.ForbiddenException;
 import org.example.gdgpage.exception.NotFoundException;

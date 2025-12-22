@@ -9,8 +9,8 @@ import org.example.gdgpage.dto.user.response.UserResponse;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.exception.NotFoundException;
-import org.example.gdgpage.mapper.UserMapper;
-import org.example.gdgpage.repository.UserRepository;
+import org.example.gdgpage.mapper.auth.UserMapper;
+import org.example.gdgpage.repository.auth.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,7 +78,7 @@ public class AdminService {
     @Transactional
     public void rejectUsers(UserRejectRequest userRejectRequest) {
         if (userRejectRequest.reason() == null || userRejectRequest.reason().isBlank()) {
-            throw new BadRequestException(ErrorMessage.INVALID_REQUEST);
+            throw new BadRequestException(ErrorMessage.INVALID_DENY_REQUEST);
         }
 
         Map<Long, User> users = loadUsers(userRejectRequest.userIds());

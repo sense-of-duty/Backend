@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "comments")
+@Table(name = "notice_comments")
 @SQLDelete(sql = "UPDATE comments SET deleted_at = NOW() WHERE id = ?")
 @Where(clause = "deleted_at IS NULL")
 public class NoticeComment {

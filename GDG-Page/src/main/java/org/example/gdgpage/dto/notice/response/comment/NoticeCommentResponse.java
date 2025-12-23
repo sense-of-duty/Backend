@@ -10,7 +10,6 @@ public record NoticeCommentResponse(
         String content,
         Long authorId,
         String authorName,
-        boolean isAnonymous,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         List<NoticeCommentResponse> children

@@ -1,13 +1,13 @@
 package org.example.gdgpage.controller.notice;
 
-import jakarta.persistence.EntityListeners;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.AuthUser;
 import org.example.gdgpage.dto.notice.request.post.NoticeCreateRequest;
+import org.example.gdgpage.dto.notice.request.post.NoticeUpdateRequest;
 import org.example.gdgpage.dto.notice.response.NoticeListResponse;
 import org.example.gdgpage.dto.notice.response.post.NoticeResponse;
 import org.example.gdgpage.service.notice.NoticeService;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,7 +18,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/notices")
-@EntityListeners(AuditingEntityListener.class)
 public class NoticeController {
 
     private final NoticeService noticeService;
@@ -26,10 +25,10 @@ public class NoticeController {
     @PostMapping
     public ResponseEntity<?> createNotice(
             @AuthenticationPrincipal AuthUser authUser,
-            @RequestBody NoticeCreateRequest request
+            @RequestBody @Valid NoticeCreateRequest request
     ) {
         if (authUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요한 서비스입니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 후 글 작성이 가능합니다.");
         }
 
         Long userId = authUser.id();
@@ -49,14 +48,14 @@ public class NoticeController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{noticeId}")
-    public ResponseEntity<?> updateNotice(
-            @PathVariable Long noticeId,
-            @AuthenticationPrincipal AuthUser authUser,
-            @RequestBody NoticeCreateRequest request
+    @PatchMapping("/{noticeId}")
+    public ResponseEntity<Void> updateNotice(
+                                              @PathVariable Long noticeId,
+                                              @AuthenticationPrincipal AuthUser authUser,
+                                              @RequestBody @Valid NoticeUpdateRequest request
     ) {
         if (authUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요한 서비스입니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         Long userId = authUser.id();
@@ -65,12 +64,12 @@ public class NoticeController {
     }
 
     @DeleteMapping("/{noticeId}")
-    public ResponseEntity<?> deleteNotice(
-            @PathVariable Long noticeId,
-            @AuthenticationPrincipal AuthUser authUser
+    public ResponseEntity<Void> deleteNotice(
+                                              @PathVariable Long noticeId,
+                                              @AuthenticationPrincipal AuthUser authUser
     ) {
         if (authUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요한 서비스입니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         Long userId = authUser.id();

@@ -1,5 +1,6 @@
 package org.example.gdgpage.controller.notice;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.AuthUser;
 import org.example.gdgpage.dto.notice.request.comment.NoticeCommentCreateRequest;
@@ -24,7 +25,7 @@ public class NoticeCommentController {
     public ResponseEntity<Long> createComment(
                                             @PathVariable Long noticeId,
                                             @AuthenticationPrincipal AuthUser authUser,
-                                            @RequestBody NoticeCommentCreateRequest request) {
+                                            @RequestBody @Valid NoticeCommentCreateRequest request) {
 
 
         Long commentId = noticeCommentService.createComment(noticeId, authUser.id(), request);
@@ -42,9 +43,9 @@ public class NoticeCommentController {
             @PathVariable Long noticeId,
             @PathVariable Long commentId,
             @AuthenticationPrincipal AuthUser authUser,
-            @RequestBody NoticeCommentUpdateRequest request) {
+            @RequestBody @Valid NoticeCommentUpdateRequest request) {
 
-        noticeCommentService.updateComment(commentId,authUser.id(), request);
+        noticeCommentService.updateComment(noticeId, commentId, authUser.id(), request);
         return ResponseEntity.ok().build();
     }
 
@@ -54,7 +55,7 @@ public class NoticeCommentController {
     @PathVariable Long commentId,
     @AuthenticationPrincipal AuthUser authUser
             ) {
-        noticeCommentService.deleteComment(commentId,authUser.id());
+        noticeCommentService.deleteComment(noticeId, commentId, authUser.id());
         return ResponseEntity.noContent().build();
     }
 }

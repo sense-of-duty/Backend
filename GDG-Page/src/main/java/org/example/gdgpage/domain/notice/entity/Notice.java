@@ -3,6 +3,7 @@ package org.example.gdgpage.domain.notice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.gdgpage.domain.auth.PartType;
+import org.example.gdgpage.domain.auth.User;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -26,8 +27,9 @@ public class Notice {
     @Column(name = "part_id")
     private PartType partId;
 
-    @Column(name = "author_id", nullable = false)
-    private Long authorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
+    private User author;
 
     @Column(nullable = false, length = 255)
     private String title;
@@ -52,13 +54,19 @@ public class Notice {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+
     public void incrementViewCount() {
         this.viewCount++;
     }
 
-    public void updateNotice(String title, String content, boolean isPinned) {
+    public void updateNotice(String title, String content, boolean isPinned, PartType partId) {
         this.title = title;
         this.content = content;
         this.isPinned = isPinned;
+        this.partId = partId;
+    }
+
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
     }
 }

@@ -7,7 +7,7 @@ import org.example.gdgpage.domain.notice.repository.NoticeRepository;
 import org.example.gdgpage.dto.notice.request.post.NoticeCreateRequest;
 import org.example.gdgpage.dto.notice.response.NoticeListResponse;
 import org.example.gdgpage.dto.notice.response.post.NoticeResponse;
-import org.example.gdgpage.repository.UserRepository;
+import org.example.gdgpage.repository.auth.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +28,7 @@ public class NoticeService {
                 .title(request.title())
                 .content(request.content())
                 .isPinned(request.isPinned())
-                .partId(request.partId()) // record 방식 호출
+                .partId(request.partId())
                 .authorId(authorId)
                 .viewCount(0)
                 .build();
@@ -68,7 +68,7 @@ public class NoticeService {
                 .content(notice.getContent())
                 .partId(notice.getPartId())
                 .authorId(notice.getAuthorId())
-                .authorName(authorName) // 이제 null이 아니라 이름이 나옵니다
+                .authorName(authorName)
                 .viewCount(notice.getViewCount())
                 .isPinned(notice.isPinned())
                 .createdAt(notice.getCreatedAt())

@@ -24,12 +24,13 @@ public class NotificationService {
 
     @Transactional
     public void createNotification(
-            User receiver,
+            Long receiverId,
             NotificationType type,
             String message,
             Long targetId,
             String targetUrl
     ) {
+        User receiver = getUser(receiverId);
         notificationRepository.save(Notification.create(receiver, type, message, targetId, targetUrl));
     }
 
@@ -52,7 +53,9 @@ public class NotificationService {
             throw new ForbiddenException(ErrorMessage.ACCESS_DENY);
         }
 
-        notification.markAsRead();
+        if (!notification.isRead()) {
+            notification.markAsRead();
+        }
     }
 
     private User getUser(Long userId) {

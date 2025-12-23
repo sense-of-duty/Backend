@@ -43,16 +43,12 @@ public class NotificationService {
     }
 
     public List<Notification> getMyNotifications(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
-
+        User user = getUser(userId);
         return notificationRepository.findByReceiverOrderByCreatedAtDesc(user);
     }
 
     public long countUnread(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
-
+        User user = getUser(userId);
         return notificationRepository.countByReceiverAndIsReadFalse(user);
     }
 
@@ -66,5 +62,10 @@ public class NotificationService {
         }
 
         notification.markAsRead();
+    }
+
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
     }
 }

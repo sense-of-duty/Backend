@@ -29,8 +29,7 @@ public class NotificationController {
     public ResponseEntity<Long> getUnreadCount(
             @AuthenticationPrincipal AuthUser authUser
     ) {
-        long count = notificationService.countUnread(authUser.id());
-        return ResponseEntity.ok(count);
+        return ResponseEntity.ok(notificationService.countUnread(authUser.id()));
     }
 
     @PatchMapping("/{notificationId}/read")

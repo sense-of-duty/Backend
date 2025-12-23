@@ -43,6 +43,8 @@ public class SecurityConfig {
             "/auth/reissue",
             "/auth/logout",
             "/oauth2/**",
+            "/auth/resend-verification",
+            "/auth/verify-email/**"
     };
 
     private static final String[] SWAGGER_WHITELIST = {

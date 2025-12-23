@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.domain.notification.Notification;
 import org.example.gdgpage.domain.notification.NotificationType;
+import org.example.gdgpage.dto.notification.NotificationResponseDto;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.exception.ForbiddenException;
 import org.example.gdgpage.exception.NotFoundException;
@@ -34,9 +35,13 @@ public class NotificationService {
         notificationRepository.save(Notification.create(receiver, type, message, targetId, targetUrl));
     }
 
-    public List<Notification> getMyNotifications(Long userId) {
+    public List<NotificationResponseDto> getMyNotifications(Long userId) {
         User user = getUser(userId);
-        return notificationRepository.findByReceiverOrderByCreatedAtDesc(user);
+
+        return notificationRepository.findByReceiverOrderByCreatedAtDesc(user)
+                .stream()
+                .map(NotificationResponseDto::from)
+                .toList();
     }
 
     public long countUnread(Long userId) {

@@ -22,14 +22,7 @@ public class NotificationController {
     public ResponseEntity<List<NotificationResponseDto>> getMyNotifications(
             @AuthenticationPrincipal AuthUser authUser
     ) {
-        List<Notification> notifications =
-                notificationService.getMyNotifications(authUser.id());
-
-        return ResponseEntity.ok(
-                notifications.stream()
-                        .map(NotificationResponseDto::from)
-                        .toList()
-        );
+        return ResponseEntity.ok(notificationService.getMyNotifications(authUser.id()));
     }
 
     @GetMapping("/unread-count")

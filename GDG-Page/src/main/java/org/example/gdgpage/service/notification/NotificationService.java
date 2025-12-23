@@ -30,16 +30,7 @@ public class NotificationService {
             Long targetId,
             String targetUrl
     ) {
-        Notification notification = Notification.builder()
-                .receiver(receiver)
-                .type(type)
-                .message(message)
-                .targetId(targetId)
-                .targetUrl(targetUrl)
-                .isRead(false)
-                .build();
-
-        notificationRepository.save(notification);
+        notificationRepository.save(Notification.create(receiver, type, message, targetId, targetUrl));
     }
 
     public List<Notification> getMyNotifications(Long userId) {

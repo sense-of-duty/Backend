@@ -37,4 +37,16 @@ public class Notification extends BaseTimeEntity {
     public void markAsRead() {
         this.isRead = true;
     }
+
+    public static Notification create(User receiver, NotificationType type,
+                                      String message, Long targetId, String targetUrl) {
+        return Notification.builder()
+                .receiver(receiver)
+                .type(type)
+                .message(message)
+                .targetId(targetId)
+                .targetUrl(targetUrl)
+                .isRead(false)
+                .build();
+    }
 }

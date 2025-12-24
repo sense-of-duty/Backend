@@ -42,6 +42,8 @@ public enum ErrorMessage {
     EMAIL_NOT_VERIFIED("이메일 인증이 완료되지 않았습니다."),
     INVALID_PASSWORD_RESET_TOKEN("유효하지 않은 링크입니다."),
     EXPIRED_PASSWORD_RESET_TOKEN("만료된 링크입니다."),
+    INVALID_PHOTO_FILE("유효하지 않은 이미지 파일입니다."),
+    NOT_EXIST_PHOTO("존재하지 않는 사진입니다."),
     COMMENT_POST_MISMATCH("댓글이 해당 게시글에 속하지 않습니다."),
     ALREADY_LIKED("이미 좋아요를 눌렀습니다."),
     NOT_LIKED("취소할 좋아요가 없습니다."),

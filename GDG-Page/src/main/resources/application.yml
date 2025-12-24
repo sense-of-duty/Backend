@@ -42,6 +42,7 @@ app:
     bucket-name: gdgpage-growthon
     profile-prefix: profiles
     lecture-prefix: lectures
+    photo-prefix: photos
   aws:
     region: ap-northeast-2
   cors:
@@ -57,4 +58,3 @@ server:
 
 password-reset:
   frontend-reset-page-url: ${FRONTEND_RESET_PAGE_URL}
-

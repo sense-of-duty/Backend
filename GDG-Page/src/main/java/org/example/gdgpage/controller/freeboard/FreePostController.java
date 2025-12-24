@@ -66,8 +66,8 @@ public class FreePostController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FreePostListResponseDto>> getPostList(@AuthenticationPrincipal AuthUser authUser) {
-        List<FreePostListResponseDto> response = freePostService.getPostList();
+    public ResponseEntity<List<FreePostListResponseDto>> getPostList(@RequestParam(required = false) String keyword) {
+        List<FreePostListResponseDto> response = freePostService.getPostList(keyword);
         return ResponseEntity.ok(response);
     }
 

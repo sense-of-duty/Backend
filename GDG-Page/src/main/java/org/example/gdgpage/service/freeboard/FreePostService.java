@@ -72,7 +72,6 @@ public class FreePostService {
     public FreePostResponseDto updatePost(Long postId, FreePostUpdateRequestDto dto, Long userId) {
 
         FreePost post = getPostWithPermissionCheck(postId, userId);
-        User user = getUser(userId);
 
         if (dto.title() == null || dto.title().isBlank()) {
             throw new BadRequestException(ErrorMessage.EMPTY_TITLE);
@@ -115,9 +114,15 @@ public class FreePostService {
     }
 
     @Transactional(readOnly = true)
-    public List<FreePostListResponseDto> getPostList() {
+    public List<FreePostListResponseDto> getPostList(String keyword) {
 
-        List<FreePost> posts = freePostRepository.findAllWithAuthor();
+        List<FreePost> posts;
+
+        if (keyword == null || keyword.isBlank()) {
+            posts = freePostRepository.findAllWithAuthor();
+        } else {
+            posts = freePostRepository.searchWithAuthor(keyword);
+        }
 
         return posts.stream()
                 .map(FreePostListResponseDto::new)

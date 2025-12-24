@@ -34,7 +34,7 @@ jwt:
 google:
   client-id: ${GOOGLE_CLIENT_ID}
   client-secret: ${GOOGLE_CLIENT_SECRET}
-  redirect-uri: http://localhost:8080/oauth2/callback/google
+  redirect-uri: https://www.gdgoc-skhu.ddnsfree.com/oauth2/callback/google
   scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
 
 app:
@@ -53,6 +53,9 @@ app:
   security:
     refresh-token-history-retention-days: 3
     refresh-token-cleanup-cron: "0 0 4 * * *"
+
+  oauth:
+    frontend-redirect-url: https://frontend-plum-two-49.vercel.app/mainPage
 
 
 server:

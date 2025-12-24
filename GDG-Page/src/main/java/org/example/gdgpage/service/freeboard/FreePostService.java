@@ -116,13 +116,7 @@ public class FreePostService {
     @Transactional(readOnly = true)
     public List<FreePostListResponseDto> getPostList(String keyword) {
 
-        List<FreePost> posts;
-
-        if (keyword == null || keyword.isBlank()) {
-            posts = freePostRepository.findAllWithAuthor();
-        } else {
-            posts = freePostRepository.searchWithAuthor(keyword);
-        }
+        List<FreePost> posts = freePostRepository.findAllWithAuthorAndKeyword(keyword);
 
         return posts.stream()
                 .map(FreePostListResponseDto::new)

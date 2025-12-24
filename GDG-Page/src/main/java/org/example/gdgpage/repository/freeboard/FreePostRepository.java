@@ -12,15 +12,9 @@ public interface FreePostRepository extends JpaRepository<FreePost, Long> {
     @Query("""
         select p from FreePost p
         join fetch p.author
+        where (:keyword is null or :keyword = '' 
+               or lower(p.title) like lower(concat('%', :keyword, '%')))
         order by p.isPinned desc, p.createdAt desc
     """)
-    List<FreePost> findAllWithAuthor();
-
-    @Query("""
-    select p from FreePost p
-    join fetch p.author
-    where lower(p.title) like lower(concat('%', :keyword, '%'))
-    order by p.isPinned desc, p.createdAt desc
-""")
-    List<FreePost> searchWithAuthor(@Param("keyword") String keyword);
+    List<FreePost> findAllWithAuthorAndKeyword(@Param("keyword") String keyword);
 }

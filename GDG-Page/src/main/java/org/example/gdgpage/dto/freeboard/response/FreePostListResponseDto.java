@@ -1,6 +1,7 @@
 package org.example.gdgpage.dto.freeboard.response;
 
 import lombok.Getter;
+import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.domain.freeboard.FreePost;
 
 import java.time.LocalDateTime;
@@ -17,7 +18,9 @@ public class FreePostListResponseDto {
     private final Integer viewCount;
     private final Integer likeCount;
     private final Integer commentCount;
+    private final String profileImageUrl;
     private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
 
     public FreePostListResponseDto(FreePost post) {
 
@@ -27,14 +30,19 @@ public class FreePostListResponseDto {
                 ? "익명"
                 : post.getAuthor().getName();
 
-        this.previewContent = createPreview(post.getContent());
-
         this.isAnonymous = post.getIsAnonymous();
+
+        this.profileImageUrl = isAnonymous
+                ? Constants.DEFAULT_PROFILE_IMAGE_URL
+                : post.getAuthor().getProfileImageUrl();
+
+        this.previewContent = createPreview(post.getContent());
         this.isPinned = post.getIsPinned();
         this.viewCount = post.getViewCount();
         this.likeCount = post.getLikeCount();
         this.commentCount = post.getCommentCount();
         this.createdAt = post.getCreatedAt();
+        this.updatedAt = post.getUpdatedAt();
     }
 
     private String createPreview(String content) {

@@ -44,7 +44,11 @@ public enum ErrorMessage {
     EXPIRED_PASSWORD_RESET_TOKEN("만료된 링크입니다."),
     COMMENT_POST_MISMATCH("댓글이 해당 게시글에 속하지 않습니다."),
     ALREADY_LIKED("이미 좋아요를 눌렀습니다."),
-    NOT_LIKED("취소할 좋아요가 없습니다.");
+    NOT_LIKED("취소할 좋아요가 없습니다."),
+    NOT_EXIST_LECTURE_MATERIAL("강의자료가 존재하지 않습니다."),
+    INVALID_LECTURE_FILE("유효하지 않은 강의자료 파일입니다."),
+    INVALID_LECTURE_INPUT("잘못된 강의자료 입력입니다."),
+    INVALID_DENY_REQUEST("반려 사유를 입력해주세요."),;
 
     private final String message;
 

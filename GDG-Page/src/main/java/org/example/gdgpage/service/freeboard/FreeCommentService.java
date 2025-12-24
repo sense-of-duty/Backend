@@ -13,16 +13,14 @@ import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.exception.ForbiddenException;
 import org.example.gdgpage.exception.NotFoundException;
+import org.example.gdgpage.repository.auth.UserRepository;
 import org.example.gdgpage.repository.freeboard.FreeCommentLikeRepository;
 import org.example.gdgpage.repository.freeboard.FreeCommentRepository;
 import org.example.gdgpage.repository.freeboard.FreePostRepository;
-import org.example.gdgpage.service.finder.FindUserImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,11 +30,12 @@ public class FreeCommentService {
     private final FreeCommentRepository freeCommentRepository;
     private final FreePostRepository freePostRepository;
     private final FreeCommentLikeRepository freeCommentLikeRepository;
-    private final FindUserImpl findUserImpl;
+    private final UserRepository userRepository;
 
     @Transactional
     public void likeComment(Long postId, Long commentId, Long userId) {
-        User user = findUserImpl.getUserById(userId);
+
+        User user = getUser(userId);
         FreeComment comment = getLikeableComment(postId, commentId);
 
         if (freeCommentLikeRepository.existsByUserAndComment(user, comment)) {
@@ -49,13 +48,13 @@ public class FreeCommentService {
 
     @Transactional
     public void unlikeComment(Long postId, Long commentId, Long userId) {
-        User user = findUserImpl.getUserById(userId);
+
+        User user = getUser(userId);
         FreeComment comment = getLikeableComment(postId, commentId);
 
         FreeCommentLike like = freeCommentLikeRepository
                 .findByUserAndComment(user, comment)
-                .orElseThrow(() ->
-                        new BadRequestException(ErrorMessage.NOT_LIKED));
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_LIKED));
 
         freeCommentLikeRepository.delete(like);
         comment.decreaseLikeCount();
@@ -64,7 +63,7 @@ public class FreeCommentService {
     @Transactional
     public FreeCommentResponseDto createComment(Long postId, FreeCommentCreateRequestDto dto, Long userId) {
 
-        User author = findUserImpl.getUserById(userId);
+        User author = getUser(userId);
 
         if (dto.content() == null || dto.content().isBlank()) {
             throw new BadRequestException(ErrorMessage.EMPTY_COMMENT);
@@ -110,7 +109,6 @@ public class FreeCommentService {
         }
 
         comment.update(dto.content());
-
         return new FreeCommentResponseDto(comment);
     }
 
@@ -124,7 +122,6 @@ public class FreeCommentService {
         }
 
         comment.getPost().decreaseCommentCount();
-
         comment.delete();
     }
 
@@ -134,8 +131,7 @@ public class FreeCommentService {
         FreePost post = freePostRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
 
-        List<FreeComment> comments = freeCommentRepository
-                .findByPostWithAuthorAndParent(post);
+        List<FreeComment> comments = freeCommentRepository.findByPostWithAuthorAndParent(post);
 
         List<FreeCommentResponseDto> dtoList = comments.stream()
                 .map(FreeCommentResponseDto::new)
@@ -156,12 +152,17 @@ public class FreeCommentService {
                 }
             }
         }
-
         return roots;
     }
 
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
+    }
+
     private FreeComment getCommentWithPermissionCheck(Long commentId, Long userId) {
-        User user = findUserImpl.getUserById(userId);
+
+        User user = getUser(userId);
 
         FreeComment comment = freeCommentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
@@ -181,6 +182,7 @@ public class FreeCommentService {
     }
 
     private FreeComment getLikeableComment(Long postId, Long commentId) {
+
         FreeComment comment = freeCommentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
 
@@ -188,12 +190,10 @@ public class FreeCommentService {
             throw new BadRequestException(ErrorMessage.NOT_EXIST_COMMENT);
         }
 
-        FreePost post = comment.getPost();
-        if (post == null || !post.getId().equals(postId)) {
+        if (!comment.getPost().getId().equals(postId)) {
             throw new NotFoundException(ErrorMessage.NOT_EXIST_POST);
         }
 
         return comment;
     }
-
 }

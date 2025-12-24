@@ -15,9 +15,9 @@ import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.exception.ForbiddenException;
 import org.example.gdgpage.exception.NotFoundException;
+import org.example.gdgpage.repository.auth.UserRepository;
 import org.example.gdgpage.repository.freeboard.FreePostLikeRepository;
 import org.example.gdgpage.repository.freeboard.FreePostRepository;
-import org.example.gdgpage.service.finder.FindUserImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,13 +28,12 @@ import java.util.List;
 public class FreePostService {
 
     private final FreePostRepository freePostRepository;
-    private final FindUserImpl findUser;
     private final FreePostLikeRepository freePostLikeRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public FreePostResponseDto createUserPost(FreePostCreateRequestDto dto, Long userId) {
-
-        User author = findUser.getUserById(userId);
+        User author = getUser(userId);
 
         if (author.getRole() == Role.ORGANIZER) {
             throw new ForbiddenException(ErrorMessage.NO_PERMISSION_USER_POST);
@@ -52,8 +51,7 @@ public class FreePostService {
 
     @Transactional
     public FreePostResponseDto createAdminPost(AdminPostCreateRequestDto dto, Long userId) {
-
-        User author = findUser.getUserById(userId);
+        User author = getUser(userId);
 
         if (author.getRole() != Role.ORGANIZER) {
             throw new ForbiddenException(ErrorMessage.NO_PERMISSION_ADMIN_POST);
@@ -74,7 +72,7 @@ public class FreePostService {
     public FreePostResponseDto updatePost(Long postId, FreePostUpdateRequestDto dto, Long userId) {
 
         FreePost post = getPostWithPermissionCheck(postId, userId);
-        User user = findUser.getUserById(userId);
+        User user = getUser(userId);
 
         if (dto.title() == null || dto.title().isBlank()) {
             throw new BadRequestException(ErrorMessage.EMPTY_TITLE);
@@ -91,7 +89,7 @@ public class FreePostService {
     @Transactional
     public FreePostResponseDto updatePostByAdmin(Long postId, AdminPostUpdateRequestDto dto, Long userId
     ) {
-        User admin = findUser.getUserById(userId);
+        User admin = getUser(userId);
 
         if (admin.getRole() != Role.ORGANIZER) {
             throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
@@ -134,7 +132,7 @@ public class FreePostService {
     }
 
     private FreePost getPostWithPermissionCheck(Long postId, Long userId) {
-        User author = findUser.getUserById(userId);
+        User author = getUser(userId);
 
         FreePost post = freePostRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
@@ -149,7 +147,7 @@ public class FreePostService {
 
     @Transactional
     public void likePost(Long postId, Long userId) {
-        User user = findUser.getUserById(userId);
+        User user = getUser(userId);
         FreePost post = getLikeablePost(postId);
 
         if (freePostLikeRepository.existsByUserAndPost(user, post)) {
@@ -162,7 +160,7 @@ public class FreePostService {
 
     @Transactional
     public void unlikePost(Long postId, Long userId) {
-        User user = findUser.getUserById(userId);
+        User user = getUser(userId);
         FreePost post = getLikeablePost(postId);
 
         FreePostLike like = freePostLikeRepository
@@ -174,9 +172,13 @@ public class FreePostService {
         post.decreaseLikeCount();
     }
 
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
+    }
+
     private FreePost getLikeablePost(Long postId) {
         return freePostRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
     }
-
 }

@@ -23,11 +23,11 @@ import org.example.gdgpage.domain.common.BaseTimeEntity;
 @Builder
 @Table(name = "assignment_submissions",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_submission_assignment_submitter", columnNames = {"assignmentId", "submitterId"})
+                @UniqueConstraint(name = "uk_submission_assignment_submitter", columnNames = {"assignment_id", "submitter_id"})
         },
         indexes = {
-                @Index(name = "idx_submission_assignment", columnList = "assignmentId"),
-                @Index(name = "idx_submission_submitter", columnList = "submitterId")
+                @Index(name = "idx_submission_assignment", columnList = "assignment_id"),
+                @Index(name = "idx_submission_submitter", columnList = "submitter_id")
         }
 )
 public class AssignmentSubmission extends BaseTimeEntity {

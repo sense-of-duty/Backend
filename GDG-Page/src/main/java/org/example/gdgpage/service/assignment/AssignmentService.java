@@ -13,7 +13,7 @@ import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.exception.ForbiddenException;
 import org.example.gdgpage.mapper.assignment.AssignmentMapper;
-import org.example.gdgpage.repository.UserRepository;
+import org.example.gdgpage.repository.auth.UserRepository;
 import org.example.gdgpage.repository.assignment.AssignmentRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

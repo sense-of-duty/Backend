@@ -60,13 +60,17 @@ public class Assignment extends BaseTimeEntity {
     @Column(nullable = false)
     private Long authorId;
 
-    public static Assignment create(Long authorId, String title, String content, LocalDateTime dueAt, Set<PartType> parts) {
+    @Column(length = 500)
+    private String attachmentUrl;
+
+    public static Assignment create(Long authorId, String title, String content, LocalDateTime dueAt, Set<PartType> parts, String attachmentUrl) {
         return Assignment.builder()
                 .authorId(authorId)
                 .title(title)
                 .content(content)
                 .dueAt(dueAt)
                 .parts(parts == null ? new HashSet<>() : new HashSet<>(parts))
+                .attachmentUrl(attachmentUrl)
                 .build();
     }
 

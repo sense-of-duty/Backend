@@ -38,7 +38,8 @@ public enum ErrorMessage {
     ONLY_ACTIVE_USER_CAN_SUBMIT("현 기수 멤버만 제출 가능합니다."),
     ASSIGNMENT_DUE_PASSED("과제 제출 기한이 지났습니다."),
     NOT_EXIST_SUBMISSION("아직 과제를 제출하지 않았습니다."),
-    NOT_EXIST_FEEDBACK("존재하지 않는 피드백입니다.");
+    NOT_EXIST_FEEDBACK("존재하지 않는 피드백입니다."),
+    INVALID_ATTACHMENT_FILE("유효하지 않은 첨부 파일입니다.");
 
     private final String message;
 

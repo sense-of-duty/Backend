@@ -10,11 +10,18 @@ import org.example.gdgpage.dto.assignment.request.AssignmentCreateRequest;
 import org.example.gdgpage.dto.assignment.response.AssignmentListResponse;
 import org.example.gdgpage.dto.assignment.response.AssignmentResponse;
 import org.example.gdgpage.service.assignment.AssignmentService;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -26,28 +33,26 @@ public class AssignmentController {
     private final AssignmentService assignmentService;
 
     @Operation(summary = "과제 생성", description = "관리자(core/organizer)만 과제 생성 가능")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "생성 성공"),
-            @ApiResponse(responseCode = "401", description = "인증 필요"),
-            @ApiResponse(responseCode = "403", description = "권한 없음")
-    })
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('CORE','ORGANIZER')")
     public ResponseEntity<AssignmentResponse> create(@AuthenticationPrincipal AuthUser authUser,
-                                                     @Valid @RequestBody AssignmentCreateRequest request) {
-        AssignmentResponse response = assignmentService.create(authUser.id(), request);
+                                                     @Valid @RequestPart("request") AssignmentCreateRequest request,
+                                                     @RequestPart(value = "file", required = false) MultipartFile file) {
+        AssignmentResponse response = assignmentService.create(authUser.id(), request, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(summary = "과제 목록 조회", description = "로그인 유저 과제 목록 조회")
     @GetMapping
-    public ResponseEntity<List<AssignmentListResponse>> getAll() {
-        return ResponseEntity.ok(assignmentService.getAll());
+    public ResponseEntity<Page<AssignmentListResponse>> getAll(@AuthenticationPrincipal AuthUser authUser,
+                                                               @ParameterObject @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(assignmentService.getAllVisible(authUser, pageable));
     }
 
     @Operation(summary = "과제 상세 조회", description = "로그인 유저 과제 상세 조회")
     @GetMapping("/{assignmentId}")
-    public ResponseEntity<AssignmentResponse> getOne(@PathVariable Long assignmentId) {
-        return ResponseEntity.ok(assignmentService.getOne(assignmentId));
+    public ResponseEntity<AssignmentResponse> getOne(@PathVariable Long assignmentId,
+                                                     @AuthenticationPrincipal AuthUser authUser) {
+        return ResponseEntity.ok(assignmentService.getOneVisible(assignmentId, authUser));
     }
 }

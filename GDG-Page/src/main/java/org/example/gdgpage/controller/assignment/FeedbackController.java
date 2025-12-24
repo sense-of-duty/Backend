@@ -7,6 +7,11 @@ import org.example.gdgpage.domain.auth.AuthUser;
 import org.example.gdgpage.dto.assignment.request.FeedbackCreateRequest;
 import org.example.gdgpage.dto.assignment.response.FeedbackResponse;
 import org.example.gdgpage.service.assignment.FeedbackService;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,8 +43,9 @@ public class FeedbackController {
 
     @Operation(summary = "피드백 댓글 목록 조회", description = "로그인한 유저라면 누구나 조회 가능")
     @GetMapping
-    public ResponseEntity<List<FeedbackResponse>> getAll(@PathVariable Long submissionId) {
-        return ResponseEntity.ok(feedbackService.getFeedbacks(submissionId));
+    public ResponseEntity<Page<FeedbackResponse>> getAll(@PathVariable Long submissionId,
+                                                         @ParameterObject @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(feedbackService.getFeedbacks(submissionId, pageable));
     }
 
     @Operation(summary = "피드백 댓글 삭제", description = "본인 작성자이거나 관리자(CORE/ORGANIZER)일 때만 삭제 가능")
@@ -47,10 +53,7 @@ public class FeedbackController {
     public ResponseEntity<Void> delete(@PathVariable Long submissionId,
                                        @PathVariable Long feedbackId,
                                        @AuthenticationPrincipal AuthUser authUser) {
-
-        boolean isAdmin = authUser.role().equals("CORE") || authUser.role().equals("ORGANIZER");
-
-        feedbackService.deleteFeedback(submissionId, feedbackId, authUser.id(), isAdmin);
+        feedbackService.deleteFeedback(submissionId, feedbackId, authUser);
         return ResponseEntity.noContent().build();
     }
 }

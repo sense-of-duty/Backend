@@ -48,12 +48,6 @@ public class Gallery extends BaseTimeEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    public static Gallery createEmpty() {
-        Gallery gallery = new Gallery();
-        gallery.deleted = false;
-        return gallery;
-    }
-
     public void attachImage(String imageUrl, String imageKey, String originalFileName, String contentType, Long fileSize) {
         this.imageUrl = imageUrl;
         this.imageKey = imageKey;

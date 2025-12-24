@@ -1,19 +1,23 @@
 package org.example.gdgpage.service.gallery;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
+import org.example.gdgpage.exception.StorageException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class GalleryFileStorageImpl implements GalleryFileStorage {
@@ -53,7 +57,8 @@ public class GalleryFileStorageImpl implements GalleryFileStorage {
         }
 
         String originalFileName = file.getOriginalFilename();
-        String ext = extractExtension(originalFileName, contentType);
+
+        String ext = extensionFromContentType(contentType);
 
         String key = String.format("%s/%s.%s",
                 normalizePrefix(photoPrefix),
@@ -71,6 +76,8 @@ public class GalleryFileStorageImpl implements GalleryFileStorage {
             s3Client.putObject(request, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
         } catch (IOException e) {
             throw new BadRequestException(ErrorMessage.INVALID_PHOTO_FILE);
+        } catch (Exception e) {
+            throw new StorageException("Photo upload to S3 failed", e);
         }
 
         return new StoredFile(
@@ -80,6 +87,22 @@ public class GalleryFileStorageImpl implements GalleryFileStorage {
                 contentType,
                 file.getSize()
         );
+    }
+
+    @Override
+    public void deleteGalleryFile(String fileKey) {
+        if (fileKey == null || fileKey.isBlank()) return;
+
+        try {
+            DeleteObjectRequest request = DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(fileKey)
+                    .build();
+
+            s3Client.deleteObject(request);
+        } catch (Exception e) {
+            throw new StorageException("Photo delete from S3 failed. key=" + fileKey, e);
+        }
     }
 
     private String buildPublicUrl(String key) {
@@ -94,10 +117,7 @@ public class GalleryFileStorageImpl implements GalleryFileStorage {
         );
     }
 
-    private String extractExtension(String originalFilename, String contentType) {
-        if (originalFilename != null && originalFilename.contains(".")) {
-            return originalFilename.substring(originalFilename.lastIndexOf('.') + 1);
-        }
+    private String extensionFromContentType(String contentType) {
         if ("image/png".equalsIgnoreCase(contentType)) {
             return "png";
         }

@@ -6,6 +6,7 @@ import org.example.gdgpage.domain.auth.AuthUser;
 import org.example.gdgpage.domain.auth.PartType;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.dto.assignment.request.AssignmentCreateRequest;
+import org.example.gdgpage.dto.assignment.request.AssignmentUpdateRequest;
 import org.example.gdgpage.dto.assignment.response.AssignmentListResponse;
 import org.example.gdgpage.dto.assignment.response.AssignmentResponse;
 import org.example.gdgpage.exception.BadRequestException;
@@ -86,6 +87,57 @@ public class AssignmentService {
     public Assignment getEntity(Long assignmentId) {
         return assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_ASSIGNMENT));
+    }
+
+    @Transactional
+    public AssignmentResponse update(Long assignmentId, AuthUser authUser, AssignmentUpdateRequest request, MultipartFile file) {
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_ASSIGNMENT));
+
+        boolean isAdmin = authUser.role().equals("ORGANIZER") || authUser.role().equals("CORE");
+
+        if (!isAdmin) {
+            throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
+        }
+
+        LocalDateTime now = LocalDateTime.now(clock);
+        if (!request.dueAt().isAfter(now)) {
+            throw new BadRequestException(ErrorMessage.ASSIGNMENT_DUE_PASSED);
+        }
+
+        String attachmentUrl = assignment.getAttachmentUrl();
+        if (file != null && !file.isEmpty()) {
+            attachmentUrl = attachmentStorage.uploadAssignmentAttachment(authUser.id(), file);
+        }
+
+        assignment.update(
+                request.title(),
+                request.content(),
+                request.dueAt(),
+                request.parts()
+        );
+
+        assignment.updateAttachmentUrl(attachmentUrl);
+
+        return AssignmentMapper.toResponse(assignment);
+    }
+
+    @Transactional
+    public void deleteAssignment(Long assignmentId, AuthUser authUser) {
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_ASSIGNMENT));
+
+        boolean isAdmin = authUser.role().equals("ORGANIZER") || authUser.role().equals("CORE");
+
+        if (!isAdmin) {
+            throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
+        }
+
+        if (assignment.isDeleted()) {
+            throw new BadRequestException(ErrorMessage.ALREADY_DELETED_ASSIGNMENT);
+        }
+
+        assignment.delete(LocalDateTime.now(clock));
     }
 
     private boolean canAccess(Assignment assignment, AuthUser authUser) {

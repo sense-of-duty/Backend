@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.AuthUser;
 import org.example.gdgpage.dto.assignment.request.AssignmentCreateRequest;
+import org.example.gdgpage.dto.assignment.request.AssignmentUpdateRequest;
 import org.example.gdgpage.dto.assignment.response.AssignmentListResponse;
 import org.example.gdgpage.dto.assignment.response.AssignmentResponse;
 import org.example.gdgpage.service.assignment.AssignmentService;
@@ -54,5 +55,21 @@ public class AssignmentController {
     public ResponseEntity<AssignmentResponse> getOne(@PathVariable Long assignmentId,
                                                      @AuthenticationPrincipal AuthUser authUser) {
         return ResponseEntity.ok(assignmentService.getOneVisible(assignmentId, authUser));
+    }
+
+    @Operation(summary = "과제 수정", description = "관리자(core/organizer)만 수정 가능. 파일 교체 가능.")
+    @PutMapping(value = "/{assignmentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AssignmentResponse> update(@PathVariable Long assignmentId,
+                                                     @AuthenticationPrincipal AuthUser authUser,
+                                                     @Valid @RequestPart("request") AssignmentUpdateRequest request,
+                                                     @RequestPart(value = "file", required = false) MultipartFile file) {
+        return ResponseEntity.ok(assignmentService.update(assignmentId, authUser, request, file));
+    }
+
+    @Operation(summary = "과제 삭제", description = "관리자(core/organizer)만 삭제 가능(소프트 삭제)")
+    @DeleteMapping("/{assignmentId}")
+    public ResponseEntity<Void> delete(@PathVariable Long assignmentId, @AuthenticationPrincipal AuthUser authUser) {
+        assignmentService.deleteAssignment(assignmentId, authUser);
+        return ResponseEntity.noContent().build();
     }
 }

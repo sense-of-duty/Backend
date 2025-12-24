@@ -39,7 +39,8 @@ public enum ErrorMessage {
     ASSIGNMENT_DUE_PASSED("과제 제출 기한이 지났습니다."),
     NOT_EXIST_SUBMISSION("아직 과제를 제출하지 않았습니다."),
     NOT_EXIST_FEEDBACK("존재하지 않는 피드백입니다."),
-    INVALID_ATTACHMENT_FILE("유효하지 않은 첨부 파일입니다.");
+    INVALID_ATTACHMENT_FILE("유효하지 않은 첨부 파일입니다."),
+    ALREADY_DELETED_ASSIGNMENT("이미 삭제된 과제입니다.");
 
     private final String message;
 

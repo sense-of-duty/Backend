@@ -5,6 +5,7 @@ import org.example.gdgpage.domain.assignment.AssignmentSubmission;
 import org.example.gdgpage.domain.assignment.SubmissionFeedback;
 import org.example.gdgpage.domain.auth.AuthUser;
 import org.example.gdgpage.dto.assignment.request.FeedbackCreateRequest;
+import org.example.gdgpage.dto.assignment.request.FeedbackUpdateRequest;
 import org.example.gdgpage.dto.assignment.response.FeedbackResponse;
 import org.example.gdgpage.exception.BadRequestException;
 import org.example.gdgpage.exception.ErrorMessage;
@@ -43,6 +44,23 @@ public class FeedbackService {
 
         return feedbackRepository.findAllBySubmissionId(submissionId, pageable)
                 .map(FeedbackMapper::toResponse);
+    }
+
+    @Transactional
+    public FeedbackResponse updateFeedback(Long submissionId, Long feedbackId, AuthUser authUser, FeedbackUpdateRequest request) {
+        SubmissionFeedback feedback = feedbackRepository.findByIdAndSubmissionId(feedbackId, submissionId)
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.NOT_EXIST_FEEDBACK));
+
+        boolean isAdmin = authUser.role().equals("ORGANIZER") || authUser.role().equals("CORE");
+        boolean isAuthor = feedback.getAuthorId().equals(authUser.id());
+
+        if (!isAdmin && !isAuthor) {
+            throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
+        }
+
+        feedback.updateContent(request.content());
+
+        return FeedbackMapper.toResponse(feedback);
     }
 
     @Transactional

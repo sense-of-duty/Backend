@@ -63,6 +63,9 @@ public class Assignment extends BaseTimeEntity {
     @Column(length = 500)
     private String attachmentUrl;
 
+    @Column
+    private LocalDateTime deletedAt;
+
     public static Assignment create(Long authorId, String title, String content, LocalDateTime dueAt, Set<PartType> parts, String attachmentUrl) {
         return Assignment.builder()
                 .authorId(authorId)
@@ -79,5 +82,17 @@ public class Assignment extends BaseTimeEntity {
         this.content = content;
         this.dueAt = dueAt;
         this.parts = (parts == null ? new HashSet<>() : new HashSet<>(parts));
+    }
+
+    public void updateAttachmentUrl(String attachmentUrl) {
+        this.attachmentUrl = attachmentUrl;
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
+    public void delete(LocalDateTime now) {
+        this.deletedAt = now;
     }
 }

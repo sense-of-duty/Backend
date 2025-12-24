@@ -41,12 +41,18 @@ app:
   s3:
     bucket-name: gdgpage-growthon
     profile-prefix: profiles
+    lecture-prefix: lectures
+    photo-prefix: photos
     assignment-attachment-prefix: attachments/assignments
     submission-attachment-prefix: attachments/submissions
   aws:
     region: ap-northeast-2
   cors:
     allowed-origin-patterns: ${APP_CORS_ALLOWED_ORIGIN_PATTERNS:https://gdgoc-skhu.ddnsfree.com,http://localhost:*}
+
+  security:
+    refresh-token-history-retention-days: 3
+    refresh-token-cleanup-cron: "0 0 4 * * *"
 
 
 server:

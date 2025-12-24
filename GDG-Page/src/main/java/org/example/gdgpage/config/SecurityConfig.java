@@ -37,8 +37,15 @@ public class SecurityConfig {
     private List<String> allowedOrigins;
 
     private static final String[] PUBLIC_AUTH = {
-            "/auth/**",
-            "/oauth2/**"
+            "/auth/signup",
+            "/auth/login",
+            "/auth/oauth/login",
+            "/auth/reissue",
+            "/auth/logout",
+            "/oauth2/**",
+            "/auth/resend-verification",
+            "/auth/verify-email/**",
+            "/photos/**"
     };
 
     private static final String[] SWAGGER_WHITELIST = {
@@ -65,6 +72,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .requestMatchers(PUBLIC_AUTH).permitAll()
+                        .requestMatchers("/api/free-posts/admin").hasAnyRole("ORGANIZER", "CORE")
                         .requestMatchers("/admin/**").hasAnyRole("ORGANIZER")
                         .anyRequest().authenticated()
                 )

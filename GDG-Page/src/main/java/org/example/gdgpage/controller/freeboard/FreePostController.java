@@ -66,7 +66,7 @@ public class FreePostController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FreePostListResponseDto>> getPostList(@RequestParam(required = false) String keyword) {
+    public ResponseEntity<List<FreePostListResponseDto>> getPostList(@RequestParam(required = false, defaultValue = "") String keyword) {
         List<FreePostListResponseDto> response = freePostService.getPostList(keyword);
         return ResponseEntity.ok(response);
     }

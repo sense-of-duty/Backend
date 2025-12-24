@@ -1,6 +1,7 @@
 package org.example.gdgpage.service.notice;
 
 import lombok.RequiredArgsConstructor;
+import org.example.gdgpage.domain.auth.Role;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.domain.notice.entity.Notice;
 import org.example.gdgpage.dto.notice.request.post.NoticeUpdateRequest;
@@ -23,16 +24,19 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final UserRepository userRepository;
 
-
     @Transactional
     public Long createNotice(Long authorId, NoticeCreateRequest request) {
-
         User user = userRepository.findById(authorId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-
         if (!user.getRole().isAdmin()) {
-            throw new RuntimeException("공지사항은 코어와 오거나이저만 작성할 수 있습니다.");
+            throw new RuntimeException("공지사항 작성 권한이 없습니다.");
+        }
+
+        if (user.getRole() == Role.CORE) {
+            if (user.getPart() != request.partId()) {
+                throw new IllegalArgumentException("CORE 멤버는 자신의 소속 파트(" + user.getPart() + ") 공지만 작성할 수 있습니다.");
+            }
         }
 
         Notice notice = Notice.builder()
@@ -67,9 +71,7 @@ public class NoticeService {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
-
         notice.incrementViewCount();
-
 
         User author = notice.getAuthor();
 

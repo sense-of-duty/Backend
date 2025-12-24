@@ -13,6 +13,7 @@ public interface FreePostRepository extends JpaRepository<FreePost, Long> {
         select p from FreePost p
         join fetch p.author
         where (:keyword is null or :keyword = '' 
+               or p.isPinned = true
                or lower(p.title) like lower(concat('%', :keyword, '%')))
         order by p.isPinned desc, p.createdAt desc
     """)

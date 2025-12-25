@@ -59,15 +59,14 @@ public class FreePostController {
 
 
     @GetMapping("/{postId}")
-    public ResponseEntity<FreePostResponseDto> getPost(@AuthenticationPrincipal AuthUser authUser,
-                                                       @PathVariable Long postId) {
-        FreePostResponseDto response = freePostService.getPost(postId, authUser.id());
+    public ResponseEntity<FreePostResponseDto> getPost(@PathVariable Long postId) {
+        FreePostResponseDto response = freePostService.getPost(postId);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<FreePostListResponseDto>> getPostList(@AuthenticationPrincipal AuthUser authUser) {
-        List<FreePostListResponseDto> response = freePostService.getPostList();
+    public ResponseEntity<List<FreePostListResponseDto>> getPostList(@RequestParam(required = false, defaultValue = "") String keyword) {
+        List<FreePostListResponseDto> response = freePostService.getPostList(keyword);
         return ResponseEntity.ok(response);
     }
 

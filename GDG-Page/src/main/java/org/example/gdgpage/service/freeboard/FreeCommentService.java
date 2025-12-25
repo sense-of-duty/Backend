@@ -6,6 +6,7 @@ import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.domain.freeboard.FreeComment;
 import org.example.gdgpage.domain.freeboard.FreeCommentLike;
 import org.example.gdgpage.domain.freeboard.FreePost;
+import org.example.gdgpage.domain.notification.NotificationType;
 import org.example.gdgpage.dto.freeboard.request.FreeCommentCreateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreeCommentUpdateRequestDto;
 import org.example.gdgpage.dto.freeboard.response.FreeCommentResponseDto;
@@ -17,6 +18,8 @@ import org.example.gdgpage.repository.auth.UserRepository;
 import org.example.gdgpage.repository.freeboard.FreeCommentLikeRepository;
 import org.example.gdgpage.repository.freeboard.FreeCommentRepository;
 import org.example.gdgpage.repository.freeboard.FreePostRepository;
+import org.example.gdgpage.repository.notification.NotificationRepository;
+import org.example.gdgpage.service.notification.NotificationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +34,7 @@ public class FreeCommentService {
     private final FreePostRepository freePostRepository;
     private final FreeCommentLikeRepository freeCommentLikeRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public void likeComment(Long postId, Long commentId, Long userId) {
@@ -92,7 +96,35 @@ public class FreeCommentService {
 
         post.increaseCommentCount();
 
-        return new FreeCommentResponseDto(freeCommentRepository.save(comment));
+        FreeComment saved = freeCommentRepository.save(comment);
+
+        if (!Objects.equals(post.getAuthor().getId(), userId)) {
+            notificationService.createNotification(
+                    post.getAuthor().getId(),
+                    NotificationType.FREE_POST_COMMENT,
+                    "새 댓글이 달렸습니다.",
+                    post.getId(),
+                    "/free-posts/" + post.getId()
+            );
+        }
+
+        if (parent != null) {
+            Long parentAuthorId = parent.getAuthor().getId();
+
+            if (!Objects.equals(parentAuthorId, userId)
+                    && !Objects.equals(parentAuthorId, post.getAuthor().getId())) {
+
+                notificationService.createNotification(
+                        parentAuthorId,
+                        NotificationType.FREE_POST_COMMENT,
+                        "내 댓글에 대댓글이 달렸습니다.",
+                        post.getId(),
+                        "/free-posts/" + post.getId()
+                );
+            }
+        }
+
+        return new FreeCommentResponseDto(saved);
     }
 
     @Transactional

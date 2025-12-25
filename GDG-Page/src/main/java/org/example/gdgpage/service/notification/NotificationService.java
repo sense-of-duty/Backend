@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
@@ -35,11 +34,13 @@ public class NotificationService {
         notificationRepository.save(Notification.create(receiver, type, message, targetId, targetUrl));
     }
 
+    @Transactional(readOnly = true)
     public Page<NotificationResponseDto> getMyNotifications(Long userId, Pageable pageable) {
         return notificationRepository.findByReceiverId(userId, pageable)
                 .map(NotificationResponseDto::from);
     }
 
+    @Transactional(readOnly = true)
     public long countUnread(Long userId) {
         return notificationRepository.countByReceiverIdAndIsReadFalse(userId);
     }

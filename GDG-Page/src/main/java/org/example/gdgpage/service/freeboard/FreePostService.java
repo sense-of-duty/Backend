@@ -103,9 +103,9 @@ public class FreePostService {
     }
 
     @Transactional
-    public FreePostResponseDto getPost(Long postId, Long userId) {
+    public FreePostResponseDto getPost(Long postId) {
 
-        FreePost post = freePostRepository.findById(postId)
+        FreePost post = freePostRepository.findWithAuthor(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
 
         post.increaseViewCount();

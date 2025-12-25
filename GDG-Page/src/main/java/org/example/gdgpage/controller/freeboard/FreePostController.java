@@ -59,9 +59,8 @@ public class FreePostController {
 
 
     @GetMapping("/{postId}")
-    public ResponseEntity<FreePostResponseDto> getPost(@AuthenticationPrincipal AuthUser authUser,
-                                                       @PathVariable Long postId) {
-        FreePostResponseDto response = freePostService.getPost(postId, authUser.id());
+    public ResponseEntity<FreePostResponseDto> getPost(@PathVariable Long postId) {
+        FreePostResponseDto response = freePostService.getPost(postId);
         return ResponseEntity.ok(response);
     }
 

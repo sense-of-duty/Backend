@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FreePostRepository extends JpaRepository<FreePost, Long> {
 
@@ -18,4 +19,11 @@ public interface FreePostRepository extends JpaRepository<FreePost, Long> {
         order by p.isPinned desc, p.createdAt desc
     """)
     List<FreePost> findAllWithAuthorAndKeyword(@Param("keyword") String keyword);
+
+    @Query("""
+        select p from FreePost p
+        join fetch p.author
+        where p.id = :postId
+    """)
+    Optional<FreePost> findWithAuthor(@Param("postId") Long postId);
 }

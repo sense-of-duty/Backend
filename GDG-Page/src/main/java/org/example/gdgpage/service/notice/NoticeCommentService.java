@@ -4,12 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.domain.notice.entity.Notice;
 import org.example.gdgpage.domain.notice.entity.NoticeComment;
-import org.example.gdgpage.repository.notice.NoticeRepository;
-import org.example.gdgpage.repository.notice.NoticeCommentRepository;
 import org.example.gdgpage.dto.notice.request.comment.NoticeCommentCreateRequest;
 import org.example.gdgpage.dto.notice.request.comment.NoticeCommentUpdateRequest;
 import org.example.gdgpage.dto.notice.response.comment.NoticeCommentResponse;
+import org.example.gdgpage.exception.BadRequestException;
+import org.example.gdgpage.exception.ErrorMessage;
+import org.example.gdgpage.exception.ForbiddenException;
+import org.example.gdgpage.exception.NotFoundException;
 import org.example.gdgpage.repository.auth.UserRepository;
+import org.example.gdgpage.repository.notice.NoticeCommentRepository;
+import org.example.gdgpage.repository.notice.NoticeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,18 +34,18 @@ public class NoticeCommentService {
     @Transactional
     public Long createComment(Long noticeId, Long authorId, NoticeCommentCreateRequest request) {
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
 
         User user = userRepository.findById(authorId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
 
         NoticeComment parent = null;
         if (request.parentId() != null) {
             parent = commentRepository.findById(request.parentId())
-                    .orElseThrow(() -> new IllegalArgumentException("답글이 존재하지 않습니다."));
+                    .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_PARENT_COMMENT));
 
             if (!parent.getNotice().getId().equals(notice.getId())) {
-                throw new IllegalArgumentException("다른 공지사항의 댓글에는 답글을 달 수 없습니다.");
+                throw new BadRequestException(ErrorMessage.COMMENT_POST_MISMATCH);
             }
         }
 
@@ -57,7 +61,7 @@ public class NoticeCommentService {
 
     public List<NoticeCommentResponse> getCommentsByNotice(Long noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
 
         List<NoticeComment> comments = commentRepository.findAllByNoticeOrderByCreatedAtAsc(notice);
 
@@ -93,14 +97,14 @@ public class NoticeCommentService {
     @Transactional
     public void updateComment(Long noticeId, Long commentId, Long userId, NoticeCommentUpdateRequest request) {
         NoticeComment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
 
         if (!comment.getNotice().getId().equals(noticeId)) {
-            throw new IllegalArgumentException("해당 공지사항의 댓글이 아닙니다.");
+            throw new BadRequestException(ErrorMessage.COMMENT_POST_MISMATCH);
         }
 
         if (!comment.getAuthor().getId().equals(userId)) {
-            throw new RuntimeException("수정 권한이 없습니다.");
+            throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
         }
 
         comment.updateContent(request.content());
@@ -109,17 +113,16 @@ public class NoticeCommentService {
     @Transactional
     public void deleteComment(Long noticeId, Long commentId, Long userId) {
         NoticeComment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
 
         if (!comment.getNotice().getId().equals(noticeId)) {
-            throw new IllegalArgumentException("해당 공지사항의 댓글이 아닙니다.");
+            throw new BadRequestException(ErrorMessage.COMMENT_POST_MISMATCH);
         }
 
         if (!comment.getAuthor().getId().equals(userId)) {
-            throw new RuntimeException("삭제 권한이 없습니다.");
+            throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
         }
 
         comment.delete();
     }
-
 }

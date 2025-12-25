@@ -11,6 +11,7 @@ import java.util.List;
 
 @Repository
 public interface NoticeCommentRepository extends JpaRepository<NoticeComment, Long> {
+
     @Query("SELECT c FROM NoticeComment c JOIN FETCH c.author WHERE c.notice = :notice ORDER BY c.createdAt ASC")
     List<NoticeComment> findAllByNoticeOrderByCreatedAtAsc(@Param("notice") Notice notice);
 }

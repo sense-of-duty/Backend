@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.Role;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.domain.notice.entity.Notice;
-import org.example.gdgpage.dto.notice.request.post.NoticeUpdateRequest;
-import org.example.gdgpage.repository.notice.NoticeRepository;
 import org.example.gdgpage.dto.notice.request.post.NoticeCreateRequest;
+import org.example.gdgpage.dto.notice.request.post.NoticeUpdateRequest;
 import org.example.gdgpage.dto.notice.response.NoticeListResponse;
 import org.example.gdgpage.dto.notice.response.post.NoticeResponse;
+import org.example.gdgpage.exception.ErrorMessage;
+import org.example.gdgpage.exception.ForbiddenException;
+import org.example.gdgpage.exception.NotFoundException;
 import org.example.gdgpage.repository.auth.UserRepository;
+import org.example.gdgpage.repository.notice.NoticeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,15 +30,15 @@ public class NoticeService {
     @Transactional
     public NoticeResponse createNotice(Long authorId, NoticeCreateRequest request) {
         User user = userRepository.findById(authorId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
 
         if (!user.getRole().isAdmin()) {
-            throw new RuntimeException("공지사항 작성 권한이 없습니다.");
+            throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
         }
 
         if (user.getRole() == Role.CORE) {
             if (user.getPart() != request.partId()) {
-                throw new IllegalArgumentException("CORE 멤버는 자신의 소속 파트(" + user.getPart() + ") 공지만 작성할 수 있습니다.");
+                throw new ForbiddenException(ErrorMessage.ACCESS_DENY);
             }
         }
 
@@ -83,9 +86,8 @@ public class NoticeService {
     public NoticeResponse getNotice(Long noticeId) {
         noticeRepository.updateViewCount(noticeId);
 
-
         Notice notice = noticeRepository.findByIdAndDeletedAtIsNull(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
 
         return NoticeResponse.builder()
                 .id(notice.getId())
@@ -103,15 +105,7 @@ public class NoticeService {
 
     @Transactional
     public void updateNotice(Long noticeId, Long userId, NoticeUpdateRequest request) {
-        Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보가 없습니다."));
-
-        if (!notice.getAuthor().getId().equals(userId) && !user.getRole().isAdmin()) {
-            throw new RuntimeException("수정 권한이 없습니다.");
-        }
+        Notice notice = findNoticeWithPermission(noticeId, userId);
 
         notice.updateNotice(
                 request.title(),
@@ -123,16 +117,23 @@ public class NoticeService {
 
     @Transactional
     public void deleteNotice(Long noticeId, Long userId) {
-        Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보가 없습니다."));
-
-        if (!notice.getAuthor().getId().equals(userId) && !user.getRole().isAdmin()) {
-            throw new RuntimeException("삭제 권한이 없습니다.");
-        }
+        Notice notice = findNoticeWithPermission(noticeId, userId);
 
         notice.delete();
+    }
+
+
+    private Notice findNoticeWithPermission(Long noticeId, Long userId) {
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_USER));
+
+        if (!notice.getAuthor().getId().equals(userId) && !user.getRole().isAdmin()) {
+            throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
+        }
+
+        return notice;
     }
 }

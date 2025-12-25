@@ -3,7 +3,6 @@ package org.example.gdgpage.domain.notice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.gdgpage.domain.auth.User;
-import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -19,7 +18,6 @@ import java.util.List;
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "notice_comments")
-@Where(clause = "deleted_at IS NULL")
 @ToString(exclude = {"notice", "parent", "children"})
 public class NoticeComment {
 

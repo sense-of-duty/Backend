@@ -102,12 +102,16 @@ public class NoticeService {
                 .build();
     }
 
+
     @Transactional
     public void updateNotice(Long noticeId, Long userId, NoticeUpdateRequest request) {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
-        if (!notice.getAuthor().getId().equals(userId)) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저 정보가 없습니다."));
+
+        if (!notice.getAuthor().getId().equals(userId) && !user.getRole().isAdmin()) {
             throw new RuntimeException("수정 권한이 없습니다.");
         }
 
@@ -124,9 +128,13 @@ public class NoticeService {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
-        if (!notice.getAuthor().getId().equals(userId)) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저 정보가 없습니다."));
+
+        if (!notice.getAuthor().getId().equals(userId) && !user.getRole().isAdmin()) {
             throw new RuntimeException("삭제 권한이 없습니다.");
         }
+
         notice.delete();
     }
 }

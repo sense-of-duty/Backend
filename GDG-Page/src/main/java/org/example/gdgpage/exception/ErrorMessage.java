@@ -42,13 +42,23 @@ public enum ErrorMessage {
     EMAIL_NOT_VERIFIED("이메일 인증이 완료되지 않았습니다."),
     INVALID_PASSWORD_RESET_TOKEN("유효하지 않은 링크입니다."),
     EXPIRED_PASSWORD_RESET_TOKEN("만료된 링크입니다."),
+    NOT_EXIST_NOTIFICATION("존재하지 않는 알람입니다."),
+    NOT_EXIST_ASSIGNMENT("존재하지 않는 과제입니다."),
+    ONLY_ACTIVE_USER_CAN_SUBMIT("현 기수 멤버만 제출 가능합니다."),
+    ASSIGNMENT_DUE_PASSED("과제 제출 기한이 지났습니다."),
+    NOT_EXIST_SUBMISSION("아직 과제를 제출하지 않았습니다."),
+    NOT_EXIST_FEEDBACK("존재하지 않는 피드백입니다."),
+    INVALID_ATTACHMENT_FILE("유효하지 않은 첨부 파일입니다."),
+    ALREADY_DELETED_ASSIGNMENT("이미 삭제된 과제입니다."),
+    INVALID_PHOTO_FILE("유효하지 않은 이미지 파일입니다."),
+    NOT_EXIST_PHOTO("존재하지 않는 사진입니다."),
     COMMENT_POST_MISMATCH("댓글이 해당 게시글에 속하지 않습니다."),
     ALREADY_LIKED("이미 좋아요를 눌렀습니다."),
     NOT_LIKED("취소할 좋아요가 없습니다."),
     NOT_EXIST_LECTURE_MATERIAL("강의자료가 존재하지 않습니다."),
     INVALID_LECTURE_FILE("유효하지 않은 강의자료 파일입니다."),
     INVALID_LECTURE_INPUT("잘못된 강의자료 입력입니다."),
-    INVALID_DENY_REQUEST("반려 사유를 입력해주세요."),;
+    INVALID_DENY_REQUEST("반려 사유를 입력해주세요.");
 
     private final String message;
 

@@ -44,7 +44,8 @@ public class SecurityConfig {
             "/auth/logout",
             "/oauth2/**",
             "/auth/resend-verification",
-            "/auth/verify-email/**"
+            "/auth/verify-email/**",
+            "/photos/**"
     };
 
     private static final String[] SWAGGER_WHITELIST = {

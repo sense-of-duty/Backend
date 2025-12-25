@@ -72,7 +72,6 @@ public class FreePostService {
     public FreePostResponseDto updatePost(Long postId, FreePostUpdateRequestDto dto, Long userId) {
 
         FreePost post = getPostWithPermissionCheck(postId, userId);
-        User user = getUser(userId);
 
         if (dto.title() == null || dto.title().isBlank()) {
             throw new BadRequestException(ErrorMessage.EMPTY_TITLE);
@@ -104,9 +103,9 @@ public class FreePostService {
     }
 
     @Transactional
-    public FreePostResponseDto getPost(Long postId, Long userId) {
+    public FreePostResponseDto getPost(Long postId) {
 
-        FreePost post = freePostRepository.findById(postId)
+        FreePost post = freePostRepository.findWithAuthor(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
 
         post.increaseViewCount();
@@ -115,9 +114,9 @@ public class FreePostService {
     }
 
     @Transactional(readOnly = true)
-    public List<FreePostListResponseDto> getPostList() {
+    public List<FreePostListResponseDto> getPostList(String keyword) {
 
-        List<FreePost> posts = freePostRepository.findAllWithAuthor();
+        List<FreePost> posts = freePostRepository.findAllWithAuthorAndKeyword(keyword);
 
         return posts.stream()
                 .map(FreePostListResponseDto::new)

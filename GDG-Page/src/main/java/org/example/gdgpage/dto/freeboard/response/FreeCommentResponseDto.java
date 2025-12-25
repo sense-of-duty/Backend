@@ -1,6 +1,7 @@
 package org.example.gdgpage.dto.freeboard.response;
 
 import lombok.Getter;
+import org.example.gdgpage.common.Constants;
 import org.example.gdgpage.domain.freeboard.FreeComment;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ public class FreeCommentResponseDto {
     private final String content;
     private final Boolean isAnonymous;
     private final String authorName;
+    private final String profileImageUrl;
     private final Integer likeCount;
     private final Long parentId;
     private final LocalDateTime createdAt;
@@ -28,6 +30,10 @@ public class FreeCommentResponseDto {
         this.authorName = comment.getIsAnonymous()
                 ? "익명"
                 : comment.getAuthor().getName();
+
+        this.profileImageUrl = isAnonymous
+                ? Constants.DEFAULT_PROFILE_IMAGE_URL
+                : comment.getAuthor().getProfileImageUrl();
 
         this.likeCount = comment.getLikeCount();
         this.parentId = comment.getParent() != null

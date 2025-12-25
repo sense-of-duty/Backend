@@ -13,8 +13,10 @@ import org.example.gdgpage.repository.auth.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -57,10 +59,35 @@ public class NoticeCommentService {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
-        return commentRepository.findByNoticeAndParentIsNullOrderByCreatedAtAsc(notice)
-                .stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
+        List<NoticeComment> comments = commentRepository.findAllByNoticeOrderByCreatedAtAsc(notice);
+
+        Map<Long, NoticeCommentResponse> map = new HashMap<>();
+        List<NoticeCommentResponse> roots = new ArrayList<>();
+
+        for (NoticeComment comment : comments) {
+            NoticeCommentResponse dto = NoticeCommentResponse.builder()
+                    .id(comment.getId())
+                    .content(comment.getContent())
+                    .authorId(comment.getAuthor().getId())
+                    .authorName(comment.getAuthor().getName())
+                    .createdAt(comment.getCreatedAt())
+                    .updatedAt(comment.getUpdatedAt())
+                    .children(new ArrayList<>())
+                    .build();
+
+            map.put(dto.id(), dto);
+
+            if (comment.getParent() != null) {
+                NoticeCommentResponse parentDto = map.get(comment.getParent().getId());
+                if (parentDto != null) {
+                    parentDto.children().add(dto);
+                }
+            } else {
+                roots.add(dto);
+            }
+        }
+
+        return roots;
     }
 
     @Transactional
@@ -95,19 +122,4 @@ public class NoticeCommentService {
         comment.delete();
     }
 
-    private NoticeCommentResponse convertToResponse(NoticeComment comment) {
-        User author = comment.getAuthor();
-
-        return NoticeCommentResponse.builder()
-                .id(comment.getId())
-                .content(comment.getContent())
-                .authorId(author.getId())
-                .authorName(author.getName())
-                .createdAt(comment.getCreatedAt())
-                .updatedAt(comment.getUpdatedAt())
-                .children(comment.getChildren().stream()
-                        .map(this::convertToResponse)
-                        .collect(Collectors.toList()))
-                .build();
-    }
 }

@@ -48,6 +48,18 @@ public class FreeCommentService {
 
         freeCommentLikeRepository.save(new FreeCommentLike(user, comment));
         comment.increaseLikeCount();
+
+        Long commentAuthorId = comment.getAuthor().getId();
+
+        if (!Objects.equals(commentAuthorId, userId)) {
+            notificationService.createNotification(
+                    commentAuthorId,
+                    NotificationType.FREE_COMMENT_LIKE,
+                    "작성하신 댓글이 좋아요를 받았습니다.",
+                    comment.getPost().getId(),   // targetId → 게시글 ID
+                    "/free-posts/" + comment.getPost().getId()
+            );
+        }
     }
 
     @Transactional

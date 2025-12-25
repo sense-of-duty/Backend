@@ -5,6 +5,7 @@ import org.example.gdgpage.domain.auth.Role;
 import org.example.gdgpage.domain.auth.User;
 import org.example.gdgpage.domain.freeboard.FreePost;
 import org.example.gdgpage.domain.freeboard.FreePostLike;
+import org.example.gdgpage.domain.notification.NotificationType;
 import org.example.gdgpage.dto.freeboard.request.AdminPostCreateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.AdminPostUpdateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreePostCreateRequestDto;
@@ -18,10 +19,12 @@ import org.example.gdgpage.exception.NotFoundException;
 import org.example.gdgpage.repository.auth.UserRepository;
 import org.example.gdgpage.repository.freeboard.FreePostLikeRepository;
 import org.example.gdgpage.repository.freeboard.FreePostRepository;
+import org.example.gdgpage.service.notification.NotificationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class FreePostService {
     private final FreePostRepository freePostRepository;
     private final FreePostLikeRepository freePostLikeRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public FreePostResponseDto createUserPost(FreePostCreateRequestDto dto, Long userId) {
@@ -155,6 +159,16 @@ public class FreePostService {
 
         freePostLikeRepository.save(new FreePostLike(user, post));
         post.increaseLikeCount();
+
+        if (!Objects.equals(post.getAuthor().getId(), userId)) {
+            notificationService.createNotification(
+                    post.getAuthor().getId(),
+                    NotificationType.FREE_POST_LIKE,
+                    "작성하신 게시글이 좋아요를 받았습니다.",
+                    post.getId(),
+                    "/free-posts/" + post.getId()
+            );
+        }
     }
 
     @Transactional

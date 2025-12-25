@@ -36,17 +36,14 @@ public class NotificationService {
     }
 
     public List<NotificationResponseDto> getMyNotifications(Long userId) {
-        User user = getUser(userId);
-
-        return notificationRepository.findByReceiverOrderByCreatedAtDesc(user)
+        return notificationRepository.findByReceiverIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(NotificationResponseDto::from)
                 .toList();
     }
 
     public long countUnread(Long userId) {
-        User user = getUser(userId);
-        return notificationRepository.countByReceiverAndIsReadFalse(user);
+        return notificationRepository.countByReceiverIdAndIsReadFalse(userId);
     }
 
     @Transactional

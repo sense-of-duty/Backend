@@ -81,27 +81,25 @@ public class NoticeService {
 
     @Transactional
     public NoticeResponse getNotice(Long noticeId) {
-        Notice notice = noticeRepository.findById(noticeId)
+        noticeRepository.updateViewCount(noticeId);
+
+
+        Notice notice = noticeRepository.findByIdAndDeletedAtIsNull(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
-
-        notice.incrementViewCount();
-
-        User author = notice.getAuthor();
 
         return NoticeResponse.builder()
                 .id(notice.getId())
                 .title(notice.getTitle())
                 .content(notice.getContent())
                 .partId(notice.getPartId())
-                .authorId(author.getId())
-                .authorName(author.getName())
+                .authorId(notice.getAuthor().getId())
+                .authorName(notice.getAuthor().getName())
                 .viewCount(notice.getViewCount())
                 .isPinned(notice.isPinned())
                 .createdAt(notice.getCreatedAt())
                 .updatedAt(notice.getUpdatedAt())
                 .build();
     }
-
 
     @Transactional
     public void updateNotice(Long noticeId, Long userId, NoticeUpdateRequest request) {

@@ -11,4 +11,5 @@ import java.util.List;
 public interface NoticeCommentRepository extends JpaRepository<NoticeComment, Long> {
 
     List<NoticeComment> findByNoticeAndParentIsNullOrderByCreatedAtAsc(Notice notice);
+
 }

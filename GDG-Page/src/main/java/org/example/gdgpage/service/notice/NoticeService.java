@@ -25,7 +25,7 @@ public class NoticeService {
     private final UserRepository userRepository;
 
     @Transactional
-    public Long createNotice(Long authorId, NoticeCreateRequest request) {
+    public NoticeResponse createNotice(Long authorId, NoticeCreateRequest request) {
         User user = userRepository.findById(authorId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
@@ -48,7 +48,20 @@ public class NoticeService {
                 .viewCount(0)
                 .build();
 
-        return noticeRepository.save(notice).getId();
+        Notice savedNotice = noticeRepository.save(notice);
+
+        return NoticeResponse.builder()
+                .id(savedNotice.getId())
+                .title(savedNotice.getTitle())
+                .content(savedNotice.getContent())
+                .partId(savedNotice.getPartId())
+                .authorId(user.getId())
+                .authorName(user.getName())
+                .viewCount(savedNotice.getViewCount())
+                .isPinned(savedNotice.isPinned())
+                .createdAt(savedNotice.getCreatedAt())
+                .updatedAt(savedNotice.getUpdatedAt())
+                .build();
     }
 
     public List<NoticeListResponse> getAllNotices() {

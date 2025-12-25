@@ -47,8 +47,6 @@ public class NoticeComment {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "is_anonymous", nullable = false)
-    private boolean isAnonymous;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)

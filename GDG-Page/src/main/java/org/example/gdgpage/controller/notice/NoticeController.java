@@ -23,17 +23,14 @@ public class NoticeController {
     private final NoticeService noticeService;
 
     @PostMapping
-    public ResponseEntity<?> createNotice(
-            @AuthenticationPrincipal AuthUser authUser,
-            @RequestBody @Valid NoticeCreateRequest request
+    public ResponseEntity<NoticeResponse> createNotice(
+                                                        @AuthenticationPrincipal AuthUser authUser,
+                                                        @RequestBody @Valid NoticeCreateRequest request
     ) {
-        if (authUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 후 글 작성이 가능합니다.");
-        }
 
-        Long userId = authUser.id();
-        Long noticeId = noticeService.createNotice(userId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(noticeId);
+        NoticeResponse response = noticeService.createNotice(authUser.id(), request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping

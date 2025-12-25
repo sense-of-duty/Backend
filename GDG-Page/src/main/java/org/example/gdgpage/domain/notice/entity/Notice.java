@@ -54,11 +54,6 @@ public class Notice {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-
-    public void incrementViewCount() {
-        this.viewCount++;
-    }
-
     public void updateNotice(String title, String content, boolean isPinned, PartType partId) {
         this.title = title;
         this.content = content;

@@ -18,6 +18,7 @@ public class FreePostResponseDto {
     private final Integer likeCount;
     private final Integer commentCount;
     private final String authorName;
+    private final String imageUrl;
     private final String profileImageUrl;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
@@ -39,6 +40,7 @@ public class FreePostResponseDto {
         this.isPinned = post.getIsPinned();
         this.viewCount = post.getViewCount();
         this.likeCount = post.getLikeCount();
+        this.imageUrl = post.getImageUrl();
         this.commentCount = post.getCommentCount();
         this.createdAt = post.getCreatedAt();
         this.updatedAt = post.getUpdatedAt();

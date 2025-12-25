@@ -2,6 +2,7 @@ package org.example.gdgpage.dto.freeboard.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.web.multipart.MultipartFile;
 
 public record FreePostCreateRequestDto(
 
@@ -12,5 +13,7 @@ public record FreePostCreateRequestDto(
         String content,
 
         @NotNull(message = "익명 여부는 null일 수 없습니다.")
-        Boolean isAnonymous
+        Boolean isAnonymous,
+
+        MultipartFile image
 ) {}

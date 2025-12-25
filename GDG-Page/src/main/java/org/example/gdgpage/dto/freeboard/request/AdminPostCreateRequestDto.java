@@ -2,6 +2,7 @@ package org.example.gdgpage.dto.freeboard.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.web.multipart.MultipartFile;
 
 public record AdminPostCreateRequestDto(
 
@@ -15,5 +16,7 @@ public record AdminPostCreateRequestDto(
         Boolean isAnonymous,
 
         @NotNull(message = "공지 고정 여부는 null일 수 없습니다.")
-        Boolean isPinned
+        Boolean isPinned,
+
+        MultipartFile image
 ) {}

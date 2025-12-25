@@ -24,39 +24,43 @@ public class FreePostController {
 
     private final FreePostService freePostService;
 
-    @PostMapping
-    public ResponseEntity<FreePostResponseDto> createPost(@AuthenticationPrincipal AuthUser authUser,
-                                                          @Valid @RequestBody FreePostCreateRequestDto dto) {
+    @PostMapping(consumes = "multipart/form-data")
+    public ResponseEntity<FreePostResponseDto> createPost(
+            @AuthenticationPrincipal AuthUser authUser,
+            @Valid @ModelAttribute FreePostCreateRequestDto dto
+    ) {
         FreePostResponseDto response = freePostService.createUserPost(dto, authUser.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PostMapping("/admin")
-    public ResponseEntity<FreePostResponseDto> createAdminPost(@AuthenticationPrincipal AuthUser authUser,
-                                                               @Valid @RequestBody AdminPostCreateRequestDto dto) {
+    @PostMapping(value = "/admin", consumes = "multipart/form-data")
+    public ResponseEntity<FreePostResponseDto> createAdminPost(
+            @AuthenticationPrincipal AuthUser authUser,
+            @Valid @ModelAttribute AdminPostCreateRequestDto dto
+    ) {
         FreePostResponseDto response = freePostService.createAdminPost(dto, authUser.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PatchMapping("/{postId}")
-    public ResponseEntity<FreePostResponseDto> updatePost(@AuthenticationPrincipal AuthUser authUser,
-                                                          @PathVariable Long postId,
-                                                          @Valid @RequestBody FreePostUpdateRequestDto dto) {
+    @PatchMapping(value = "/{postId}", consumes = "multipart/form-data")
+    public ResponseEntity<FreePostResponseDto> updatePost(
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long postId,
+            @Valid @ModelAttribute FreePostUpdateRequestDto dto
+    ) {
         FreePostResponseDto response = freePostService.updatePost(postId, dto, authUser.id());
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/admin/{postId}")
+    @PatchMapping(value = "/admin/{postId}", consumes = "multipart/form-data")
     public ResponseEntity<FreePostResponseDto> updatePostByAdmin(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long postId,
-            @Valid @RequestBody AdminPostUpdateRequestDto dto
+            @Valid @ModelAttribute AdminPostUpdateRequestDto dto
     ) {
-        FreePostResponseDto response =
-                freePostService.updatePostByAdmin(postId, dto, authUser.id());
+        FreePostResponseDto response = freePostService.updatePostByAdmin(postId, dto, authUser.id());
         return ResponseEntity.ok(response);
     }
-
 
     @GetMapping("/{postId}")
     public ResponseEntity<FreePostResponseDto> getPost(@PathVariable Long postId) {

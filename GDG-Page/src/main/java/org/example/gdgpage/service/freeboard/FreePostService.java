@@ -30,6 +30,7 @@ public class FreePostService {
     private final FreePostRepository freePostRepository;
     private final FreePostLikeRepository freePostLikeRepository;
     private final UserRepository userRepository;
+    private final FreeboardFileStorage fileStorage;
 
     @Transactional
     public FreePostResponseDto createUserPost(FreePostCreateRequestDto dto, Long userId) {
@@ -46,11 +47,20 @@ public class FreePostService {
                 dto.isAnonymous()
         );
 
+        if (dto.image() != null && !dto.image().isEmpty()) {
+            String imageUrl = fileStorage.uploadFreePostImage(userId, dto.image());
+            post.updateImage(imageUrl);
+        }
+
         return new FreePostResponseDto(freePostRepository.save(post));
     }
 
     @Transactional
     public FreePostResponseDto createAdminPost(AdminPostCreateRequestDto dto, Long userId) {
+        System.out.println(">>>> title = " + dto.title());
+        System.out.println(">>>> image = " + dto.image());
+        System.out.println(">>>> image isEmpty? = " + (dto.image() == null ? "null" : dto.image().isEmpty()));
+
         User author = getUser(userId);
 
         if (author.getRole() != Role.ORGANIZER) {
@@ -64,6 +74,11 @@ public class FreePostService {
                 dto.isAnonymous(),
                 dto.isPinned()
         );
+
+        if (dto.image() != null && !dto.image().isEmpty()) {
+            String imageUrl = fileStorage.uploadFreePostImage(userId, dto.image());
+            post.updateImage(imageUrl);
+        }
 
         return new FreePostResponseDto(freePostRepository.save(post));
     }
@@ -82,6 +97,11 @@ public class FreePostService {
 
         post.update(dto.title(), dto.content());
 
+        if (dto.image() != null && !dto.image().isEmpty()) {
+            String imageUrl = fileStorage.uploadFreePostImage(userId, dto.image());
+            post.updateImage(imageUrl);
+        }
+
         return new FreePostResponseDto(post);
     }
 
@@ -98,6 +118,11 @@ public class FreePostService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
 
         post.updateByAdmin(dto.title(), dto.content(), dto.isPinned());
+
+        if (dto.image() != null && !dto.image().isEmpty()) {
+            String imageUrl = fileStorage.uploadFreePostImage(userId, dto.image());
+            post.updateImage(imageUrl);
+        }
 
         return new FreePostResponseDto(post);
     }

@@ -36,7 +36,7 @@ public class NotificationService {
 
     @Transactional(readOnly = true)
     public Page<NotificationResponseDto> getMyNotifications(Long userId, Pageable pageable) {
-        return notificationRepository.findByReceiverId(userId, pageable)
+        return notificationRepository.findByReceiverIdOrderByCreatedAtDesc(userId, pageable)
                 .map(NotificationResponseDto::from);
     }
 

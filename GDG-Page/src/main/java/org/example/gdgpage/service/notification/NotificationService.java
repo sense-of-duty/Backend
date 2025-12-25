@@ -10,6 +10,8 @@ import org.example.gdgpage.exception.ForbiddenException;
 import org.example.gdgpage.exception.NotFoundException;
 import org.example.gdgpage.repository.auth.UserRepository;
 import org.example.gdgpage.repository.notification.NotificationRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,11 +37,9 @@ public class NotificationService {
         notificationRepository.save(Notification.create(receiver, type, message, targetId, targetUrl));
     }
 
-    public List<NotificationResponseDto> getMyNotifications(Long userId) {
-        return notificationRepository.findByReceiverIdOrderByCreatedAtDesc(userId)
-                .stream()
-                .map(NotificationResponseDto::from)
-                .toList();
+    public Page<NotificationResponseDto> getMyNotifications(Long userId, Pageable pageable) {
+        return notificationRepository.findByReceiverId(userId, pageable)
+                .map(NotificationResponseDto::from);
     }
 
     public long countUnread(Long userId) {

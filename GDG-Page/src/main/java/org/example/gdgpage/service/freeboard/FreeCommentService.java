@@ -123,9 +123,7 @@ public class FreeCommentService {
         if (parent != null) {
             Long parentAuthorId = parent.getAuthor().getId();
 
-            if (!Objects.equals(parentAuthorId, userId)
-                    && !Objects.equals(parentAuthorId, post.getAuthor().getId())) {
-
+            if (!Objects.equals(parentAuthorId, userId)) {
                 notificationService.createNotification(
                         parentAuthorId,
                         NotificationType.FREE_POST_COMMENT,

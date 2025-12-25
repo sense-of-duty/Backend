@@ -1,11 +1,5 @@
 package org.example.gdgpage.dto.token;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@Getter
-@AllArgsConstructor
-public class TokenDto {
-    private String accessToken;
-    private String refreshToken;
-}
+public record TokenDto(
+    String accessToken
+) {}

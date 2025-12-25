@@ -13,4 +13,8 @@ public final class Constants {
     public static final String ACCESS_TOKEN = "access_token";
     public static final String REFRESH_TOKEN = "refresh_token";
     public static final String DEFAULT_PROFILE_IMAGE_URL = "https://gdgpage-growthon.s3.ap-northeast-2.amazonaws.com/profiles/default_img.webp";
+
+    public static final String DEVICE_ID = "device_id";
+    public static final String JTI = "jti";
+    public static final String DID = "did";
 }

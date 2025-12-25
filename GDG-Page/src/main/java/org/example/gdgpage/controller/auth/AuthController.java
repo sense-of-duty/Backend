@@ -3,6 +3,7 @@ package org.example.gdgpage.controller.auth;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -53,9 +54,10 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음")
     })
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
-        LoginResponse loginResponse = authService.login(loginRequest, httpServletResponse);
-        return ResponseEntity.ok(loginResponse);
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest,
+                                               HttpServletRequest httpServletRequest,
+                                               HttpServletResponse httpServletResponse) {
+        return ResponseEntity.ok(authService.login(loginRequest, httpServletRequest, httpServletResponse));
     }
 
     @Operation(summary = "소셜 로그인", description = "소셜 로그인 API")
@@ -64,9 +66,10 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음")
     })
     @PostMapping("/oauth/login")
-    public ResponseEntity<LoginResponse> oauthLogin(@Valid @RequestBody OAuthLoginRequest oAuthLoginRequest, HttpServletResponse httpServletResponse) {
-        LoginResponse loginResponse = authService.oauthLogin(oAuthLoginRequest, httpServletResponse);
-        return ResponseEntity.ok(loginResponse);
+    public ResponseEntity<LoginResponse> oauthLogin(@Valid @RequestBody OAuthLoginRequest oAuthLoginRequest,
+                                                    HttpServletRequest httpServletRequest,
+                                                    HttpServletResponse httpServletResponse) {
+        return ResponseEntity.ok(authService.oauthLogin(oAuthLoginRequest, httpServletRequest, httpServletResponse));
     }
 
     @Operation(summary = "토큰 재발급", description = "리프레시 토큰으로 액세스 토큰 재발급 API")
@@ -75,9 +78,10 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "요청 값이 유효하지 않음")
     })
     @PostMapping("/reissue")
-    public ResponseEntity<TokenDto> reissue(@CookieValue(name = Constants.REFRESH_TOKEN, required = false) String refreshToken, HttpServletResponse httpServletResponse) {
-        TokenDto tokenDto = authService.reissue(refreshToken, httpServletResponse);
-        return ResponseEntity.ok(tokenDto);
+    public ResponseEntity<TokenDto> reissue(@CookieValue(name = Constants.REFRESH_TOKEN, required = false) String refreshToken,
+                                            HttpServletRequest httpServletRequest,
+                                            HttpServletResponse httpServletResponse) {
+        return ResponseEntity.ok(authService.reissue(refreshToken, httpServletRequest, httpServletResponse));
     }
 
     @Operation(summary = "로그아웃", description = "리프레시 토큰을 만료시키고 로그아웃")
@@ -86,8 +90,10 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "리프레시 토큰이 없거나 유효하지 않음")
     })
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@CookieValue(name = Constants.REFRESH_TOKEN, required = false) String refreshToken, HttpServletResponse httpServletResponse) {
-        authService.logout(refreshToken, httpServletResponse);
+    public ResponseEntity<Void> logout(@CookieValue(name = Constants.REFRESH_TOKEN, required = false) String refreshToken,
+                                       HttpServletRequest httpServletRequest,
+                                       HttpServletResponse httpServletResponse) {
+        authService.logout(refreshToken, httpServletRequest, httpServletResponse);
         return ResponseEntity.noContent().build();
     }
 

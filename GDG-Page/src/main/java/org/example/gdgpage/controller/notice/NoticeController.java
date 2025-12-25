@@ -50,13 +50,9 @@ public class NoticeController {
                                               @PathVariable Long noticeId,
                                               @AuthenticationPrincipal AuthUser authUser,
                                               @RequestBody @Valid NoticeUpdateRequest request
-    ) {
-        if (authUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    ){
 
-        Long userId = authUser.id();
-        noticeService.updateNotice(noticeId, userId, request);
+        noticeService.updateNotice(noticeId,authUser.id(), request);
         return ResponseEntity.noContent().build();
     }
 
@@ -65,12 +61,8 @@ public class NoticeController {
                                               @PathVariable Long noticeId,
                                               @AuthenticationPrincipal AuthUser authUser
     ) {
-        if (authUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
-        Long userId = authUser.id();
-        noticeService.deleteNotice(noticeId, userId);
+        noticeService.deleteNotice(noticeId,authUser.id());
         return ResponseEntity.noContent().build();
     }
 }

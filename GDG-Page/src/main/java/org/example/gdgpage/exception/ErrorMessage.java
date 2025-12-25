@@ -42,6 +42,7 @@ public enum ErrorMessage {
     EMAIL_NOT_VERIFIED("이메일 인증이 완료되지 않았습니다."),
     INVALID_PASSWORD_RESET_TOKEN("유효하지 않은 링크입니다."),
     EXPIRED_PASSWORD_RESET_TOKEN("만료된 링크입니다."),
+    NOT_EXIST_NOTIFICATION("존재하지 않는 알람입니다."),
     NOT_EXIST_ASSIGNMENT("존재하지 않는 과제입니다."),
     ONLY_ACTIVE_USER_CAN_SUBMIT("현 기수 멤버만 제출 가능합니다."),
     ASSIGNMENT_DUE_PASSED("과제 제출 기한이 지났습니다."),

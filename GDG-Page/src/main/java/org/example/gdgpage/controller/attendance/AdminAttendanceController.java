@@ -44,7 +44,7 @@ public class AdminAttendanceController {
             @ApiResponse(responseCode = "401", description = "인증 필요"),
             @ApiResponse(responseCode = "403", description = "권한 필요")
     })
-    @PostMapping("/weeks/{weekId}/attendance-sessions")
+    @PostMapping("/weeks/{weekId}/sessions")
     public ResponseEntity<AdminSessionStartResponse> startSession(@PathVariable Long weekId,
                                                                   @AuthenticationPrincipal AuthUser authUser) {
         return ResponseEntity.ok(attendanceAdminService.startSession(authUser.id(), weekId));
@@ -56,7 +56,7 @@ public class AdminAttendanceController {
             @ApiResponse(responseCode = "401", description = "인증 필요"),
             @ApiResponse(responseCode = "403", description = "권한 필요")
     })
-    @PostMapping("/attendance-sessions/{sessionId}/close")
+    @PostMapping("/sessions/{sessionId}/close")
     public ResponseEntity<Void> closeSession(@PathVariable Long sessionId,
                                              @AuthenticationPrincipal AuthUser authUser) {
         attendanceAdminService.closeSession(authUser.id(), sessionId);
@@ -70,7 +70,7 @@ public class AdminAttendanceController {
             @ApiResponse(responseCode = "401", description = "인증 필요"),
             @ApiResponse(responseCode = "403", description = "권한 필요")
     })
-    @PatchMapping("/weeks/{weekId}/attendance/{userId}")
+    @PatchMapping("/weeks/{weekId}/users/{userId}")
     public ResponseEntity<Void> adminUpdate(@PathVariable Long weekId,
                                             @PathVariable Long userId,
                                             @Valid @RequestBody AdminAttendanceUpdateRequest request,

@@ -11,6 +11,6 @@ public record AdminSessionStartResponse(
         Long weekId,
         PartType part,
         int weekNo,
-        String code,              // 관리자만
+        String code,
         LocalDateTime expiresAt
 ) {}

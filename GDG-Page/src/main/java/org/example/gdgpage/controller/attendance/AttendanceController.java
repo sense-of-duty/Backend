@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping
+@RequestMapping("/attendance")
 public class AttendanceController {
 
     private final AttendanceService attendanceService;
@@ -32,7 +32,7 @@ public class AttendanceController {
             @ApiResponse(responseCode = "204", description = "활성 출석 없음"),
             @ApiResponse(responseCode = "401", description = "인증 필요")
     })
-    @GetMapping("/courses/{courseId}/attendance/active")
+    @GetMapping("/active")
     public ResponseEntity<ActiveSessionResponse> getActive(@AuthenticationPrincipal AuthUser authUser) {
         ActiveSessionResponse active = attendanceService.getActive(authUser.id());
 
@@ -49,7 +49,7 @@ public class AttendanceController {
             @ApiResponse(responseCode = "400", description = "세션 종료/만료/코드 불일치"),
             @ApiResponse(responseCode = "401", description = "인증 필요")
     })
-    @PostMapping("/weeks/{weekId}/attendance/check")
+    @PostMapping("/check")
     public ResponseEntity<AttendanceCheckResponse> check(@Valid @RequestBody AttendanceCheckRequest request,
                                                          @AuthenticationPrincipal AuthUser authUser) {
         return ResponseEntity.ok(attendanceService.checkAttendance(authUser.id(), request.code()));
@@ -60,7 +60,7 @@ public class AttendanceController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "401", description = "인증 필요")
     })
-    @GetMapping("/courses/{courseId}/attendance/my-attendance")
+    @GetMapping("/my-attendance")
     public ResponseEntity<MyAttendanceResponse> myAttendance(@AuthenticationPrincipal AuthUser authUser) {
         return ResponseEntity.ok(attendanceService.getMyAttendance(authUser.id()));
     }

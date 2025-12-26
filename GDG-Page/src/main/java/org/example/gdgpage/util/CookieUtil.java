@@ -14,6 +14,7 @@ public final class CookieUtil {
 
     private static final String PATH = "/";
     private static final String SAME_SITE = "Lax";
+    private static final String OAUTH_STATE = "OAUTH_STATE";
 
     public static void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         ResponseCookie cookie = ResponseCookie.from(Constants.REFRESH_TOKEN, refreshToken)
@@ -32,6 +33,30 @@ public final class CookieUtil {
                 .httpOnly(true)
                 .secure(true)
                 .path(PATH)
+                .maxAge(0)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
+    public static void setOAuthState(HttpServletResponse response, String state) {
+        ResponseCookie cookie = ResponseCookie.from(OAUTH_STATE, state)
+                .httpOnly(true)
+                .secure(true)
+                .path(PATH)
+                .sameSite(SAME_SITE)
+                .maxAge(Duration.ofMinutes(5))
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
+    public static void clearOAuthState(HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from(OAUTH_STATE, "")
+                .httpOnly(true)
+                .secure(true)
+                .path(PATH)
+                .sameSite(SAME_SITE)
                 .maxAge(0)
                 .build();
 

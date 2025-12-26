@@ -40,6 +40,7 @@ public class SecurityConfig {
             "/auth/signup",
             "/auth/login",
             "/auth/oauth/login",
+            "/auth/oauth/google",
             "/auth/reissue",
             "/auth/logout",
             "/oauth2/**",

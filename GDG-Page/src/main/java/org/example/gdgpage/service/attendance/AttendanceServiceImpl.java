@@ -19,6 +19,7 @@ import org.example.gdgpage.mapper.attendance.AttendanceMapper;
 import org.example.gdgpage.repository.attendance.AttendanceRecordRepository;
 import org.example.gdgpage.repository.attendance.WeekRepository;
 import org.example.gdgpage.repository.auth.UserRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,31 +52,43 @@ public class AttendanceServiceImpl implements AttendanceService {
             throw new BadRequestException(ErrorMessage.ATTENDANCE_SESSION_NOT_ACTIVE);
         }
 
+        LocalDateTime now = LocalDateTime.now();
+
         if (!sessionService.matchesCode(active, code)) {
             throw new BadRequestException(ErrorMessage.ATTENDANCE_CODE_INVALID);
         }
 
         Week week = active.getWeek();
 
-        recordRepository.findByWeekAndUser(week, user).ifPresent(record -> {
-            if (record.getStatus() == AttendanceStatus.PRESENT) {
-                throw new BadRequestException(ErrorMessage.ATTENDANCE_ALREADY_CHECKED);
-            }
-        });
+        AttendanceRecord existing = recordRepository.findByWeekAndUser(week, user)
+                .orElse(null);
 
-        LocalDateTime now = LocalDateTime.now();
+        if (existing != null && existing.getStatus() == AttendanceStatus.PRESENT) {
+            throw new BadRequestException(ErrorMessage.ATTENDANCE_ALREADY_CHECKED);
+        }
 
-        AttendanceRecord record = recordRepository.findByWeekAndUser(week, user)
-                .orElseGet(() -> AttendanceRecord.builder()
-                        .week(week)
-                        .user(user)
-                        .status(AttendanceStatus.PRESENT)
-                        .build());
+        AttendanceRecord record = (existing != null)
+                ? existing
+                : AttendanceRecord.builder().week(week).user(user).status(AttendanceStatus.PRESENT).build();
 
         record.markPresent(now);
-        AttendanceRecord saved = recordRepository.save(record);
 
-        return AttendanceMapper.toAttendanceCheckResponse(saved);
+        try {
+            AttendanceRecord saved = recordRepository.saveAndFlush(record);
+            return AttendanceMapper.toAttendanceCheckResponse(saved);
+        } catch (DataIntegrityViolationException e) {
+            AttendanceRecord after = recordRepository.findByWeekAndUser(week, user)
+                    .orElseThrow(() -> e);
+
+            if (after.getStatus() == AttendanceStatus.PRESENT) {
+                throw new BadRequestException(ErrorMessage.ATTENDANCE_ALREADY_CHECKED);
+            }
+
+            after.markPresent(now);
+            AttendanceRecord saved = recordRepository.save(after);
+
+            return AttendanceMapper.toAttendanceCheckResponse(saved);
+        }
     }
 
     @Override

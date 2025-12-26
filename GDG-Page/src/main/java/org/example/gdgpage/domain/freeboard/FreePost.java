@@ -123,4 +123,8 @@ public class FreePost extends BaseTimeEntity {
     public void updateImage(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+
+    public void attachImage(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }

@@ -1,5 +1,7 @@
 package org.example.gdgpage.controller.freeboard;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.AuthUser;
@@ -9,11 +11,18 @@ import org.example.gdgpage.dto.freeboard.request.FreePostCreateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreePostUpdateRequestDto;
 import org.example.gdgpage.dto.freeboard.response.FreePostListResponseDto;
 import org.example.gdgpage.dto.freeboard.response.FreePostResponseDto;
+import org.example.gdgpage.exception.BadRequestException;
+import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.service.freeboard.FreePostService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -23,22 +32,29 @@ import java.util.List;
 public class FreePostController {
 
     private final FreePostService freePostService;
+    private final ObjectMapper objectMapper;
+    private final Validator validator;
 
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<FreePostResponseDto> createPost(
             @AuthenticationPrincipal AuthUser authUser,
-            @Valid @ModelAttribute FreePostCreateRequestDto dto
+            @RequestPart("data") String requestJson,
+            @RequestPart(value = "image", required = false) MultipartFile image
     ) {
-        FreePostResponseDto response = freePostService.createUserPost(dto, authUser.id());
+        FreePostCreateRequestDto dto = parseAndValidate(requestJson, FreePostCreateRequestDto.class);
+        FreePostResponseDto response = freePostService.createUserPost(dto, authUser.id(), image);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping(value = "/admin", consumes = "multipart/form-data")
     public ResponseEntity<FreePostResponseDto> createAdminPost(
             @AuthenticationPrincipal AuthUser authUser,
-            @Valid @ModelAttribute AdminPostCreateRequestDto dto
+            @RequestPart("data") String requestJson,
+            @RequestPart(value = "image", required = false) MultipartFile image
     ) {
-        FreePostResponseDto response = freePostService.createAdminPost(dto, authUser.id());
+        AdminPostCreateRequestDto dto = parseAndValidate(requestJson, AdminPostCreateRequestDto.class);
+        FreePostResponseDto response = freePostService.createAdminPost(dto, authUser.id(), image);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -46,9 +62,11 @@ public class FreePostController {
     public ResponseEntity<FreePostResponseDto> updatePost(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long postId,
-            @Valid @ModelAttribute FreePostUpdateRequestDto dto
+            @RequestPart("data") String requestJson,
+            @RequestPart(value = "image", required = false) MultipartFile image
     ) {
-        FreePostResponseDto response = freePostService.updatePost(postId, dto, authUser.id());
+        FreePostUpdateRequestDto dto = parseAndValidate(requestJson, FreePostUpdateRequestDto.class);
+        FreePostResponseDto response = freePostService.updatePost(postId, dto, authUser.id(), image);
         return ResponseEntity.ok(response);
     }
 
@@ -56,9 +74,11 @@ public class FreePostController {
     public ResponseEntity<FreePostResponseDto> updatePostByAdmin(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long postId,
-            @Valid @ModelAttribute AdminPostUpdateRequestDto dto
+            @RequestPart("data") String requestJson,
+            @RequestPart(value = "image", required = false) MultipartFile image
     ) {
-        FreePostResponseDto response = freePostService.updatePostByAdmin(postId, dto, authUser.id());
+        AdminPostUpdateRequestDto dto = parseAndValidate(requestJson, AdminPostUpdateRequestDto.class);
+        FreePostResponseDto response = freePostService.updatePostByAdmin(postId, dto, authUser.id(), image);
         return ResponseEntity.ok(response);
     }
 
@@ -96,5 +116,23 @@ public class FreePostController {
     ) {
         freePostService.unlikePost(postId, authUser.id());
         return ResponseEntity.noContent().build();
+    }
+
+    private <T> T parseAndValidate(String json, Class<T> clazz) {
+        try {
+            T dto = objectMapper.readValue(json, clazz);
+
+            BindingResult errors = new BeanPropertyBindingResult(dto, clazz.getSimpleName());
+            validator.validate(dto, errors);
+
+            if (errors.hasErrors()) {
+                throw new BadRequestException(ErrorMessage.INVALID_FREEPOST_INPUT);
+            }
+
+            return dto;
+
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException(ErrorMessage.INVALID_FREEPOST_INPUT);
+        }
     }
 }

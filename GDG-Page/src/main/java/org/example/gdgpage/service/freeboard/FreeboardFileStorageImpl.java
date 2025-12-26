@@ -38,8 +38,7 @@ public class FreeboardFileStorageImpl implements FreeboardFileStorage {
     private String publicBaseUrl;
 
     @Override
-    public String uploadFreePostImage(Long userId, MultipartFile file) {
-
+    public StoredFile uploadFreePostImage(Long userId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new BadRequestException(ErrorMessage.INVALID_ATTACHMENT_FILE);
         }
@@ -71,7 +70,13 @@ public class FreeboardFileStorageImpl implements FreeboardFileStorage {
             throw new BadRequestException(ErrorMessage.INVALID_ATTACHMENT_FILE);
         }
 
-        return buildPublicUrl(key);
+        return new StoredFile(
+                buildPublicUrl(key),
+                key,
+                file.getOriginalFilename(),
+                file.getContentType(),
+                file.getSize()
+        );
     }
 
     private String buildPublicUrl(String key) {
@@ -101,5 +106,14 @@ public class FreeboardFileStorageImpl implements FreeboardFileStorage {
 
     private String normalizePrefix(String prefix) {
         return prefix.endsWith("/") ? prefix.substring(0, prefix.length() - 1) : prefix;
+    }
+
+    @Override
+    public void deleteFreePostImage(String fileKey) {
+        if (fileKey == null || fileKey.isBlank()) {
+            return;
+        }
+
+        s3Client.deleteObject(b -> b.bucket(bucketName).key(fileKey));
     }
 }

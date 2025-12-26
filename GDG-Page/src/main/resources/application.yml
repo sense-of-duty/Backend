@@ -48,7 +48,8 @@ app:
   aws:
     region: ap-northeast-2
   cors:
-    allowed-origin-patterns: ${APP_CORS_ALLOWED_ORIGIN_PATTERNS:https://gdgoc-skhu.ddnsfree.com,http://localhost:*}
+    allowed-origin-patterns: ${APP_CORS_ALLOWED_ORIGIN_PATTERNS:https://frontend-plum-two-49.vercel.app,https://*.vercel.app,https://gdgoc-skhu.ddnsfree.com,http://localhost:*}
+
 
   security:
     refresh-token-history-retention-days: 3

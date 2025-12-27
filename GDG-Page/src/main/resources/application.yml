@@ -45,6 +45,7 @@ app:
     photo-prefix: photos
     assignment-attachment-prefix: attachments/assignments
     submission-attachment-prefix: attachments/submissions
+    freeboard-prefix: attachments/freeboard
   aws:
     region: ap-northeast-2
   cors:

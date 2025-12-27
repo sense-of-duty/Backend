@@ -59,7 +59,8 @@ public enum ErrorMessage {
     INVALID_LECTURE_FILE("유효하지 않은 강의자료 파일입니다."),
     INVALID_LECTURE_INPUT("잘못된 강의자료 입력입니다."),
     INVALID_DENY_REQUEST("반려 사유를 입력해주세요."),
-    INVALID_OAUTH_STATE("소셜 로그인 검증에 실패했습니다.");
+    INVALID_OAUTH_STATE("소셜 로그인 검증에 실패했습니다."),
+    INVALID_FREEPOST_INPUT("잘못된 게시글 입력입니다.");
 
     private final String message;
 

@@ -1,6 +1,7 @@
 package org.example.gdgpage.controller.freeboard;
 
-import jakarta.validation.Valid;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.example.gdgpage.domain.auth.AuthUser;
 import org.example.gdgpage.dto.freeboard.request.AdminPostCreateRequestDto;
@@ -9,11 +10,25 @@ import org.example.gdgpage.dto.freeboard.request.FreePostCreateRequestDto;
 import org.example.gdgpage.dto.freeboard.request.FreePostUpdateRequestDto;
 import org.example.gdgpage.dto.freeboard.response.FreePostListResponseDto;
 import org.example.gdgpage.dto.freeboard.response.FreePostResponseDto;
+import org.example.gdgpage.exception.BadRequestException;
+import org.example.gdgpage.exception.ErrorMessage;
 import org.example.gdgpage.service.freeboard.FreePostService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.Validator;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -23,40 +38,55 @@ import java.util.List;
 public class FreePostController {
 
     private final FreePostService freePostService;
+    private final ObjectMapper objectMapper;
+    private final Validator validator;
 
-    @PostMapping
-    public ResponseEntity<FreePostResponseDto> createPost(@AuthenticationPrincipal AuthUser authUser,
-                                                          @Valid @RequestBody FreePostCreateRequestDto dto) {
-        FreePostResponseDto response = freePostService.createUserPost(dto, authUser.id());
+    @PostMapping(consumes = "multipart/form-data")
+    public ResponseEntity<FreePostResponseDto> createPost(
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestPart("data") String requestJson,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) {
+        FreePostCreateRequestDto dto = parseAndValidate(requestJson, FreePostCreateRequestDto.class);
+        FreePostResponseDto response = freePostService.createUserPost(dto, authUser.id(), image);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PostMapping("/admin")
-    public ResponseEntity<FreePostResponseDto> createAdminPost(@AuthenticationPrincipal AuthUser authUser,
-                                                               @Valid @RequestBody AdminPostCreateRequestDto dto) {
-        FreePostResponseDto response = freePostService.createAdminPost(dto, authUser.id());
+    @PostMapping(value = "/admin", consumes = "multipart/form-data")
+    public ResponseEntity<FreePostResponseDto> createAdminPost(
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestPart("data") String requestJson,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) {
+        AdminPostCreateRequestDto dto = parseAndValidate(requestJson, AdminPostCreateRequestDto.class);
+        FreePostResponseDto response = freePostService.createAdminPost(dto, authUser.id(), image);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PatchMapping("/{postId}")
-    public ResponseEntity<FreePostResponseDto> updatePost(@AuthenticationPrincipal AuthUser authUser,
-                                                          @PathVariable Long postId,
-                                                          @Valid @RequestBody FreePostUpdateRequestDto dto) {
-        FreePostResponseDto response = freePostService.updatePost(postId, dto, authUser.id());
+    @PatchMapping(value = "/{postId}", consumes = "multipart/form-data")
+    public ResponseEntity<FreePostResponseDto> updatePost(
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long postId,
+            @RequestPart("data") String requestJson,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) {
+        FreePostUpdateRequestDto dto = parseAndValidate(requestJson, FreePostUpdateRequestDto.class);
+        FreePostResponseDto response = freePostService.updatePost(postId, dto, authUser.id(), image);
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/admin/{postId}")
+    @PatchMapping(value = "/admin/{postId}", consumes = "multipart/form-data")
     public ResponseEntity<FreePostResponseDto> updatePostByAdmin(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long postId,
-            @Valid @RequestBody AdminPostUpdateRequestDto dto
+            @RequestPart("data") String requestJson,
+            @RequestPart(value = "image", required = false) MultipartFile image
     ) {
-        FreePostResponseDto response =
-                freePostService.updatePostByAdmin(postId, dto, authUser.id());
+        AdminPostUpdateRequestDto dto = parseAndValidate(requestJson, AdminPostUpdateRequestDto.class);
+        FreePostResponseDto response = freePostService.updatePostByAdmin(postId, dto, authUser.id(), image);
         return ResponseEntity.ok(response);
     }
-
 
     @GetMapping("/{postId}")
     public ResponseEntity<FreePostResponseDto> getPost(@PathVariable Long postId) {
@@ -92,5 +122,23 @@ public class FreePostController {
     ) {
         freePostService.unlikePost(postId, authUser.id());
         return ResponseEntity.noContent().build();
+    }
+
+    private <T> T parseAndValidate(String json, Class<T> clazz) {
+        try {
+            T dto = objectMapper.readValue(json, clazz);
+
+            BindingResult errors = new BeanPropertyBindingResult(dto, clazz.getSimpleName());
+            validator.validate(dto, errors);
+
+            if (errors.hasErrors()) {
+                throw new BadRequestException(ErrorMessage.INVALID_FREEPOST_INPUT);
+            }
+
+            return dto;
+
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException(ErrorMessage.INVALID_FREEPOST_INPUT);
+        }
     }
 }

@@ -112,7 +112,7 @@ public class AuthService {
 
     @Transactional
     public LoginResponse oauthLogin(OAuthLoginRequest oAuthLoginRequest, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
-        GoogleTokenResponse tokenResponse = googleOAuthClient.exchangeCodeForToken(oAuthLoginRequest.authorizationCode());
+        GoogleTokenResponse tokenResponse = googleOAuthClient.exchangeCodeForToken(oAuthLoginRequest.code());
         GoogleUserInfoResponse userInfo = googleOAuthClient.getUserInfo(tokenResponse.accessToken());
 
         if (userInfo.verifiedEmail() != null && !userInfo.verifiedEmail()) {

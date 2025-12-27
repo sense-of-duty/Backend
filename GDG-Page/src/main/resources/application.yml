@@ -8,12 +8,13 @@ spring:
     database: mysql
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     properties:
       hibernate:
         show-sql: true
         format_sql: false
         use_sql_comments: true
+        default_batch_fetch_size: 100
   mail:
     host: smtp.gmail.com
     port: 587
@@ -34,7 +35,7 @@ jwt:
 google:
   client-id: ${GOOGLE_CLIENT_ID}
   client-secret: ${GOOGLE_CLIENT_SECRET}
-  redirect-uri: http://localhost:8080/oauth2/callback/google
+  redirect-uri: https://www.gdgoc-skhu.ddnsfree.com/oauth2/callback/google
   scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
 
 app:
@@ -42,14 +43,22 @@ app:
     bucket-name: gdgpage-growthon
     profile-prefix: profiles
     lecture-prefix: lectures
+    photo-prefix: photos
+    assignment-attachment-prefix: attachments/assignments
+    submission-attachment-prefix: attachments/submissions
+    freeboard-prefix: attachments/freeboard
   aws:
     region: ap-northeast-2
   cors:
-    allowed-origin-patterns: ${APP_CORS_ALLOWED_ORIGIN_PATTERNS:https://gdgoc-skhu.ddnsfree.com,http://localhost:*}
+    allowed-origin-patterns: ${APP_CORS_ALLOWED_ORIGIN_PATTERNS:https://frontend-plum-two-49.vercel.app,https://*.vercel.app,https://gdgoc-skhu.ddnsfree.com,http://localhost:*}
+
 
   security:
     refresh-token-history-retention-days: 3
     refresh-token-cleanup-cron: "0 0 4 * * *"
+
+  oauth:
+    frontend-redirect-url: https://frontend-plum-two-49.vercel.app
 
 
 server:
@@ -57,4 +66,3 @@ server:
 
 password-reset:
   frontend-reset-page-url: ${FRONTEND_RESET_PAGE_URL}
-

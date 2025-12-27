@@ -40,11 +40,15 @@ public class SecurityConfig {
             "/auth/signup",
             "/auth/login",
             "/auth/oauth/login",
+            "/auth/oauth/google",
             "/auth/reissue",
             "/auth/logout",
             "/auth/resend-verification",
             "/auth/verify-email/**",
             "/oauth2/**",
+            "/auth/resend-verification",
+            "/auth/verify-email/**",
+            "/photos/**"
     };
 
     private static final String[] SWAGGER_WHITELIST = {
@@ -71,6 +75,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .requestMatchers(PUBLIC_AUTH).permitAll()
+                        .requestMatchers("/api/free-posts/admin").hasAnyRole("ORGANIZER", "CORE")
                         .requestMatchers("/admin/**").hasAnyRole("ORGANIZER")
                         .requestMatchers("/assign-admin/**").hasAnyRole("ORGANIZER", "CORE")
                         .requestMatchers("/lecture-admin/**").hasAnyRole("ORGANIZER", "CORE")

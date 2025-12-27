@@ -28,7 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin/lectures")
+@RequestMapping("/lecture-admin/lectures")
 public class AdminLectureMaterialController {
 
     private final LectureMaterialService lectureMaterialService;

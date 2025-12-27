@@ -18,12 +18,14 @@ import org.example.gdgpage.repository.auth.UserRepository;
 import org.example.gdgpage.repository.freeboard.FreeCommentLikeRepository;
 import org.example.gdgpage.repository.freeboard.FreeCommentRepository;
 import org.example.gdgpage.repository.freeboard.FreePostRepository;
-import org.example.gdgpage.repository.notification.NotificationRepository;
 import org.example.gdgpage.service.notification.NotificationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service

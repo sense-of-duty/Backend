@@ -22,6 +22,7 @@ import org.example.gdgpage.repository.freeboard.FreePostRepository;
 import org.example.gdgpage.service.notification.NotificationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
@@ -33,10 +34,11 @@ public class FreePostService {
     private final FreePostRepository freePostRepository;
     private final FreePostLikeRepository freePostLikeRepository;
     private final UserRepository userRepository;
+    private final FreeboardFileStorage fileStorage;
     private final NotificationService notificationService;
 
     @Transactional
-    public FreePostResponseDto createUserPost(FreePostCreateRequestDto dto, Long userId) {
+    public FreePostResponseDto createUserPost(FreePostCreateRequestDto dto, Long userId, MultipartFile image) {
         User author = getUser(userId);
 
         if (author.getRole() == Role.ORGANIZER) {
@@ -50,11 +52,16 @@ public class FreePostService {
                 dto.isAnonymous()
         );
 
+        if (image != null && !image.isEmpty()) {
+            FreeboardFileStorage.StoredFile stored = fileStorage.uploadFreePostImage(userId, image);
+            post.attachImage(stored.fileUrl());
+        }
+
         return new FreePostResponseDto(freePostRepository.save(post));
     }
 
     @Transactional
-    public FreePostResponseDto createAdminPost(AdminPostCreateRequestDto dto, Long userId) {
+    public FreePostResponseDto createAdminPost(AdminPostCreateRequestDto dto, Long userId, MultipartFile image) {
         User author = getUser(userId);
 
         if (author.getRole() != Role.ORGANIZER) {
@@ -69,11 +76,16 @@ public class FreePostService {
                 dto.isPinned()
         );
 
+        if (image != null && !image.isEmpty()) {
+            FreeboardFileStorage.StoredFile stored = fileStorage.uploadFreePostImage(userId, image);
+            post.attachImage(stored.fileUrl());
+        }
+
         return new FreePostResponseDto(freePostRepository.save(post));
     }
 
     @Transactional
-    public FreePostResponseDto updatePost(Long postId, FreePostUpdateRequestDto dto, Long userId) {
+    public FreePostResponseDto updatePost(Long postId, FreePostUpdateRequestDto dto, Long userId, MultipartFile image) {
 
         FreePost post = getPostWithPermissionCheck(postId, userId);
 
@@ -86,12 +98,23 @@ public class FreePostService {
 
         post.update(dto.title(), dto.content());
 
+        if (image != null && !image.isEmpty()) {
+
+            if (post.getImageUrl() != null) {
+                String fileKey = extractKeyFromUrl(post.getImageUrl());
+                fileStorage.deleteFreePostImage(fileKey);
+            }
+
+            FreeboardFileStorage.StoredFile stored = fileStorage.uploadFreePostImage(userId, image);
+            post.updateImage(stored.fileUrl());
+        }
+
         return new FreePostResponseDto(post);
     }
 
     @Transactional
-    public FreePostResponseDto updatePostByAdmin(Long postId, AdminPostUpdateRequestDto dto, Long userId
-    ) {
+    public FreePostResponseDto updatePostByAdmin(Long postId, AdminPostUpdateRequestDto dto, Long userId, MultipartFile image) {
+
         User admin = getUser(userId);
 
         if (admin.getRole() != Role.ORGANIZER) {
@@ -102,6 +125,17 @@ public class FreePostService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
 
         post.updateByAdmin(dto.title(), dto.content(), dto.isPinned());
+
+        if (image != null && !image.isEmpty()) {
+
+            if (post.getImageUrl() != null) {
+                String fileKey = extractKeyFromUrl(post.getImageUrl());
+                fileStorage.deleteFreePostImage(fileKey);
+            }
+
+            FreeboardFileStorage.StoredFile stored = fileStorage.uploadFreePostImage(userId, image);
+            post.updateImage(stored.fileUrl());
+        }
 
         return new FreePostResponseDto(post);
     }
@@ -193,5 +227,14 @@ public class FreePostService {
     private FreePost getLikeablePost(Long postId) {
         return freePostRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_POST));
+    }
+
+    private String extractKeyFromUrl(String imageUrl) {
+        if (imageUrl == null) return null;
+        try {
+            return imageUrl.substring(imageUrl.indexOf(".com/") + 5);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

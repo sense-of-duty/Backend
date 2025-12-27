@@ -58,6 +58,8 @@ public class FreePost extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FreeComment> comments = new ArrayList<>();
 
+    private String imageUrl;
+
     @OneToMany(
             mappedBy = "post",
             cascade = CascadeType.ALL,
@@ -128,4 +130,11 @@ public class FreePost extends BaseTimeEntity {
         }
     }
 
+    public void updateImage(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public void attachImage(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }

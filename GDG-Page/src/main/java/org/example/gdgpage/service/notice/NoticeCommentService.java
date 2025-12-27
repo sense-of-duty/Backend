@@ -96,24 +96,25 @@ public class NoticeCommentService {
 
     @Transactional
     public void updateComment(Long noticeId, Long commentId, Long userId, NoticeCommentUpdateRequest request) {
-        NoticeComment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
-
-        if (!comment.getNotice().getId().equals(noticeId)) {
-            throw new BadRequestException(ErrorMessage.COMMENT_POST_MISMATCH);
-        }
-
-        if (!comment.getAuthor().getId().equals(userId)) {
-            throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
-        }
+        NoticeComment comment = validateComment(noticeId, commentId, userId);
 
         comment.updateContent(request.content());
     }
 
     @Transactional
     public void deleteComment(Long noticeId, Long commentId, Long userId) {
+        NoticeComment comment = validateComment(noticeId, commentId, userId);
+
+        comment.delete();
+    }
+
+    private NoticeComment validateComment(Long noticeId, Long commentId, Long userId) {
         NoticeComment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT));
+
+        if (comment.getDeletedAt() != null) {
+            throw new NotFoundException(ErrorMessage.NOT_EXIST_COMMENT);
+        }
 
         if (!comment.getNotice().getId().equals(noticeId)) {
             throw new BadRequestException(ErrorMessage.COMMENT_POST_MISMATCH);
@@ -123,6 +124,6 @@ public class NoticeCommentService {
             throw new ForbiddenException(ErrorMessage.NO_PERMISSION);
         }
 
-        comment.delete();
+        return comment;
     }
 }

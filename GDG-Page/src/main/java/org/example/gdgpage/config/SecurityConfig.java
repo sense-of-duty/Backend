@@ -43,6 +43,8 @@ public class SecurityConfig {
             "/auth/oauth/google",
             "/auth/reissue",
             "/auth/logout",
+            "/auth/resend-verification",
+            "/auth/verify-email/**",
             "/oauth2/**",
             "/auth/resend-verification",
             "/auth/verify-email/**",
@@ -75,6 +77,8 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_AUTH).permitAll()
                         .requestMatchers("/api/free-posts/admin").hasAnyRole("ORGANIZER", "CORE")
                         .requestMatchers("/admin/**").hasAnyRole("ORGANIZER")
+                        .requestMatchers("/assign-admin/**").hasAnyRole("ORGANIZER", "CORE")
+                        .requestMatchers("/lecture-admin/**").hasAnyRole("ORGANIZER", "CORE")
                         .anyRequest().authenticated()
                 )
                 .headers(h -> h.frameOptions(Customizer.withDefaults()).disable())

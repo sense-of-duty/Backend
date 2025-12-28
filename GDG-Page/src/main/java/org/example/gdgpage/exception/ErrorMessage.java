@@ -60,7 +60,14 @@ public enum ErrorMessage {
     INVALID_LECTURE_INPUT("잘못된 강의자료 입력입니다."),
     INVALID_DENY_REQUEST("반려 사유를 입력해주세요."),
     INVALID_OAUTH_STATE("소셜 로그인 검증에 실패했습니다."),
-    INVALID_FREEPOST_INPUT("잘못된 게시글 입력입니다.");
+    INVALID_FREEPOST_INPUT("잘못된 게시글 입력입니다."),
+    NOT_EXIST_WEEK("해당 주차 정보를 찾을 수 없습니다."),
+    ATTENDANCE_SESSION_ALREADY_EXISTS("이미 진행 중인 출석이 있습니다."),
+    ATTENDANCE_SESSION_NOT_ACTIVE("현재 진행 중인 출석이 없습니다."),
+    ATTENDANCE_CODE_INVALID("출석 번호가 올바르지 않습니다."),
+    ATTENDANCE_ALREADY_CHECKED("이미 출석 체크를 했습니다."),
+    NOT_EXIST_ATTENDANCE_SESSION("출석 세션을 찾을 수 없습니다."),
+    FORBIDDEN_PART_ACCESS("다른 파트의 출석은 관리할 수 없습니다.");
 
     private final String message;
 
